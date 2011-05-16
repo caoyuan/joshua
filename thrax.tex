@@ -11,31 +11,69 @@
 
 \setlength\titlebox{6.5cm}
 
-\title{Thrax: a fast and flexible grammar extractor for machine translation}
+\title{Joshua}
 
-%\author{Jonathan Weese \\
-%Center for Language and Speech Processing \\
-%Johns Hopkins University \\
-%{\tt jonny@cs.jhu.edu}}
+\author{Jonathan Weese${}^\dag$, Chris Callison-Burch${}^\dag$, \and Matt Post${}^\star$ \\
+\textdagger\ Center for Language and Speech Processing \\
+$\star$\ Human Language Technology Center of Excellence \\
+Johns Hopkins University \\
+Baltimore, MD}
 
 \date{}
 
 \begin{document}
 \maketitle
+
 \begin{abstract}
-Many modern machine translation systems use translation models based
-on synchronous context-free grammars. The training of these grammars
-from aligned parallel corpora is a significant time and computation
-bottleneck in the MT pipeline, and changes to the grammar can make a
-significant difference to translation performance. Unfortunately, most
-MT distributions come with a dedicated grammar extractor that is not
-designed for flexibility or easy extension.
-We introduce Thrax, a program that extracts synchronous context-free grammars from aligned parallel corpora. 
-%The extracted grammars are intended for use as translation models in statistical machine translation systems. 
-Thrax can extract grammars in the style of Hiero \cite{Chiang2007} or syntax-augmented machine translation \cite{samt2006}. It uses Apache Hadoop for efficient distributed performance. The software can easily be extended with support for new grammars, feature functions, and output formats.
+We present progress on Joshua, an open-source decoder for hierarchical
+and syntax-based machine translation.  The main focus
+is on describing Thrax, a flexible, open source synchronous
+context-free grammar extractor using Apache Hadoop.  Thrax extracts
+both hierarchical \cite{Chiang2007} and syntax-augmented machine
+translation \cite{samt2006} grammars.  It is built on Apache Hadoop for efficient
+distributed performance, and can easily be extended with
+support for new grammars, feature functions, and output formats.  
+
+In addition, we present a single parameterized script for running the
+complete Joshua pipeline.  This script is built on top of CachePipe, a
+simple wrapper around shell command invocations that uses SHA1 hashes
+of explicitly-listed dependencies to avoid re-running commands when
+unnecessary.
 \end{abstract}
 
 \section{Introduction}
+
+Joshua is an open-sourced toolkit for hierarchical machine translation
+of human languages.  The original version of Joshua was a
+reimplementation of the Python-based Hiero machine-translation system
+(cite), and it was later extended to support richer syntactic
+formalisms, such as SAMT (cite).
+
+This past year, development in Joshua has had a broad focus on
+improving the experimental pipeline.  Machine translation makes
+use of many different datasets, training procedures, and pre- and
+post-processing techniques that can have large effects on translation
+outcome and make direct comparisons between systems difficult.  In addition,
+managing one's own experiments is also quite difficult, as there is no
+widely-accepted systematic means of recording every last parameter
+that might have affected an experiment.  To address these, the latest
+version of Joshua includes the following projects:
+
+\begin{enumerate}
+\item \emph{Thrax}, an open-source parameterized grammar extractor
+  capable of extracting both Hiero and SAMT grammars.  Thrax is highly
+  configurable.
+\item \emph{CachePipe}, an open-source project that implements a cached
+  pipeline.  CachePipe is a simple wrapper that determines whether
+  pipeline commands need to be re-run.  It does this by computing SHA1
+  hashes of dependencies to determine whether any of them have changed.
+\item \verb|pipeline.pl|.  In the spirit of Moses'
+  \verb|train-factored-phrase-model.perl| and \verb|mert-moses.pl|, we
+  provide a single script that implements the entire Joshua pipeline,
+  from data preparation to test-set decoding and evaluation.
+\end{enumerate}
+
+\section{Thrax: grammar extraction}
 
 In modern machine translation systems such as Joshua \cite{Joshua-WMT} and cdec \cite{cdec}, a translation model is often represented as a synchronous context-free grammar (SCFG). Formally, an SCFG may be considered as a tuple
 $$(N,S,T_\sigma,T_\tau,G)$$
@@ -105,7 +143,7 @@ None of these three extractors are designed for flexibility in terms of grammar 
 
 Since variation in translation models and feature sets can have a significant effect on translation performance, we have developed Thrax in order to make it easy to build and test new models. We hope it will encourage novel feature engineering.
 
-\section{System overview}
+\subsection{System overview}
 \label{design}
 \begin{figure*}
 \includegraphics[width=6in]{figures/thrax-pipeline}
@@ -129,7 +167,7 @@ After the feature jobs have been completed, we have several copies of the gramma
 
 Some users may not have access to a Hadoop cluster. Thrax can be run in standalone or pseudo-distributed mode on a single machine. It can also be used with Amazon Elastic MapReduce\footnote{\url{http://aws.amazon.com/elasticmapreduce/}}, a web service that provides computation time on a Hadoop cluster on-demand.
 
-\section{Extraction}
+\subsection{Extraction}
 
 The first step in the Thrax workflow is the extraction of grammar rules from an input corpus. As mentioned above, Hiero and SAMT grammars both require a parallel corpus with word-level alignments. SAMT additionally requires that the target side of the corpus be parsed.
 
@@ -147,7 +185,7 @@ Chiang \shortcite{Chiang2007} gives reasonable heuristic choices for these param
 
 When extracting Hiero- or SAMT-style grammars, the first Hadoop job in the Thrax workflow takes in a parallel corpus and produces a set of rules. But in fact Thrax's extraction mechanism is more general than that; all it requires is a function that maps a string to a set of rules. This makes it easy to implement new grammars and extract them using Thrax.
 
-\section{Feature functions}
+\subsection{Feature functions}
 \label{features}
 
 Thrax considers feature functions of two types: first, there are features that can be calculated by looking at each rule in isolation. Such features do not require a Hadoop job to calculate their scores, since we may inspect the rules in any order. (In practice, we calculate the scores at the very last moment before outputting the final grammar.) We call these features {\em simple features}. Thrax implements the following simple features:
@@ -186,13 +224,121 @@ Each of the features we mentioned above can be individually included or excluded
 
 It is very easy to extend Thrax with new feature functions. For simple features, all that is needed is a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
 
+
+\section{The Joshua pipeline}
+
+Machine translation systems require the specification and execution of
+many steps, including:
+
+\begin{enumerate}
+\item Tokenizing, shortening, and recasing the training, tuning, and test data
+\item Aligning the training corpora
+\item Optionally parsing one or both sides of the input
+\item Extracting phrase tables and hierarchical grammars
+\item Tuning the parameters of the model
+\item Optionally detokenizing and recasing
+\item Evaluation
+\end{enumerate}
+
+\noindent Each of these high-level steps is controlled by any number
+of parameters and broken down further into sub-steps, leading to
+significant complication in maintaining, repeating, and comparing
+experimental results.
+
+Building and managing pipelines --- both as a record of what was done,
+and a means of reproducing it in the future --- is often left to individual
+researchers.  This is a problem especially for publicly available open-source
+toolkits, like Joshua, that are improved and extended, or used as
+black-box baselines.
+
+The Moses decoder provides scripts that automate the pipeline
+(e.g., \verb|train-factored-phrase-model.perl| and \verb|mert-moses.pl|).
+In this spirit, we have written a single script that runs the entire
+Joshua pipeline, effectively implementing the detailed step-by-step
+instructions already available
+online.\footnote{\url{http://www.cs.jhu.edu/~ccb/joshua/index.html}}
+The script, distributed with the Joshua source code, minimally
+requires the source and target language extensions and path prefixes
+for training, tuning, and development data.  It follows many of the
+command-line conventions of the Moses scripts.  It has the following
+non-exhaustive feature set:
+
+\begin{itemize}
+\item run only a piece of the pipeline by specifying pre-defined start
+  and stop steps
+\item optionally subsample the corpus towards the development data
+\item extract and decode with either Hiero or SAMT grammars
+\item skip steps by providing the information produced by that
+  step
+\item recase and detokenize
+\item evaluate
+\end{itemize}
+
+\noindent The script is written in Perl and is well-documented.
+
+\section{CachePipe: Cached pipeline runs}
+
+Some commands in the MT pipeline are very expensive to run, taking
+hours or even days to complete.  There are many situations in which a
+command does not need to be re-run, and it would be nice to have a
+system which could make those determinations.  Exactly how such a
+determination is made is not always obvious or easy to specify, and
+many systems have been proposed to help manage this problem, such as
+Experiment.perl,\footnote{\url{http://www.statmt.org/moses/?n=FactoredTraining.EMS}},
+LoonyBin \cite{clark2010loonybin}.
+
+These systems all vary in how they make the caching determination, in
+complexity and extensibility, and in ease of use.  
+
+Our solution to the caching dependency problem is CachePipe.
+CachePipe is designed with the following goals:
+
+\begin{enumerate}
+\item Ease of use, requiring minimal editing of existing scripts
+\item Robust content-based dependency system
+\end{enumerate}
+
+\noindent CachePipe is essentially a wrapper for shell commands that
+only runs the command if necessary.  Presented with a command to run
+and a list of file dependencies, it works by computing SHA1 hashes of
+the dependencies and of the command invocation and storing them; it
+then executes the command only if any of those hashes are different
+from previous runs.  
+
+CachePipe is implemented as a Perl module, for easy incorporation into
+existing Perl scripts.  It also works in shell scripts.  A basic
+invocation involves the following components:
+
+\begin{itemize}
+\item a name or identifier associated with the command or step
+\item the command to run
+\item a list of file dependencies
+\end{itemize}
+
+\noindent For example, to copy file \verb|a| to \verb|b|, the
+following shell command could be used:
+
+\verb|cachecmd copy "cp a b" a b|
+
+\noindent The use of SHA1 hashes results in a much more robust system than
+timestamp-based determinations, especially in networked environments
+where timestamps may differ slightly across machines.
+
+Since it is built on CachePipe, the Joshua's pipeline command can be
+safely re-run from start to finish.
+
 \section{Future work}
 
-As of this writing, Thrax is limited to SCFG-based translation models, but there has been a lot of recent work more complex tree-to-tree models \cite{zhang2008,liu2009,chiang2010}. It would be a natural development to improve Thrax to extract these kinds of grammars as well, allowing researchers to easily vary their extraction parameters and feature sets.
-We also hope that Thrax will continue to be extended with more feature functions as researchers develop them.
+As of this writing, Thrax is limited to SCFG-based translation models.
+A natural development would be to extract GHKM grammars
+\cite{galley2004what} or more recent tree-to-tree models
+\cite{zhang2008,liu2009,chiang2010}.  We also hope that Thrax will
+continue to be extended with more feature functions as researchers
+develop and contribute them.
 
-
-%\section{Acknowledgments}
+%% \section{Acknowledgments}
+%% - grants
+%% - Adam Lopez for help brainstorming CachePipe
 
 \bibliographystyle{acl}
 \bibliography{thrax}
