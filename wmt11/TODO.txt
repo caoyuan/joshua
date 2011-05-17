@@ -6,4 +6,4 @@
 - [ ] synchronous CCG in the future work section
 - [ ] citations
   - [ ] galley et al (2004)
-  - [X] both previous joshua papers
+  - [ ] both previous joshua papers
