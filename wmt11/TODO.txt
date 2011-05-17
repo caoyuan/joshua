@@ -1,0 +1,6 @@
+- new title (joshua 3.0)
+- include link to github repository, change documentation on chris'
+  site
+  - github page: joshua-decoder
+- visualization: SAMT vs.\ hiero
+- synchronous CCG in the future work section
