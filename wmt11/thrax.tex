@@ -143,10 +143,6 @@ Since variation in translation models and feature sets can have a significant ef
 
 \subsection{System overview}
 \label{design}
-\begin{figure*}
-\includegraphics[width=6in]{figures/thrax-pipeline}
-\caption{The Thrax pipeline. The right-pointing triangles are jobs that are submitted to a Hadoop cluster. Note that the feature jobs are all submitted in parallel.\label{thrax-workflow}}
-\end{figure*}
 
 To contrast with current grammar-extraction programs, we desire the following characteristics of Thrax:
 \begin{itemize}
@@ -157,7 +153,7 @@ To contrast with current grammar-extraction programs, we desire the following ch
 
 Thrax treats the grammar extraction and scoring as a series of dependent Hadoop jobs. Hadoop is an implementation of Google's MapReduce \cite{mapreduce}, a framework for distributed processing of large data sets. Hadoop jobs have two parts. In the {\em map} step, a set of key/value pairs is mapped to a set of intermediate key/value pairs. In the {\em reduce} step, all intermediate values associated with an intermediate key are merged.
 
-The Thrax pipeline is shown in figure \ref{thrax-workflow}. The first step is to extract all the grammar rules. The map step in this job takes as input word-aligned sentence pairs and produces a set of ordered pairs $(r,c)$ where $r$ is a rule and $c$ is the number of times it was extracted. During the reduce step, these rule counts are summed, so the result is a set of rules, along with the total number of times each rule was extracted from the entire corpus.
+The first step in the Thrax pipeline is to extract all the grammar rules. The map step in this job takes as input word-aligned sentence pairs and produces a set of ordered pairs $(r,c)$ where $r$ is a rule and $c$ is the number of times it was extracted. During the reduce step, these rule counts are summed, so the result is a set of rules, along with the total number of times each rule was extracted from the entire corpus.
 
 Given the rules and their counts, a separate Hadoop job is run for each feature. These jobs can all be submitted at once and run in parallel, avoiding the linear sort-and-score workflow. The output from each feature job is the same set of pairs $(r,c)$ as the input, except each rule $r$ has been annotated with some feature score $f$.
 
