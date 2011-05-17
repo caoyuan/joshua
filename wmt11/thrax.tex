@@ -42,34 +42,29 @@ and output formats.
 \section{Introduction}
 
 Joshua is an open-sourced toolkit for hierarchical machine translation
-of human languages.  The original version of Joshua was a
-reimplementation of the Python-based Hiero machine-translation system
-\cite{Joshua-WMT}, and it was later extended \cite{li2010joshua} to
+of human languages.  The original version of Joshua \cite{Joshua-WMT}
+was a reimplementation of the Python-based Hiero machine-translation
+system \cite{Chiang2007}; it was later extended \cite{li2010joshua} to
 support richer syntactic formalisms, such as SAMT \cite{samt2006}.
 
-This past year, development in Joshua has had a broad focus on
-improving the experimental pipeline.  Machine translation makes
-use of many different datasets, training procedures, and pre- and
-post-processing techniques that can have large effects on translation
-outcome and make direct comparisons between systems difficult.  In addition,
-managing one's own experiments is also quite difficult, as there is no
-widely-accepted systematic means of recording every last parameter
-that might have affected an experiment.  To address these, the latest
-version of Joshua includes the following projects:
+The main focus of this paper is to describe this past year's work in
+developing {\bf Thrax}, an open-source grammar extractor for Hiero and
+SAMT grammars.  Grammar extraction has shown itself to be something of
+a black art, with decoding performance depending crucially on a
+variety of features and options that are not always clearly described in papers.
+This hindered direct comparison both between and within grammatical formalisms.
+Thrax standardizes Joshua's grammar extraction procedures by providing
+a flexible and configurable means of specifying these settings.
+Section~\ref{section:results} contains the first direct comparison of
+Hiero and SAMT grammars with similar feature sets.
 
-\begin{enumerate}
-\item \emph{Thrax}, an open-source parameterized grammar extractor
-  capable of extracting both Hiero and SAMT grammars.  Thrax is highly
-  configurable.
-\item \emph{CachePipe}, an open-source project that implements a cached
-  pipeline.  CachePipe is a simple wrapper that determines whether
-  pipeline commands need to be re-run.  It does this by computing SHA1
-  hashes of dependencies to determine whether any of them have changed.
-\item \verb|pipeline.pl|.  In the spirit of Moses'
-  \verb|train-factored-phrase-model.perl| and \verb|mert-moses.pl|, we
-  provide a single script that implements the entire Joshua pipeline,
-  from data preparation to test-set decoding and evaluation.
-\end{enumerate}
+In addition, Joshua now includes a single parameterized script that
+implements the entire MT pipeline, from data preparation to
+evaluation.  This script is built on top of a module called
+\emph{CachePipe}.  CachePipe is a simple wrapper around shell commands
+that uses SHA-1 hashes and explicitly-provided lists of dependencies
+to determine whether a command needs to be run, saving time both in
+running and debugging machine translation pipelines.
 
 \section{Thrax: grammar extraction}
 
@@ -223,6 +218,9 @@ Each of the features we mentioned above can be individually included or excluded
 It is very easy to extend Thrax with new feature functions. For simple features, all that is needed is a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
 
 
+\section{Experiments}
+\label{section:results}
+
 \section{The Joshua pipeline}
 
 Machine translation systems require the specification and execution of
@@ -276,6 +274,17 @@ non-exhaustive feature set:
 
 \section{CachePipe: Cached pipeline runs}
 
+
+This past year, development in Joshua has had a broad focus on
+improving the experimental pipeline.  Machine translation makes
+use of many different datasets, training procedures, and pre- and
+post-processing techniques that can have large effects on translation
+outcome and make direct comparisons between systems difficult.  In addition,
+managing one's own experiments is also quite difficult, as there is no
+widely-accepted systematic means of recording every last parameter
+that might have affected an experiment.  To address these, the latest
+version of Joshua includes the following projects:
+
 Some commands in the MT pipeline are very expensive to run, taking
 hours or even days to complete.  There are many situations in which a
 command does not need to be re-run, and it would be nice to have a
@@ -306,6 +315,15 @@ from previous runs.
 CachePipe is implemented as a Perl module, for easy incorporation into
 existing Perl scripts.  It also works in shell scripts.  A basic
 invocation involves the following components:
+
+\emph{CachePipe}, an open-source project that implements a cached
+  pipeline.  CachePipe is a simple wrapper that determines whether
+  pipeline commands need to be re-run.  It does this by computing SHA1
+  hashes of dependencies to determine whether any of them have changed.
+\verb|pipeline.pl|.  In the spirit of Moses'
+  \verb|train-factored-phrase-model.perl| and \verb|mert-moses.pl|, we
+  provide a single script that implements the entire Joshua pipeline,
+  from data preparation to test-set decoding and evaluation.
 
 \begin{itemize}
 \item a name or identifier associated with the command or step
