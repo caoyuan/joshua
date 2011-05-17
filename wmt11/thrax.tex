@@ -30,19 +30,13 @@ Johns Hopkins University}
 
 \begin{abstract}
 We present progress on Joshua, an open-source decoder for hierarchical
-and syntax-based machine translation.  The main focus
-is on describing Thrax, a flexible, open source synchronous
-context-free grammar extractor using Apache Hadoop.  Thrax extracts
-both hierarchical \cite{Chiang2007} and syntax-augmented machine
-translation \cite{samt2006} grammars.  It is built on Apache Hadoop for efficient
-distributed performance, and can easily be extended with
-support for new grammars, feature functions, and output formats.  
-
-In addition, we present a single parameterized script for running the
-complete Joshua pipeline.  This script is built on top of CachePipe, a
-simple wrapper around shell command invocations that uses SHA1 hashes
-of explicitly-listed dependencies to avoid re-running commands when
-unnecessary.
+and syntax-based machine translation.  The main focus is describing
+Thrax, a flexible, open source synchronous context-free grammar
+extractor.  Thrax extracts both hierarchical \cite{Chiang2007} and
+syntax-augmented machine translation \cite{samt2006} grammars.  It is
+built on Apache Hadoop for efficient distributed performance, and can
+easily be extended with support for new grammars, feature functions,
+and output formats.
 \end{abstract}
 
 \section{Introduction}
@@ -50,8 +44,8 @@ unnecessary.
 Joshua is an open-sourced toolkit for hierarchical machine translation
 of human languages.  The original version of Joshua was a
 reimplementation of the Python-based Hiero machine-translation system
-(cite), and it was later extended to support richer syntactic
-formalisms, such as SAMT (cite).
+\cite{Joshua-WMT}, and it was later extended \cite{li2010joshua} to
+support richer syntactic formalisms, such as SAMT \cite{samt2006}.
 
 This past year, development in Joshua has had a broad focus on
 improving the experimental pipeline.  Machine translation makes
