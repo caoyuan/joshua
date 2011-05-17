@@ -7,4 +7,5 @@
 - [ ] citations
   - [ ] galley et al (2004)
   - [X] both previous joshua papers
-  - [ ] zollman2008systematic
+  - [ ] zollman2008systematic -- and check whether they had identical
+    feature sets
