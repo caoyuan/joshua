@@ -1,4 +1,4 @@
-- [ ] new title (joshua 3.0)
+- [X] new title (joshua 3.0)
 - [ ] include link to github repository, change documentation on chris'
   site
   - [ ] github page: joshua-decoder
