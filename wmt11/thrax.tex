@@ -227,7 +227,23 @@ we built both SAMT and hiero grammars.\footnote{Except for fr-en and
   en-fr.  We were unable to decode with SAMT grammars for these
   language pairs due to their large size.  We have since resolved this
   issue and will have scores for the final version of the paper.}
-Table~\ref{table:results} contains the results on the complete WMT 2011 test set.
+Table~\ref{table:results} contains the results on the complete WMT
+2011 test set.
+
+- TM: europarl + news commentary
+- LM: appropriate side of training data, except english, used gigaword
+- standard tokenization and lowercasing
+- length limit 50
+- subsampled towards development set
+- subsampled towards test set?
+- tuning data: which test set from
+  http://www.statmt.org/wmt11/translation-task.html? (2009?)
+- dev data: which test set? (2010?)
+- MERT
+- detokenized
+- recasing: built monotonic word-based TM between UC and lc,
+  translated
+
 
 \begin{table}[t]
   \centering
