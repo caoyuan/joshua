@@ -12,6 +12,8 @@
 
 \setlength\titlebox{6.5cm}
 
+\hyphenation{CachePipe}
+
 \newcommand{\aff}{\ensuremath{{}^\text{\Womanface}}}
 \newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
 
@@ -279,7 +281,7 @@ The complexity of managing these pipelines and experimental
 environments has led to a number of different experimental management
 systems, such as
 Experiment.perl,\footnote{\url{http://www.statmt.org/moses/?n=FactoredTraining.EMS}}
-Joshua 2.0's Makefile-like system \cite{li2010joshua}, and LoonyBin
+Joshua 2.0's Makefile system \cite{li2010joshua}, and LoonyBin
 \cite{clark2010loonybin}.  In addition to managing the pipeline, these
 scripts employ different techniques to cache different steps in an
 attempt to avoid expensive redundant computation.  However, these
