@@ -110,11 +110,14 @@ In practice, this translation model score is combined with scores from other fea
 
 Throughout this work, we will reference two particular SCFG types known as Hiero and Syntax-Augmented Machine Translation (SAMT).
 
-A Hiero grammar \cite{Chiang2007} is an SCFG with only one type of nonterminal symbol (traditionally labelled $X$). A Hiero grammar can be extracted from a parallel corpus where each sentence pair has been word-aligned. An example of a sentence pair is shown in figure \ref{aligned-sentence}.
+A Hiero grammar \cite{Chiang2007} is an SCFG with only one type of
+nonterminal symbol (traditionally labelled $X$).  A Hiero grammar can be extracted from a parallel corpus where each sentence pair has been word-aligned. An example of a sentence pair is shown in Figure~\ref{aligned-sentence}.
 
 If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence pair, we say it is {\em consistent} with the pair's alignment if none of the words in $f_i^j$ are aligned to words outside of $e_k^l$, and vice-versa. The consistent sub-phrase may be extracted as a SCFG rule as in figure \ref{hiero-rule}. Further, if a consistent phrase is contained within another one, a hierarchical rule may be extracted (see figure \ref{hiero-rule-2}).
 
-An SAMT grammar \cite{samt2006} is similar to a Hiero grammar, except that the nonterminal symbols are syntactically motivated. SAMT rules are extracted from aligned sentence pairs, but they require some additional information: they require a parse tree for the target-side sentence.
+An SAMT grammar \cite{samt2006} is similar to a Hiero grammar, except
+that the nonterminal symbol set is much larger, and its labels are
+syntactically motivated.  SAMT rules are extracted from aligned sentence pairs, but they require some additional information: they require a parse tree for the target-side sentence.
 
 When a rule is extracted as a consistent phrase pair (as in Hiero), if the target side is spanned by one constituent of the parse tree, we assign that constituent's label as the nonterminal symbol for the rule. Otherwise, we assign an extended category of the form $C_1+C_2$, $C_1 / C_2$, or $C_2$ \textbackslash $C_1$ --- indicating that the target side spans two adjacent constituents, is a $C_1$ missing a $C_2$ to the right, or is a $C_1$ missing a $C_2$ on the left, respectively. These extended categories are adapted from combinatory categorial grammars \cite{Steedman1999}.
 
