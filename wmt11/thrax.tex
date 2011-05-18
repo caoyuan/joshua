@@ -240,7 +240,7 @@ outcome, and which make direct comparisons between systems difficult.
 The complexity of managing these pipelines and experimental
 environments has led to a number of different experimental management
 systems, such as
-Experiment.perl,\footnote{\url{http://www.statmt.org/moses/?n=FactoredTraining.EMS}},
+Experiment.perl,\footnote{\url{http://www.statmt.org/moses/?n=FactoredTraining.EMS}}
 Joshua 2.0's Makefile-like system \cite{li2010joshua}, and LoonyBin
 \cite{clark2010loonybin}.  In addition to managing the pipeline, these
 scripts employ different techniques to cache different steps in an
@@ -248,7 +248,7 @@ attempt to avoid expensive redundant computation.  However, these
 approaches are based on relatively simple heuristics to make the
 caching determination.  Timestamps, in particular, are not reliable
 indicators, especially in networked filesystem environments where
-different computers have different beliefs about the current time.
+they may differ across computers
 
 Our solution to the caching dependency problem is CachePipe.
 CachePipe is designed with the following goals:
@@ -258,40 +258,28 @@ CachePipe is designed with the following goals:
 \item Ease of use, including minimal editing of existing scripts
 \end{enumerate}
 
-\noindent CachePipe is essentially a wrapper for shell commands that
-only runs the command if necessary.  Presented with a command to run
-and a list of file dependencies, it computes SHA-1 hashes of
-the dependencies and of the command invocation and stores them; it
-then executes the command only if any of those hashes are different
-from previous runs.
-
-CachePipe is implemented as a Perl module, for easy incorporation into
-existing Perl scripts.  It also works in shell scripts.  A basic
-invocation involves the following components:
-
-\begin{itemize}
-\item a name or identifier associated with the command or step
-\item the command to run
-\item a list of file dependencies
-\end{itemize}
-
-\noindent For example, to copy file \verb|a| to \verb|b|, the
-following shell command could be used:
+\noindent CachePipe is essentially a wrapper around command
+invocations.  Presented with a command to run
+and a list of file dependencies, it computes SHA-1 hashes of the
+dependencies and of the command invocation and stores them; the
+command is executed only if any of those hashes are different from
+previous runs.  A
+basic invocation involves specifying (1) a name or identifier
+associated with the command or step, (2) the command to run, and (3) a
+list of file dependencies.  For example, to copy file \verb|a| to
+\verb|b| from a shell prompt, the following command could be used:
 
 \verb|cachecmd copy "cp a b" a b|
 
-\noindent The use of SHA1 hashes results in a much more robust system than
-timestamp-based determinations, especially in networked environments
-where timestamps may differ slightly across machines.
+\noindent CachePipe is open-source software, distributed with Joshua
+and available separately from
+\url{https://github.com/mjpost/cachepipe}.  It currently provides both
+a shell script interface and a programmatic API for Perl.  It accepts
+a number of other arguments and dependency types.
 
-Joshua 3.0 contains a script that implements the complete Joshua
-pipeline, from data preparation to evaluation.  In the spirit of
-Moses' \verb|train-factored-phrase-model.perl|, it permits various
-sub-pieces of the pipeline to be run.  Furthermore, since the script
-is built on top of CachePipe, it can be safely re-run from start to finish.
-
-CachePipe is open-source software.  It is distributed with Joshua and
-can be downloaded separately from \url{https://github.com/mjpost/cachepipe}.
+CachePipe serves as the foundation of a new script in Joshua 3.0 that
+implements the complete Joshua pipeline, from data preparation to
+evaluation.
 
 \section{Future work}
 
