@@ -314,7 +314,11 @@ list of file dependencies.  For example, to copy file \verb|a| to
 
 \verb|cachecmd copy "cp a b" a b|
 
-\noindent CachePipe is open-source software, distributed with Joshua
+\noindent The first time the command is run, the file would be copied;
+afterwards, the command would be skipped after CachePipe verified that
+the contents of the dependencies and had not changed.
+
+CachePipe is open-source software, distributed with Joshua
 and available separately from
 \url{https://github.com/mjpost/cachepipe}.  It currently provides both
 a shell script interface and a programmatic API for Perl.  It accepts
