@@ -226,11 +226,11 @@ we built both SAMT and hiero grammars.\footnote{Except for fr-en and
 Table~\ref{table:results} contains the results on the complete WMT
 2011 test set.
 
-To train the translation models, we used the provided Europarl and news commentary data. For cz-en and en-cz, we also used sections of the CzEng parallel corpus {\sc (cite, I have it in my thesis)}. The parallel data was subsampled using Joshua's built-in subsampler to select sentences with $n$-grams relevant to the tuning and test set. We used SRILM to train a 5-gram language model with Kneser-Ney smoothing {\sc (cite?)} using the appropriate side of the parallel data. For the English LM, we also used English Gigaword Fourth Edition\footnote{LDC2009T13}.
+To train the translation models, we used the provided Europarl and news commentary data. For cz-en and en-cz, we also used sections of the CzEng parallel corpus \cite{czeng}. The parallel data was subsampled using Joshua's built-in subsampler to select sentences with $n$-grams relevant to the tuning and test set. We used SRILM to train a 5-gram language model with Kneser-Ney smoothing {\sc (cite?)} using the appropriate side of the parallel data. For the English LM, we also used English Gigaword Fourth Edition\footnote{LDC2009T13}.
 
 Before extracting an SCFG with Thrax, we used the provided perl scripts to tokenize and normalize the data. We also removed any sentences longer than 50 tokens. Because extracting an SAMT grammar requires parse trees for the training data, we parsed the English training data using {\sc whatever parser}.
 
-We tuned the model weights using Z-MERT {\sc (cite)}, an implementation of minimum error-rate training that is included with Joshua. The weights were tuned against the WMT08 test set ({\tt news-test2008}).
+We tuned the model weights using Z-MERT \cite{zmert}, an implementation of minimum error-rate training that is included with Joshua. The weights were tuned against the WMT08 test set ({\tt news-test2008}).
 
 We decoded the test set to produce a 300-best list, then chose the best candidate for each sentence using Minimum Bayes Risk reranking.
 
