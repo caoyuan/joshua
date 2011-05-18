@@ -1,9 +1,11 @@
 - [X] new title (joshua 3.0)
-- [ ] include link to github repository, change documentation on chris'
-  site
+- [ ] include link to github repository, change documentation on
+  chris' site
   - [ ] github page: joshua-decoder
 - [ ] visualization: SAMT vs.\ hiero
 - [ ] synchronous CCG in the future work section
 - [ ] citations
   - [ ] galley et al (2004)
-  - [ ] both previous joshua papers
+  - [X] both previous joshua papers
+  - [ ] zollman2008systematic -- and check whether they had identical
+    feature sets
