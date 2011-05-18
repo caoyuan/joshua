@@ -48,7 +48,7 @@ system \cite{Chiang2007}; it was later extended \cite{li2010joshua} to
 support richer syntactic formalisms, such as SAMT \cite{samt2006}.
 
 The main focus of this paper is to describe this past year's work in
-developing {\bf Thrax}, an open-source grammar extractor for Hiero and
+developing {\bf Thrax} \cite{jonnymasters}, an open-source grammar extractor for Hiero and
 SAMT grammars.  Grammar extraction has shown itself to be something of
 a black art, with decoding performance depending crucially on a
 variety of features and options that are not always clearly described in papers.
@@ -225,6 +225,16 @@ we built both SAMT and hiero grammars.\footnote{Except for fr-en and
   issue and will have scores for the final version of the paper.}
 Table~\ref{table:results} contains the results on the complete WMT
 2011 test set.
+
+To train the translation models, we used the provided Europarl and news commentary data. For cz-en and en-cz, we also used sections of the CzEng parallel corpus {\sc (cite, I have it in my thesis)}. The parallel data was subsampled using Joshua's built-in subsampler to select sentences with $n$-grams relevant to the tuning and test set. We used SRILM to train a 5-gram language model with Kneser-Ney smoothing {\sc (cite?)} using the appropriate side of the parallel data. For the English LM, we also used English Gigaword Fourth Edition\footnote{LDC2009T13}.
+
+Before extracting an SCFG with Thrax, we used the provided perl scripts to tokenize and normalize the data. We also removed any sentences longer than 50 tokens. Because extracting an SAMT grammar requires parse trees for the training data, we parsed the English training data using {\sc whatever parser}.
+
+We tuned the model weights using Z-MERT {\sc (cite)}, an implementation of minimum error-rate training that is included with Joshua. The weights were tuned against the WMT08 test set ({\tt news-test2008}).
+
+We decoded the test set to produce a 300-best list, then chose the best candidate for each sentence using Minimum Bayes Risk reranking.
+
+To re-case the 1-best test set output, we trained a true-case language model using the same LM training data as before. We used an SCFG translation model to translate the from the lowercased to true-case output. The translation model used rules limited to five tokens in length, and contained no hierarchical rules.
 
 - TM: europarl + news commentary
 - LM: appropriate side of training data, except english, used gigaword
