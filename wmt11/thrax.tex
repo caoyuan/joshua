@@ -206,7 +206,7 @@ There are several parameters that can make a significant difference in a grammar
 \item whether to allow unaligned words at the edges of consistent phrase pairs
 \end{itemize}
 
-Chiang \shortcite{Chiang2007} gives reasonable heuristic choices for these parameters when extracting a Hiero grammar, and Lopez \shortcite{lopez-2008} confirms some of them (maximum rule span, maximum number of source-side symbols, and maximum number of nonterminals). No similar parameter analysis has been performed for SAMT.
+Chiang \shortcite{Chiang2007} gives reasonable heuristic choices for these parameters when extracting a Hiero grammar, and Lopez \shortcite{lopez-2008} confirms some of them (maximum rule span of 10, maximum number of source-side symbols at 5, and maximum number of nonterminals at 2 per rule). No similar parameter analysis has been performed for SAMT.
 
 When extracting Hiero- or SAMT-style grammars, the first Hadoop job in the Thrax workflow takes in a parallel corpus and produces a set of rules. But in fact Thrax's extraction mechanism is more general than that; all it requires is a function that maps a string to a set of rules. This makes it easy to implement new grammars and extract them using Thrax.
 
@@ -247,11 +247,25 @@ where again $C(\cdot)$ is a count of the number of times the rule was extracted 
 
 Each of the features we mentioned above can be individually included or excluded when the grammar is extracted. One can simply list the features to be included in a configuration file.
 
-It is very easy to extend Thrax with new feature functions. For simple features, all that is needed is a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
+It is very easy to extend Thrax with new feature functions. For simple features, all that is needed is to implement the {\sc SimpleFeature} interface with a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: to subclass {\sc MapReduceFeature}, one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
 
 
 \section{Experiments}
 \label{section:results}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+Language pair & sentences (K) & words (M) \\
+cs--en & 332 & 4.7 \\
+de--en & 279 & 5.5 \\
+en--cs & 487 & 6.9 \\
+en--de & 359 & 7.2 \\
+en--fr & 682 & 12.5 \\
+fr--en & 792 & 14.4 \\
+\end{tabular}
+\caption{Amount of training data used after subsampling.\label{training-data-size}}
+\end{table}
 
 We built systems for six language pairs for the WMT 2011 shared task:
 cz-en, en-cz, de-en, en-de, fr-en, and en-fr.  For each language pair,
@@ -295,19 +309,19 @@ SAMT grammar.
 To re-case the 1-best test set output, we trained a true-case language
 model using the same LM training data as before.  We used an SCFG
 translation model to translate from the lowercased to true-case
-output.  The translation model used rules limited to five tokens in length, and contained no hierarchical rules.
+output.  The translation model used rules limited to five tokens in length, and contained no hierarchical rules. 
 
 \begin{table}[t]
   \centering
-  \begin{tabular}{l|rr}
-    pair   & hiero & SAMT \\
+  \begin{tabular}{l|rrr}
+    pair   & hiero & SAMT & Improvement \\
     \hline\hline
-    cz-en  & 21.1  & 21.7 \\
-    en-cz  & 16.8  & 16.9 \\
-    de-en  & 18.9  & 19.5 \\
-    en-de  & 14.3  & 14.9 \\
-    fr-en  & 28.0  & - \\
-    en-fr  & 30.4  & - \\
+    cz-en  & 21.1  & 21.7 & +0.8 \\
+    en-cz  & 16.8  & 16.9 & +0.1 \\
+    de-en  & 18.9  & 19.5 & +0.6 \\
+    en-de  & 14.3  & 14.9 & +0.6 \\
+    fr-en  & 28.0  & - & - \\
+    en-fr  & 30.4  & - & - \\
   \end{tabular}
   \caption{Single-reference BLEU-4 scores for the ten systems we
     built.  }
