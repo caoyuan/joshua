@@ -49,7 +49,7 @@ Joshua is an open-sourced toolkit for hierarchical machine translation
 of human languages.  The original version of Joshua \cite{Joshua-WMT}
 was a reimplementation of the Python-based Hiero machine-translation
 system \cite{Chiang2007}; it was later extended \cite{li2010joshua} to
-support richer syntactic formalisms, such as SAMT \cite{samt2006}.
+support richer formalisms, such as SAMT \cite{samt2006}.
 
 The main focus of this paper is to describe this past year's work in
 developing {\bf Thrax} \cite{jonnymasters}, an open-source grammar extractor for Hiero and
@@ -115,14 +115,15 @@ $[5.6]$ & \grammarrule{X}{.}{.} & \grammarrule{.}{.}{.} \\
 Throughout this work, we will reference two particular SCFG types known as Hiero and Syntax-Augmented Machine Translation (SAMT).
 
 A Hiero grammar \cite{Chiang2007} is an SCFG with only one type of
-nonterminal symbol (traditionally labelled $X$).  A Hiero grammar can be extracted from a parallel corpus where each sentence pair has been word-aligned. An example of a sentence pair is shown in Figure~\ref{aligned-sentence}.
-
-If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence pair, we say it is
-{\em consistent} with the pair's alignment if none of the words in
-$f_i^j$ are aligned to words outside of $e_k^l$, and vice-versa. The
-consistent sub-phrase may be extracted as an SCFG rule.  Further, if a consistent phrase is contained within
-another one, a hierarchical rule may be extracted by replacing the
-smaller piece with a nonterminal.
+nonterminal symbol (traditionally labelled $X$).  A Hiero grammar can
+be extracted from a parallel corpus where each sentence pair has been
+word-aligned.  If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence
+pair, we say it is {\em consistent} with the pair's alignment if none
+of the words in $f_i^j$ are aligned to words outside of $e_k^l$, and
+vice-versa. The consistent sub-phrase may be extracted as an SCFG
+rule.  Furthermore, if a consistent phrase is contained within another
+one, a hierarchical rule may be extracted by replacing the smaller
+piece with a nonterminal.
 
 \begin{figure}[ht]
   \centering
@@ -161,16 +162,20 @@ Memory usage is a serious limitation of both Joshua and cdec extractors. Transla
 
 Different feature calculations may require different sort orders, leading to a linear workflow that alternates between sorting the grammar and calculating a feature score. To calculate more feature scores, more sorts have to be performed. This discourages the implementation of new features. For example, Joshua's built-in rule extractor calculates the phrasal probability $p(\gamma|\alpha)$ for each rule but, to save time, does not calculate its obvious counterpart $p(\alpha|\gamma)$, which would require another sort.
 
-The SAMT extractor does not have a problem with large data sets. Indeed, SAMT has been extended \cite{venugopal2009hadoop} to run on Hadoop, an implementation of Google's MapReduce framework for efficient processing of large amounts of data. We will discuss Hadoop more in section \ref{design}.
+The SAMT extractor does not have a problem with large data sets.
+Indeed, SAMT has been extended \cite{venugopal2009hadoop} to run on
+Hadoop, an implementation of Google's MapReduce framework for
+efficient processing of large amounts of data.  We will discuss Hadoop more in section \ref{design}.
 
 None of these three extractors are designed for flexibility in terms of grammar extraction. The Joshua and cdec extractors only extract Hiero grammars, and Zollmann and Venugopal's extractor can only extract SAMT-style grammars. They are not designed to score arbitrary feature sets, either.
 
-Since variation in translation models and feature sets can have a significant effect on translation performance, we have developed Thrax in order to make it easy to build and test new models. We hope it will encourage novel feature engineering.
+Since variation in translation models and feature sets can have a significant effect on translation performance, we have developed Thrax in order to make it easy to build and test new models. 
 
 \subsection{System overview}
 \label{design}
 
-To contrast with current grammar-extraction programs, we desire the following characteristics of Thrax:
+The following were goals in the design of Thrax:
+
 \begin{itemize}
 \item ability to extract different SCFGs (such as Hiero and SAMT), and to adjust various extraction parameters for the grammars;
 \item ability to easily change the feature set with which to score the extracted rules, and easily implement new features;
@@ -274,9 +279,18 @@ provided Treebank-trained grammar.
 We tuned the model weights using Z-MERT \cite{zaidan2009z}, an
 implementation of minimum error-rate training included with Joshua.  The weights were tuned against the WMT08 test set ({\tt news-test2008}).
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/derivation}
+  \caption{}
+  \label{figure:derivation}
+\end{figure*}
+
 We decoded the test set to produce a 300-best list of unique
 translations, then chose the best candidate for each sentence using
 Minimum Bayes Risk reranking \cite{kumar2004minimum}.
+Figure~\ref{figure:derivation} shows an example derivation with an
+SAMT grammar.
 
 To re-case the 1-best test set output, we trained a true-case language
 model using the same LM training data as before.  We used an SCFG
@@ -360,8 +374,8 @@ As of this writing, Thrax is limited to SCFG-based translation models.
 A natural development would be to extract GHKM grammars
 \cite{galley2004whats} or more recent tree-to-tree models
 \cite{zhang2008,liu2009,chiang2010}.  We also hope that Thrax will
--continue to be extended with more feature functions as researchers
--develop and contribute them.
+continue to be extended with more feature functions as researchers
+develop and contribute them.
 
 %% \section{Acknowledgments}
 %% - grants
