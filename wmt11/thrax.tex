@@ -16,6 +16,7 @@
 
 \newcommand{\aff}{\ensuremath{{}^\text{\Radioactivity}}}
 \newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
+\newcommand{\rule}[3]{$#1 \to \langle \text{#2} , \text{#3} \rangle$ }
 
 \title{Joshua 3.0: Syntax-based Machine Translation with the Thrax
   Grammar Extractor}
@@ -99,15 +100,29 @@ In practice, this translation model score is combined with scores from other fea
 \caption{A fragment of an aligned sentence pair.\label{aligned-sentence}}
 \end{figure}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/simple-rule}
-\caption{A consistent phrase pair that can be extracted into the rule \\$X \to \langle \textrm{ Pour la majorit\'{e} des gens }; \textrm{ For most people } \rangle$.\label{hiero-rule}}
-\end{figure}
+\begin{table}
+\begin{tabular}{|c|c|c|}
+Span & Hiero & SAMT \\
+\hline \\
+$[0,1]$ & \rule{X}{ich}{i} & \rule{PRP}{ich}{i} \\
+$[1,3]$ & \rule{X}{sehr}{very much} & \rule{ADVP}{sehr}{very much} \\
+$[3,4]$ & \rule{X}{begr\"{u}\ss{}e}{welcome} & \rule{VBP}{begr\"{u}\ss{}e}{welcome} \\
+$[4,5]$ & \rule{X}{das}{this} & \rule{DT}{das}{this} \\
+$[5.6]$ & \rule{X}{.}{.} & \rule{.}{.}{.} \\
+\hline
+\end{tabular}
+\caption{Rules extracted from an example training sentence pair under Hiero and SAMT.\label{table:rules}}
+\end{table}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/hierarchical-rule}
-\caption{Two consistent phrase pairs that form the hierarchical rule $X \to \langle \textrm{ Pour } X ; \textrm{ For } X \rangle$.\label{hiero-rule-2}}
-\end{figure}
+% \begin{figure}[t]
+% \includegraphics[width=0.5\textwidth]{figures/simple-rule}
+% \caption{A consistent phrase pair that can be extracted into the rule \\$X \to \langle \textrm{ Pour la majorit\'{e} des gens }; \textrm{ For most people } \rangle$.\label{hiero-rule}}
+% \end{figure}
+
+% \begin{figure}[t]
+% \includegraphics[width=0.5\textwidth]{figures/hierarchical-rule}
+% \caption{Two consistent phrase pairs that form the hierarchical rule $X \to \langle \textrm{ Pour } X ; \textrm{ For } X \rangle$.\label{hiero-rule-2}}
+% \end{figure}
 
 Throughout this work, we will reference two particular SCFG types known as Hiero and Syntax-Augmented Machine Translation (SAMT).
 
@@ -130,7 +145,7 @@ Joshua includes a simple Hiero extractor \cite{schwartz2010}. The extractor runs
 
 The SAMT implementation of Zollmann and Venugopal \shortcite{samt2006} includes a several-thousand-line Perl script to extract their rules. In addition to phrasal and lexical probabilities, this extractor implements several other features that are also described in section \ref{features}.
 
-Finally, the cdec decoder \cite {cdec} includes a rudimentary grammar extractor that performs well only when all rules can be held in memory.
+Finally, the cdec decoder \cite {cdec} includes a grammar extractor that performs well only when all rules can be held in memory.
 
 Memory usage is a serious limitation of both Joshua and cdec extractors. Translation models can be very large, and many feature scores require accumulation of statistical data from the entire set of extracted rules. Since it is impractical to keep the entire grammar in memory, rules are usually sorted on disk and then read sequentially.
 
@@ -193,7 +208,7 @@ Thrax considers feature functions of two types: first, there are features that c
 \item a counter giving the number of terminals on the target side of the rule;
 \item a constant phrase penalty.
 \end{itemize}
-In addition to simple features, Thrax also implements {\em map-reduce features}. These are features that require a Hadoop job to calculate, because the rules must be compared to each other in a certain order. Thrax implements the following map-reduce features:
+In addition to simple features, Thrax also implements {\em map-reduce features}. These are features that require comparing rules in a certain order. Thrax uses Hadoop to sort the rules efficiently and calculate these feature functions. Thrax implements the following map-reduce features:
 \begin{itemize}
 \item Phrasal translation probabilities $p(\alpha|\gamma)$ and $p(\gamma|\alpha)$. These are calculated by relative frequency:
 \begin{equation}
