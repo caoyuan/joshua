@@ -293,12 +293,12 @@ provided Treebank-trained grammar.
 We tuned the model weights using Z-MERT \cite{zaidan2009z}, an
 implementation of minimum error-rate training included with Joshua.  The weights were tuned against the WMT08 test set ({\tt news-test2008}).
 
-\begin{figure*}[t]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=0.8\textwidth]{figures/derivation}
+  \includegraphics[width=\linewidth]{figures/derivation}
   \caption{}
   \label{figure:derivation}
-\end{figure*}
+\end{figure}
 
 We decoded the test set to produce a 300-best list of unique
 translations, then chose the best candidate for each sentence using
