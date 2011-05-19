@@ -97,7 +97,7 @@ In practice, this translation model score is combined with scores from other fea
 
 \begin{table*}[t]
   \centering
-  \begin{tabular}{c|c|c}
+  \begin{tabular}{ccc}
     Span & Hiero & SAMT \\
 \hline\hline
 $[1,3]$ & \grammarrule{X}{sehr}{very much} & \grammarrule{ADVP}{sehr}{very much} \\
@@ -105,9 +105,8 @@ $[0,3]$ & \grammarrule{X}{$X$ sehr}{$X$ very much} & \grammarrule{PRP+ADVP}{$PRP
 $[3,4]$ & \grammarrule{X}{begr\"{u}\ss{}e}{welcome} & \grammarrule{VBP}{begr\"{u}\ss{}e}{welcome} \\
 $[0,6]$ & \grammarrule{X}{$X$ ich sehr .}{i very much $X$ .} & \grammarrule{S}{$VP$ ich sehr .}{i very much $VP$ .} \\
 $[0,6]$ & \grammarrule{X}{$X$ .}{$X$ .} & \grammarrule{S}{$S/.$ .}{$S/.$ .} \\
-\hline
   \end{tabular}
-  \caption{Hiero and SAMT rules extracted from the training sentence
+  \caption{A subset of the Hiero and SAMT rules extracted from the sentence
     pair of Figure~\ref{figure:alignment}.}
   \label{table:rules}
 \end{table*}
@@ -162,10 +161,11 @@ Memory usage is a serious limitation of both Joshua and cdec extractors. Transla
 
 Different feature calculations may require different sort orders, leading to a linear workflow that alternates between sorting the grammar and calculating a feature score. To calculate more feature scores, more sorts have to be performed. This discourages the implementation of new features. For example, Joshua's built-in rule extractor calculates the phrasal probability $p(\gamma|\alpha)$ for each rule but, to save time, does not calculate its obvious counterpart $p(\alpha|\gamma)$, which would require another sort.
 
-The SAMT extractor does not have a problem with large data sets.
-Indeed, SAMT has been extended \cite{venugopal2009hadoop} to run on
-Hadoop, an implementation of Google's MapReduce framework for
-efficient processing of large amounts of data.  We will discuss Hadoop more in section \ref{design}.
+The SAMT extractor does not have a problem with large data sets; SAMT
+has been extended \cite{venugopal2009hadoop} to run on Hadoop, an
+implementation of Google's MapReduce framework for efficient
+processing of large amounts of data.  We will discuss Hadoop more in
+section \ref{design}.
 
 None of these three extractors are designed for flexibility in terms of grammar extraction. The Joshua and cdec extractors only extract Hiero grammars, and Zollmann and Venugopal's extractor can only extract SAMT-style grammars. They are not designed to score arbitrary feature sets, either.
 
