@@ -16,7 +16,7 @@
 
 \newcommand{\aff}{\ensuremath{{}^\text{\Radioactivity}}}
 \newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
-\newcommand{\rule}[3]{$#1 \to \langle \text{#2} , \text{#3} \rangle$ }
+\newcommand{\grammarrule}[3]{$#1 \to \langle \text{#2} , \text{#3} \rangle$ }
 
 \title{Joshua 3.0: Syntax-based Machine Translation with the Thrax
   Grammar Extractor}
@@ -95,47 +95,57 @@ In practice, this translation model score is combined with scores from other fea
 
 \subsection{Hiero and SAMT}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/aligned-sentence}
-\caption{A fragment of an aligned sentence pair.\label{aligned-sentence}}
-\end{figure}
-
-\begin{table}
-\begin{tabular}{|c|c|c|}
-Span & Hiero & SAMT \\
-\hline \\
-$[0,1]$ & \rule{X}{ich}{i} & \rule{PRP}{ich}{i} \\
-$[1,3]$ & \rule{X}{sehr}{very much} & \rule{ADVP}{sehr}{very much} \\
-$[3,4]$ & \rule{X}{begr\"{u}\ss{}e}{welcome} & \rule{VBP}{begr\"{u}\ss{}e}{welcome} \\
-$[4,5]$ & \rule{X}{das}{this} & \rule{DT}{das}{this} \\
-$[5.6]$ & \rule{X}{.}{.} & \rule{.}{.}{.} \\
+\begin{table*}[t]
+  \centering
+  \begin{tabular}{c|c|c}
+    Span & Hiero & SAMT \\
+\hline\hline
+$[0,1]$ & \grammarrule{X}{ich}{i} & \grammarrule{PRP}{ich}{i} \\
+$[1,3]$ & \grammarrule{X}{sehr}{very much} & \grammarrule{ADVP}{sehr}{very much} \\
+$[3,4]$ & \grammarrule{X}{begr\"{u}\ss{}e}{welcome} & \grammarrule{VBP}{begr\"{u}\ss{}e}{welcome} \\
+$[4,5]$ & \grammarrule{X}{das}{this} & \grammarrule{DT}{das}{this} \\
+$[5.6]$ & \grammarrule{X}{.}{.} & \grammarrule{.}{.}{.} \\
 \hline
-\end{tabular}
-\caption{Rules extracted from an example training sentence pair under Hiero and SAMT.\label{table:rules}}
-\end{table}
-
-% \begin{figure}[t]
-% \includegraphics[width=0.5\textwidth]{figures/simple-rule}
-% \caption{A consistent phrase pair that can be extracted into the rule \\$X \to \langle \textrm{ Pour la majorit\'{e} des gens }; \textrm{ For most people } \rangle$.\label{hiero-rule}}
-% \end{figure}
-
-% \begin{figure}[t]
-% \includegraphics[width=0.5\textwidth]{figures/hierarchical-rule}
-% \caption{Two consistent phrase pairs that form the hierarchical rule $X \to \langle \textrm{ Pour } X ; \textrm{ For } X \rangle$.\label{hiero-rule-2}}
-% \end{figure}
+  \end{tabular}
+  \caption{Hiero and SAMT rules extracted from the training sentence
+    pair of Figure~\ref{figure:alignment}.}
+  \label{table:rules}
+\end{table*}
 
 Throughout this work, we will reference two particular SCFG types known as Hiero and Syntax-Augmented Machine Translation (SAMT).
 
 A Hiero grammar \cite{Chiang2007} is an SCFG with only one type of
 nonterminal symbol (traditionally labelled $X$).  A Hiero grammar can be extracted from a parallel corpus where each sentence pair has been word-aligned. An example of a sentence pair is shown in Figure~\ref{aligned-sentence}.
 
-If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence pair, we say it is {\em consistent} with the pair's alignment if none of the words in $f_i^j$ are aligned to words outside of $e_k^l$, and vice-versa. The consistent sub-phrase may be extracted as a SCFG rule as in figure \ref{hiero-rule}. Further, if a consistent phrase is contained within another one, a hierarchical rule may be extracted (see figure \ref{hiero-rule-2}).
+If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence pair, we say it is
+{\em consistent} with the pair's alignment if none of the words in
+$f_i^j$ are aligned to words outside of $e_k^l$, and vice-versa. The
+consistent sub-phrase may be extracted as an SCFG rule.  Further, if a consistent phrase is contained within
+another one, a hierarchical rule may be extracted by replacing the
+smaller piece with a nonterminal.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.4\textwidth]{figures/alignment}
+  \caption{An aligned sentence pair.}
+  \label{figure:alignment}
+\end{figure}
 
 An SAMT grammar \cite{samt2006} is similar to a Hiero grammar, except
 that the nonterminal symbol set is much larger, and its labels are
 syntactically motivated.  SAMT rules are extracted from aligned sentence pairs, but they require some additional information: they require a parse tree for the target-side sentence.
 
-When a rule is extracted as a consistent phrase pair (as in Hiero), if the target side is spanned by one constituent of the parse tree, we assign that constituent's label as the nonterminal symbol for the rule. Otherwise, we assign an extended category of the form $C_1+C_2$, $C_1 / C_2$, or $C_2$ \textbackslash $C_1$ --- indicating that the target side spans two adjacent constituents, is a $C_1$ missing a $C_2$ to the right, or is a $C_1$ missing a $C_2$ on the left, respectively. These extended categories are adapted from combinatory categorial grammars \cite{Steedman1999}.
+When a rule is extracted as a consistent phrase pair (as in Hiero), if
+the target side is spanned by one constituent of the parse tree, we
+assign that constituent's label as the nonterminal symbol for the
+rule.  Otherwise, we assign an extended category of the form
+$C_1+C_2$, $C_1 / C_2$, or $C_2$ \textbackslash $C_1$ --- indicating
+that the target side spans two adjacent constituents, is a $C_1$
+missing a $C_2$ to the right, or is a $C_1$ missing a $C_2$ on the
+left, respectively.  These extended categories are adapted from
+combinatory categorial grammars \cite{Steedman1999}.
+Table~\ref{table:rules} contains a list of Hiero and SAMT rule
+extracted from the training sentence pair in Figure~\ref{figure:alignment}.
 
 \subsection{Related work}
 
