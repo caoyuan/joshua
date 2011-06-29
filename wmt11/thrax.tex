@@ -14,15 +14,17 @@
 
 \hyphenation{CachePipe}
 
-\newcommand{\aff}{\ensuremath{{}^\text{\Radioactivity}}}
-\newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
+%% \newcommand{\aff}{\ensuremath{{}^\text{\Radioactivity}}}
+%% \newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
+\newcommand{\aff}{\ensuremath{{}^\text{1}}}
+\newcommand{\afff}{\ensuremath{{}^\text{2}}}
 \newcommand{\grammarrule}[3]{$#1 \to \langle \text{#2} , \text{#3} \rangle$ }
 
 \title{Joshua 3.0: Syntax-based Machine Translation \\ with the Thrax
   Grammar Extractor}
 
 \author{Jonathan Weese\aff, Juri Ganitkevitch\aff, Chris
-   Callison-Burch\aff, Matt Post\afff \and Adam Lopez\aff\afff \\
+   Callison-Burch\aff, Matt Post\afff \and Adam Lopez\aff${}^\text{,}$\afff \\
  \aff Center for Language and Speech Processing \\
  \afff Human Language Technology Center of Excellence \\
  Johns Hopkins University}
@@ -72,13 +74,13 @@ running and debugging machine translation pipelines.
 
 \section{Thrax: grammar extraction}
 
-In modern machine translation systems such as Joshua \cite{Joshua-WMT} and cdec \cite{cdec}, a translation model is often represented as a synchronous context-free grammar (SCFG). Formally, an SCFG may be considered as a tuple
+In modern machine translation systems such as Joshua \cite{Joshua-WMT} and cdec \cite{cdec}, a translation model is represented as a synchronous context-free grammar (SCFG). Formally, an SCFG may be considered as a tuple
 $$(N,S,T_\sigma,T_\tau,G)$$
 where $N$ is a set of nonterminal symbols of the grammar, $S \in N$ is the goal symbol, $T_\sigma$ and $T_\tau$ are the source- and target-side terminal symbol vocabularies, respectively, and $G$ is a set of {\em production rules} of the grammar.
 
 Each rule in $G$ is of the form
 $$X \to \langle \alpha , \gamma , \sim \rangle$$
-where $X \in N$ is a nonterminal symbol, $\alpha$ is a (possibly mixed) sequence of symbols from $N \cup T_\sigma$, $\gamma$ is a (again, possibly mixed) sequence of symbols from $N \cup T_\tau$, and $\sim$ is a one-to-one correspondence between the nonterminal symbols of $\alpha$ and $\gamma$.
+where $X \in N$ is a nonterminal symbol, $\alpha$ is a sequence of symbols from $N \cup T_\sigma$, $\gamma$ is a sequence of symbols from $N \cup T_\tau$, and $\sim$ is a one-to-one correspondence between the nonterminal symbols of $\alpha$ and $\gamma$.
 
 The language of an SCFG is a set of ordered pairs of strings. During
 decoding, the set of candidate translations of an input sentence $f$
@@ -118,9 +120,9 @@ $[0,6]$ & \grammarrule{X}{$X$ .}{$X$ .} & \grammarrule{S}{$S/.$ .}{$S/.$ .} \\
 Throughout this work, we will reference two particular SCFG types known as Hiero and Syntax-Augmented Machine Translation (SAMT).
 
 A Hiero grammar \cite{Chiang2007} is an SCFG with only one type of
-nonterminal symbol (traditionally labelled $X$).  A Hiero grammar can
-be extracted from a parallel corpus where each sentence pair has been
-word-aligned.  If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence
+nonterminal symbol, traditionally labeled $X$.  A Hiero grammar can
+be extracted from a parallel corpus of word-aligned sentence pairs as
+follows: If $(f_i^j,e_k^l)$ is a sub-phrase of the sentence
 pair, we say it is {\em consistent} with the pair's alignment if none
 of the words in $f_i^j$ are aligned to words outside of $e_k^l$, and
 vice-versa. The consistent sub-phrase may be extracted as an SCFG
@@ -137,9 +139,8 @@ piece with a nonterminal.
 
 An SAMT grammar \cite{samt2006} is similar to a Hiero grammar, except
 that the nonterminal symbol set is much larger, and its labels are
-syntactically motivated.  SAMT rules are extracted from aligned sentence pairs, but they require some additional information: they require a parse tree for the target-side sentence.
-
-When a rule is extracted as a consistent phrase pair (as in Hiero), if
+derived from a parse tree over either the source or target side in the
+following manner.  For each rule, if
 the target side is spanned by one constituent of the parse tree, we
 assign that constituent's label as the nonterminal symbol for the
 rule.  Otherwise, we assign an extended category of the form
@@ -156,7 +157,7 @@ extracted from the training sentence pair in Figure~\ref{figure:alignment}.
 %% We are not aware of any stand-alone grammar extraction programs. Other grammar extractors are developed and distributed with a particular MT system. We give an overview of a few such extractors here.
 
 Joshua includes a simple Hiero extractor \cite{schwartz2010}. The
-extractor runs as a single Java process; this makes it difficult to
+extractor runs as a single Java process, which makes it difficult to
 extract larger grammars, since the host machine must have enough
 memory to hold all of the rules at once.  Joshua's extractor scores each rule with three feature functions --- lexical probabilities in two directions, and one phrasal probability score $p(\gamma|\alpha)$.
 
@@ -165,9 +166,19 @@ includes a several-thousand-line Perl script to extract their rules.  In additio
 
 Finally, the cdec decoder \cite {cdec} includes a grammar extractor that performs well only when all rules can be held in memory.
 
-Memory usage is a serious limitation of both Joshua and cdec extractors. Translation models can be very large, and many feature scores require accumulation of statistical data from the entire set of extracted rules. Since it is impractical to keep the entire grammar in memory, rules are usually sorted on disk and then read sequentially.
-
-Different feature calculations may require different sort orders, leading to a linear workflow that alternates between sorting the grammar and calculating a feature score. To calculate more feature scores, more sorts have to be performed. This discourages the implementation of new features. For example, Joshua's built-in rule extractor calculates the phrasal probability $p(\gamma|\alpha)$ for each rule but, to save time, does not calculate its obvious counterpart $p(\alpha|\gamma)$, which would require another sort.
+Memory usage is a serious limitation of both Joshua and cdec
+extractors. Translation models can be very large, and many feature
+scores require accumulation of statistical data from the entire set of
+extracted rules. Since it is impractical to keep the entire grammar in
+memory, rules are usually sorted on disk and then read sequentially.
+Different feature calculations may require different sort orders,
+leading to a linear workflow that alternates between sorting the
+grammar and calculating a feature score. To calculate more feature
+scores, more sorts have to be performed. This discourages the
+implementation of new features. For example, Joshua's built-in rule
+extractor calculates the phrasal probability $p(\gamma|\alpha)$ for
+each rule but, to save time, does not calculate its obvious
+counterpart $p(\alpha|\gamma)$, which would require another sort.
 
 The SAMT extractor does not have a problem with large data sets; SAMT
 has been extended \cite{venugopal2009hadoop} to run on Hadoop, an
@@ -185,8 +196,9 @@ Since variation in translation models and feature sets can have a significant ef
 The following were goals in the design of Thrax:
 
 \begin{itemize}
-\item ability to extract different SCFGs (such as Hiero and SAMT), and to adjust various extraction parameters for the grammars;
-\item ability to easily change the feature set with which to score the extracted rules, and easily implement new features;
+\item the ability to extract different SCFGs (such as Hiero and SAMT), and to adjust various extraction parameters for the grammars;
+\item the ability to easily change and extend the feature sets for
+  each rule
 \item scalability to arbitrarily large training corpora.
 \end{itemize}
 
@@ -216,7 +228,14 @@ There are several parameters that can make a significant difference in a grammar
 \item whether to allow unaligned words at the edges of consistent phrase pairs
 \end{itemize}
 
-Chiang \shortcite{Chiang2007} gives reasonable heuristic choices for these parameters when extracting a Hiero grammar, and Lopez \shortcite{lopez-2008} confirms some of them (maximum rule span of 10, maximum number of source-side symbols at 5, and maximum number of nonterminals at 2 per rule). No similar parameter analysis has been performed for SAMT.
+Chiang \shortcite{Chiang2007} gives reasonable heuristic choices for
+these parameters when extracting a Hiero grammar, and Lopez
+\shortcite{lopez-2008} confirms some of them (maximum rule span of 10,
+maximum number of source-side symbols at 5, and maximum number of
+nonterminals at 2 per rule). \newcite{zollmann2008systematic} provided
+comparisons among phrase-based, hierarchical, and syntax-based models,
+but did not report extensive experimentation with the model
+parameterizations.
 
 When extracting Hiero- or SAMT-style grammars, the first Hadoop job in the Thrax workflow takes in a parallel corpus and produces a set of rules. But in fact Thrax's extraction mechanism is more general than that; all it requires is a function that maps a string to a set of rules. This makes it easy to implement new grammars and extract them using Thrax.
 
@@ -225,13 +244,20 @@ When extracting Hiero- or SAMT-style grammars, the first Hadoop job in the Thrax
 
 Thrax considers feature functions of two types: first, there are features that can be calculated by looking at each rule in isolation. Such features do not require a Hadoop job to calculate their scores, since we may inspect the rules in any order. (In practice, we calculate the scores at the very last moment before outputting the final grammar.) We call these features {\em simple features}. Thrax implements the following simple features:
 \begin{itemize}
-\item a binary indicator function if the rule is purely abstract (with no terminal symbols);
-\item an indicator function if the rule is purely lexical (with no nonterminals);
-\item an indicator function if the rule is monotonic or has reordering;
-\item an indicator function if the rule has adjacent nonterminals on the source side;
-\item a counter giving the number of unaligned words in the rule;
-\item a counter giving the number of terminals on the target side of the rule;
-\item a constant phrase penalty.
+\item a binary indicator functions denoting:
+  \begin{itemize}
+  \item whether the rule is purely abstract (i.e., has no terminal
+    symbols)
+  \item the rule is purely lexical (i.e., has no nonterminals)
+  \item the rule is monotonic or has reordering
+  \item the rule has adjacent nonterminals on the source side
+  \end{itemize}
+\item counters for
+  \begin{itemize}
+  \item the number of unaligned words in the rule
+  \item the number of terminals on the target side of the rule
+  \end{itemize}
+\item a constant phrase penalty
 \end{itemize}
 In addition to simple features, Thrax also implements {\em map-reduce features}. These are features that require comparing rules in a certain order. Thrax uses Hadoop to sort the rules efficiently and calculate these feature functions. Thrax implements the following map-reduce features:
 \begin{itemize}
@@ -256,9 +282,10 @@ seeing word $y$ given $x$.
 where again $C(\cdot)$ is a count of the number of times the rule was extracted.
 \end{itemize}
 
-Each of the features we mentioned above can be individually included or excluded when the grammar is extracted. One can simply list the features to be included in a configuration file.
+The above features are all implemented and can be turned on or off
+with a keyword in the Thrax configuration file.
 
-It is very easy to extend Thrax with new feature functions. For simple features, all that is needed is to implement the {\sc SimpleFeature} interface with a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: to subclass {\sc MapReduceFeature}, one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
+It is easy to extend Thrax with new feature functions. For simple features, all that is needed is to implement Thrax's {\sc SimpleFeature} interface defining a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: to subclass {\sc MapReduceFeature}, one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
 
 
 \section{Experiments}
@@ -280,7 +307,8 @@ fr--en & 792 & 14.4 \\
 \end{table}
 
 We built systems for six language pairs for the WMT 2011 shared task:
-cz-en, en-cz, de-en, en-de, fr-en, and en-fr.  For each language pair,
+cz-en, en-cz, de-en, en-de, fr-en, and en-fr.\footnote{fr=French,
+  cz=Czech, de=German, en=English.}  For each language pair,
 we built both SAMT and hiero grammars.\footnote{Except for fr-en and
   en-fr.  We were unable to decode with SAMT grammars for these
   language pairs due to their large size.  We have since resolved this
@@ -314,8 +342,9 @@ implementation of minimum error-rate training included with Joshua.  We decoded 
 translations, then chose the best candidate for each sentence using
 Minimum Bayes Risk reranking \cite{kumar2004minimum}.
 Figure~\ref{figure:derivation} shows an example derivation with an
-SAMT grammar.  To re-case the 1-best test set output, we trained a true-case language
-model using the same LM training data as before.  We used an SCFG
+SAMT grammar.  To re-case the 1-best test set output, we trained a
+true-case 5-gram language
+model using the same LM training data as before, and used an SCFG
 translation model to translate from the lowercased to true-case
 output.  The translation model used rules limited to five tokens in length, and contained no hierarchical rules. 
 
@@ -355,7 +384,7 @@ caching determination.
 
 Our solution to the caching dependency problem is CachePipe.
 CachePipe is designed with the following goals: (1) robust
-content-based dependency checking, and (2) ease of use, including
+content-based dependency checking and (2) ease of use, including
 minimal editing of existing scripts.  CachePipe is essentially a
 wrapper around command invocations.  Presented with a command to run
 and a list of file dependencies, it computes SHA-1 hashes of the
@@ -371,11 +400,11 @@ be used:
 
 \noindent The first time the command is run, the file would be copied;
 afterwards, the command would be skipped after CachePipe verified that
-the contents of the dependencies and had not changed.
+the contents of the dependencies \verb|a| and \verb|b| had not changed.
 
 CachePipe is open-source software, distributed with Joshua or
 available
-separately.\footnote{\url{https://github.com/mjpost/cachepipe}} It
+separately.\footnote{\url{https://github.com/joshua-decoder/cachepipe}} It
 currently provides both a shell script interface and a programmatic
 API for Perl.  It accepts a number of other arguments and dependency
 types.  It also serves as the foundation of a new script in Joshua 3.0
