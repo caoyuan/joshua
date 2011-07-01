@@ -54,7 +54,7 @@ system \cite{Chiang2007}; it was later extended \cite{li2010joshua} to
 support richer formalisms, such as SAMT \cite{samt2006}.
 
 The main focus of this paper is to describe this past year's work in
-developing {\bf Thrax} \cite{jonnymasters}, an open-source grammar extractor for Hiero and
+developing {\em Thrax} \cite{jonnymasters}, an open-source grammar extractor for Hiero and
 SAMT grammars.  Grammar extraction has shown itself to be something of
 a black art, with decoding performance depending crucially on a
 variety of features and options that are not always clearly described in papers.
@@ -147,48 +147,10 @@ rule.  Otherwise, we assign an extended category of the form
 $C_1+C_2$, $C_1 / C_2$, or $C_2$ \textbackslash $C_1$ --- indicating
 that the target side spans two adjacent constituents, is a $C_1$
 missing a $C_2$ to the right, or is a $C_1$ missing a $C_2$ on the
-left, respectively.  These extended categories are adapted from
-combinatory categorial grammars \cite{Steedman1999}.
-Table~\ref{table:rules} contains a list of Hiero and SAMT rule
+left, respectively.  
+%These extended categories are adapted from combinatory categorial grammars \cite{Steedman1999}.
+Table~\ref{table:rules} contains a list of Hiero and SAMT rules
 extracted from the training sentence pair in Figure~\ref{figure:alignment}.
-
-\subsection{Related work}
-
-%% We are not aware of any stand-alone grammar extraction programs. Other grammar extractors are developed and distributed with a particular MT system. We give an overview of a few such extractors here.
-
-Joshua includes a simple Hiero extractor \cite{schwartz2010}. The
-extractor runs as a single Java process, which makes it difficult to
-extract larger grammars, since the host machine must have enough
-memory to hold all of the rules at once.  Joshua's extractor scores each rule with three feature functions --- lexical probabilities in two directions, and one phrasal probability score $p(\gamma|\alpha)$.
-
-The SAMT implementation of Zollmann and Venugopal \shortcite{samt2006}
-includes a several-thousand-line Perl script to extract their rules.  In addition to phrasal and lexical probabilities, this extractor implements several other features that are also described in section \ref{features}.
-
-Finally, the cdec decoder \cite {cdec} includes a grammar extractor that performs well only when all rules can be held in memory.
-
-Memory usage is a serious limitation of both Joshua and cdec
-extractors. Translation models can be very large, and many feature
-scores require accumulation of statistical data from the entire set of
-extracted rules. Since it is impractical to keep the entire grammar in
-memory, rules are usually sorted on disk and then read sequentially.
-Different feature calculations may require different sort orders,
-leading to a linear workflow that alternates between sorting the
-grammar and calculating a feature score. To calculate more feature
-scores, more sorts have to be performed. This discourages the
-implementation of new features. For example, Joshua's built-in rule
-extractor calculates the phrasal probability $p(\gamma|\alpha)$ for
-each rule but, to save time, does not calculate its obvious
-counterpart $p(\alpha|\gamma)$, which would require another sort.
-
-The SAMT extractor does not have a problem with large data sets; SAMT
-has been extended \cite{venugopal2009hadoop} to run on Hadoop, an
-implementation of Google's MapReduce framework for efficient
-processing of large amounts of data.  We will discuss Hadoop more in
-section \ref{design}.
-
-None of these three extractors are designed for flexibility in terms of grammar extraction. The Joshua and cdec extractors only extract Hiero grammars, and Zollmann and Venugopal's extractor can only extract SAMT-style grammars. They are not designed to score arbitrary feature sets, either.
-
-Since variation in translation models and feature sets can have a significant effect on translation performance, we have developed Thrax in order to make it easy to build and test new models. 
 
 \subsection{System overview}
 \label{design}
@@ -202,7 +164,7 @@ The following were goals in the design of Thrax:
 \item scalability to arbitrarily large training corpora.
 \end{itemize}
 
-Thrax treats the grammar extraction and scoring as a series of dependent Hadoop jobs. Hadoop is an implementation of Google's MapReduce \cite{mapreduce}, a framework for distributed processing of large data sets. Hadoop jobs have two parts. In the {\em map} step, a set of key/value pairs is mapped to a set of intermediate key/value pairs. In the {\em reduce} step, all intermediate values associated with an intermediate key are merged.
+Thrax treats the grammar extraction and scoring as a series of dependent Hadoop jobs. Hadoop \cite{venugopal2009hadoop} is an implementation of Google's MapReduce \cite{mapreduce}, a framework for distributed processing of large data sets. Hadoop jobs have two parts. In the {\em map} step, a set of key/value pairs is mapped to a set of intermediate key/value pairs. In the {\em reduce} step, all intermediate values associated with an intermediate key are merged.
 
 The first step in the Thrax pipeline is to extract all the grammar rules. The map step in this job takes as input word-aligned sentence pairs and produces a set of ordered pairs $(r,c)$ where $r$ is a rule and $c$ is the number of times it was extracted. During the reduce step, these rule counts are summed, so the result is a set of rules, along with the total number of times each rule was extracted from the entire corpus.
 
@@ -287,6 +249,38 @@ with a keyword in the Thrax configuration file.
 
 It is easy to extend Thrax with new feature functions. For simple features, all that is needed is to implement Thrax's {\sc SimpleFeature} interface defining a method that takes in a rule and calculates a feature score. Map-reduce features are slightly more complex: to subclass {\sc MapReduceFeature}, one must define a mapper and reducer, but also a sort comparator to determine in what order the rules are compared during the reduce step.
 
+\subsection{Related work}
+
+%% We are not aware of any stand-alone grammar extraction programs. Other grammar extractors are developed and distributed with a particular MT system. We give an overview of a few such extractors here.
+
+Joshua includes a simple Hiero extractor \cite{schwartz2010}. The
+extractor runs as a single Java process, which makes it difficult to
+extract larger grammars, since the host machine must have enough
+memory to hold all of the rules at once.  Joshua's extractor scores each rule with three feature functions --- lexical probabilities in two directions, and one phrasal probability score $p(\gamma|\alpha)$.
+
+The SAMT implementation of Zollmann and Venugopal \shortcite{samt2006}
+includes a several-thousand-line Perl script to extract their rules.  In addition to phrasal and lexical probabilities, this extractor implements several other features that are also described in section \ref{features}.
+
+Finally, the cdec decoder \cite {cdec} includes a grammar extractor that performs well only when all rules can be held in memory.
+
+Memory usage is a limitation of both the Joshua and cdec
+extractors. Translation models can be very large, and many feature
+scores require accumulation of statistical data from the entire set of
+extracted rules. Since it is impractical to keep the entire grammar in
+memory, rules are usually sorted on disk and then read sequentially.
+Different feature calculations may require different sort orders,
+leading to a linear workflow that alternates between sorting the
+grammar and calculating a feature score. To calculate more feature
+scores, more sorts have to be performed. This discourages the
+implementation of new features. For example, Joshua's built-in rule
+extractor calculates the phrasal probability $p(\gamma|\alpha)$ for
+each rule but, to save time, does not calculate its obvious
+counterpart $p(\alpha|\gamma)$, which would require another sort.
+
+The SAMT extractor does not have a problem with large data sets; SAMT
+can run on Hadoop, as Thrax does. 
+
+The Joshua and cdec extractors only extract Hiero grammars, and Zollmann and Venugopal's extractor can only extract SAMT-style grammars. They are not designed to score arbitrary feature sets, either. Since variation in translation models and feature sets can have a significant effect on translation performance, we have developed Thrax in order to make it easy to build and test new models. 
 
 \section{Experiments}
 \label{section:results}
@@ -353,7 +347,7 @@ output.  The translation model used rules limited to five tokens in length, and 
   \begin{tabular}{l|rrr}
     pair   & hiero & SAMT & improvement \\
     \hline\hline
-    cz-en  & 21.1  & 21.7 & +0.8 \\
+    cz-en  & 21.1  & 21.7 & +0.6 \\
     en-cz  & 16.8  & 16.9 & +0.1 \\
     de-en  & 18.9  & 19.5 & +0.6 \\
     en-de  & 14.3  & 14.9 & +0.6 \\
