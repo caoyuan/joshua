@@ -17,7 +17,7 @@ Adding syntactic labels to synchronous context-free translation rules can improv
 
 \section{Introduction}
 
-Hierarchical phrase-based translation models like Hiero \cite{chiang2005} uses a synchronous context-free grammar (SCFG) to define translation rules that may have gaps in them.
+Synchronous context-free grammars (SCFGs) were popularized for statistical machine translation by Chiang with his Hiero model \shortcite{chiang2005}. An SCFG is used to define translation rules that may have gaps in them.
 As an example, consider the rule
 \begin{equation}
 X \to \langle \textrm{ do not } X_1 ; \textrm{ ne } X_1 \textrm{ pas } \rangle \label{rule:ne_pas}
@@ -30,7 +30,7 @@ X \to \langle \textrm{ house ; loge } \rangle
 \end{equation}
 where ``house'' is used in the sense of the verb ``to shelter something'' we can conclude that {\em do not house} should be translated into {\em ne loge pas}.
 
-The rules above are typical of the Hiero model, where all non-terminal labels have the same symbol (traditionally $X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given (more common) Hiero rule for the noun ``house''
+The rules above are typical of the Hiero model, where all non-terminal labels have the same symbol ($X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given (more common) Hiero rule for the noun ``house''
 \begin{equation}
 X \to \langle \textrm{ house , maison } \rangle
 \end{equation}
@@ -42,50 +42,53 @@ To improve this SCFG model, we want to assign labels to the rules that describe 
 
 % We might try to assign syntactic labels by reading them from a phrase structure parse of the training data: assign labels from the parse tree where possible, and throw out all other translation rules. However, translation rules that don't correspond to these syntactic forms are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
 
-Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign complex labels to rules: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
+Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign complex labels to rules. %: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
+SAMT improved performance over other syntactic models, but the heuristic label set violates some principles about what a syntactic labeling scheme should look like:
 
-SAMT improved performance over other syntactic models, but the improved rule coverage comes at a cost:
-\begin{itemize}
-\item The concatenated and slashed labels are not common linguistic labels; they're introduced solely to increase the number of extractable rules.
-\item The number of rules in the grammar and the size of the non-terminal set are both significantly larger than their Hiero or GHKM counterparts.
-\item Because of the larger model size, translation speed decreases significantly.
-\end{itemize}
+The label set should be well-motivated: the labels should represent actual syntactic structure under some accepted model of syntax. The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient. 
+%\begin{itemize}
+%\item The concatenated and slashed labels are not common linguistic labels; they're introduced solely to increase the number of extractable rules.
+%\item The number of rules in the grammar and the size of the non-terminal set are both significantly larger than their Hiero or GHKM counterparts.
+%\item Because of the larger model size, translation speed decreases significantly.
+%\end{itemize}
+%
+%Ideally, we'd like to find a rule labeling strategy that is linguistically well-motivated, uses a smaller label set than SAMT, but still allows many useful translation rules to be extracted.
 
-Ideally, we'd like to find a rule labeling strategy that is linguistically well-motivated, uses a smaller label set than SAMT, but still allows many useful translation rules to be extracted. We show that this is possible using labels derived from {\em combinatory categorial grammar} (CCG).
+We show that by using {\em combinatory categorial grammar} (CCG), we can devise a set of labels that satisfy these principles and still allow many translation rules to be extracted.
 \begin{itemize}
-\item We introduce two models for labeling SCFG rules: Model 1 uses labels from a 1-best CCG parse tree of training data; Model 2 considers the top labels in each cell of a CCG parse chart.
-\item We show that Model 1 performs as well as a syntactic model using phrase structure derivations.
-\item We show that Model 2 performs slightly worse than SAMT, but the non-terminal label set is an order of magnitude smaller and translation is twice as fast.
+\item We introduce two models for labeling SCFG rules: one uses labels from a 1-best CCG parse tree of training data; the other uses the top labels in each cell of a CCG parse chart.
+\item We show that using 1-best parses performs as well as a syntactic model using phrase structure derivations.
+\item We show that using chart cell labels performs slightly worse than SAMT, but the non-terminal label set is an order of magnitude smaller and translation is twice as fast.
 \end{itemize}
 
 \section{Categorial grammar}
 \label{sec:cg}
 
-\subsection{Syntactic labeling}
+%\subsection{Syntactic labeling}
 
-We would like to assign syntactic labels to translation rules. If we simply assign labels from a phrase structure parse of training data, we run into a problem: many translation rules may not correspond to exact syntactic structures under this formalism.
+%We would like to assign syntactic labels to translation rules. If we simply assign labels from a phrase structure parse of training data, we run into a problem: many translation rules may not correspond to exact syntactic structures under this formalism.
 
-These {\em non-constituent} rules are important to translation performance; removing them hurts performance in both the phrase-based setting \cite{koehn-och-marcu-2003} and in more complex syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+%These {\em non-constituent} rules are important to translation performance; removing them hurts performance in both the phrase-based setting \cite{koehn-och-marcu-2003} and in more complex syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
 
-An improved label set that would assign labels to more fragments of language. It would also be well-motivated: the labels should represent actual syntactic structure in some sense.
+%An improved label set that would assign labels to more fragments of language. It would also be well-motivated: the labels should represent actual syntactic structure in some sense.
 
-The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
+%The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
 
-The formalism of {\em combinatory categorial grammar} can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. 
+%The formalism of {\em combinatory categorial grammar} can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. 
 
-\subsection{Combinatory categorial grammar}
+%\subsection{Combinatory categorial grammar}
 
-Combinatory categorial grammar (CCG) (see Steedman and Baldridge \shortcite{ccg}) is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
+Categorial grammar (CG) \cite{cg,bar-hillel-cg} is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
 
-Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and means that its argument is of type B and its return type is A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
+Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and takes an of type B and returns a type A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
 
-The simplest way to combine two categories is with function application. Formally, we write
+We can combine two categories is with {\em function application}. Formally, we write
 \begin{equation}
 A/B \, B \to A \label{eqn:forward-app}
 \end{equation}
 to show that a function type may be combined with its argument type to produce the result type.
 
-If we have only function application, and no other ways to combine categories, the formalism is called simply categorial grammar (CG) \cite{cg,bar-hillel-cg}.
+Combinatory categorial grammar (CCG) is an extension of CG that includes more {\em combinators} (operations that can combine categories). Steedman and Baldridge \shortcite{ccg} give an excellent overview of CCG.
 
 As an example, suppose we want to analyze the sentence ``Marcel proved completeness'' using the lexicon shown in Table \ref{table:lexicon}. We assign categories according to the lexicon, then combine the categories with function application to get an analysis of S for the complete sentence. Figure \ref{fig:ccg-derivation} shows the derivation tree.
 
@@ -145,7 +148,7 @@ By allowing slashed categories with CG, we're increasing the number of labels al
 \item The set of labels is still small --- it's restricted to the labels seen in CCG parses of the training data.
 \end{enumerate}
 
-Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing).
+Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing --- see Section \ref{sec:comparison}).
 
 In short, using CG labels allows us to keep more syntactic rules without making the set of syntactic labels too big.
 
@@ -239,7 +242,7 @@ Only if all of these assignments fail do we throw away the potential translation
 
 We note here that the slashed labels of SAMT are inspired by CCG, but they're not the same as our slashed labels: CCG function categories are used for syntactic structures that take arguments, like adjectives or verbs, but the SAMT slashed labels simply denote incomplete syntactic constituents.
 
-\subsection{CG Model 1}
+\subsection{CCG 1-best derivation labeling}
 
 Our first CG model is similar to the first phrase structure parse tree model. We start with a word-aligned sentence pair, but we parse the target sentence using a CCG parser instead of a phrase structure parser.
 
@@ -262,17 +265,18 @@ Then just as in the phrase structure model, we project the syntactic labels down
 \textrm{S/S } \to \langle \textrm{ Pour N }; \textrm{ For N } \rangle
 \end{equation}
 
-Model 1 does not take advantage of CCG's ability to label almost any fragment of speech: the fragments with labels in any particular sentence depend on the order that categories were combined in the sentence's derivation. In the next model, we increase the number of spans we can label.
+This does not take advantage of CCG's ability to label almost any fragment of language: the fragments with labels in any particular sentence depend on the order that categories were combined in the sentence's 1-best derivation. In the next model, we increase the number of spans we can label.
 
-\subsection{CG Model 2}
+\subsection{CCG parse chart labeling}
 
-In Model 1, we use the 1-best CCG derivation to assign labels to spans. This means that a lot of possible rules can't be labeled, because their phrase pairs don't match up to a span in the particular derivation tree.
+In the first CCG model, we use the 1-best CCG derivation to assign labels to spans. This means that a lot of possible rules can't be labeled, because their phrase pairs don't match up to a span in the particular derivation tree.
 
 For this model, we do not use the 1-best CCG derivation. Instead, when parsing the target sentence, for each cell in the parse chart, we read the most likely label according to the parsing model. This lets us assign a label for almost any span of the sentence just by reading the label from the parse chart.
 
 Thus, when we want to assign a label to a non-terminal on the left- or right-hand side of a rule, we determine what part of the target sentence that the non-terminal spans. Since we've read the 1-best category label from each cell of the parse chart, we have a category for every possible span of the sentence.
 
 \section{Comparison of resulting grammars}
+\label{sec:comparison}
 
 Our labeling schemes are trying to satisfy two competing desires: first, we want to keep as many rules possible, knowing that some of them will turn out to be useful in translation. Thus we want to add syntactic labels until we can label everything. On the other hand, large labeling sets lead to problems:
 \begin{enumerate}
@@ -284,7 +288,7 @@ What we would like is a relatively constrained non-terminal label set, so that w
 
 \subsection{Number of rules and nonterminals}
 
-Translation with a synchronous context-free grammar requires first parsing with the source-language projection of the grammar, followed by intersection of the target-language projection of the resulting grammar with a language model. While there are many possible algorithms for these operations, they all depend on the size of the grammar.
+There are sound theoretical reasons for reducing the number of non-terminal labels in a grammar. Translation with a synchronous context-free grammar requires first parsing with the source-language projection of the grammar, followed by intersection of the target-language projection of the resulting grammar with a language model. While there are many possible algorithms for these operations, they all depend on the size of the grammar.
 
 Consider for example the popular cube pruning algorithm of Chiang
 \shortcite{Chiang2007}, which is a simple extension of CKY. It works by first
@@ -411,7 +415,7 @@ To train the feature weights we used the Z-MERT implementation \cite{zmert} of t
 
 To decode the test sets, we used the Joshua machine translation decoder \cite{joshua3}.
 
-\subsection{Results}
+\subsection{Evaluation criteria}
 
 We measure machine translation performance using the BLEU metric \cite{papineni-bleu}. We also report the translation time for the test set in seconds per sentence. These results are summarized in Table \ref{table:results}.
 
