@@ -12,39 +12,41 @@
 \maketitle
 
 \begin{abstract}
-Adding syntactic labels to synchronous context-free translation rules forces you to throw away useful rules that can't be labeled. SAMT \cite{samt-wmt06} solves this problem by introducing heuristics to create new labels, but these heuristics are not linguistically motivated and tend to add many rarely-used rules to the translation grammar. We introduce a new labeling scheme based on categorial grammar, which allows syntactic labeling of many rules with a minimal, well-motivated label set. We show that our labeling scheme performs comparably to SAMT on an Urdu--English translation task, but the label set is an order of magnitude smaller, and translation is twice as fast.
+Adding syntactic labels to synchronous context-free translation rules can improve performance, but only using phrase structure constituents, as in GHKM \cite{ghkm}, excludes potentially useful translation rules. SAMT \cite{samt-wmt06} introduces heuristics to create new non-constituent labels, but these heuristics introduce many complex labels and tend to add rarely-applicable rules to the translation grammar. We introduce a new labeling scheme based on categorial grammar, which allows syntactic labeling of many rules with a minimal, well-motivated label set. We show that our labeling scheme performs comparably to SAMT on an Urdu--English translation task, but the label set is an order of magnitude smaller, and translation is twice as fast.
 \end{abstract}
 
 \section{Introduction}
 
-Hierarchical phrase-based translation uses a synchronous context-free grammar (SCFG) to define translation rules that may have gaps in them.
+Hierarchical phrase-based translation models like Hiero \cite{chiang2005} uses a synchronous context-free grammar (SCFG) to define translation rules that may have gaps in them.
 As an example, consider the rule
 \begin{equation}
-X \to \langle \textrm{ ne } X_1 \textrm{ pas }, \textrm{ do not } X_1 \rangle \label{rule:ne_pas}
+X \to \langle \textrm{ do not } X_1 ; \textrm{ ne } X_1 \textrm{ pas } \rangle \label{rule:ne_pas}
 \end{equation}
-This rule encodes the idea that the French phrase {\em ne X pas} can be translated into English {\em do not X}, as long as the $X$ phrases are themselves translation pairs. (The correspondence between the two $X$s on the right-hand side of the rule is shown by their subscripts.)
+This rule encodes the idea that the English phrase {\em do not X} can be translated into French {\em ne X pas}, as long as the $X$ phrases are themselves translation pairs. (The correspondence between the two $X$s on the right-hand side of the rule is shown by their subscripts.)
 
 So if we are given another rule
 \begin{equation}
-X \to \langle \textrm{ mange , eat } \rangle
+X \to \langle \textrm{ house ; loge } \rangle
 \end{equation}
-we can conclude that {\em ne mange pas} should be translated into {\em do not eat}.
+where ``house'' is used in the sense of the verb ``to shelter something'' we can conclude that {\em do not house} should be translated into {\em ne loge pas}.
 
-The rules above are typical of the Hiero model \cite{chiang2005}, where all non-terminal labels have the same symbol (traditionally $X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given a Hiero rule
+The rules above are typical of the Hiero model, where all non-terminal labels have the same symbol (traditionally $X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given (more common) Hiero rule for the noun ``house''
 \begin{equation}
-X \to \langle \textrm{ mange , house } \rangle
+X \to \langle \textrm{ house , maison } \rangle
 \end{equation}
-we could form the English translation {\em do not house}. 
+we could form the French translation {\em ne maison pas}. 
 
 We know that Rule \ref{rule:ne_pas} should only be applied when the missing phrase is a verb, but Hiero does not include any information about the syntactic type of rules or their missing phrases.
 
-We might try to assign syntactic labels by reading them from a phrase structure parse of the training data: assign labels from the parse tree where possible, and throw out all other translation rules. However, translation rules that don't correspond to these syntactic forms are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+To improve this SCFG model, we want to assign labels to the rules that describe their syntactic roles. However, if the set of labels is too restrictive, we may not be able to label all translation rules. Non-syntactic rules we can't label are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
 
-Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign labels to rules: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
+% We might try to assign syntactic labels by reading them from a phrase structure parse of the training data: assign labels from the parse tree where possible, and throw out all other translation rules. However, translation rules that don't correspond to these syntactic forms are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+
+Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign complex labels to rules: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
 
 SAMT improved performance over other syntactic models, but the improved rule coverage comes at a cost:
 \begin{itemize}
-\item The concatenated and slashed labels are not linguistically well-motivated.
+\item The concatenated and slashed labels are not common linguistic labels; they're introduced solely to increase the number of extractable rules.
 \item The number of rules in the grammar and the size of the non-terminal set are both significantly larger than their Hiero or GHKM counterparts.
 \item Because of the larger model size, translation speed decreases significantly.
 \end{itemize}
@@ -65,17 +67,17 @@ We would like to assign syntactic labels to translation rules. If we simply assi
 
 These {\em non-constituent} rules are important to translation performance; removing them hurts performance in both the phrase-based setting \cite{koehn-och-marcu-2003} and in more complex syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
 
-So we'd like to have a label set that can assign labels to more fragments of language. But we also want the label set to be well-motivated: we want them to represent syntactic structure in some sense.
+An improved label set that would assign labels to more fragments of language. It would also be well-motivated: the labels should represent actual syntactic structure in some sense.
 
-We also want the label set to be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
+The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
 
-Luckily, there already exists a formalism that can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. That formalism is {\em combinatory categorial grammar}.
+The formalism of {\em combinatory categorial grammar} can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. 
 
 \subsection{Combinatory categorial grammar}
 
-Combinatory categorial grammar (CCG) is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
+Combinatory categorial grammar (CCG) (see Steedman and Baldridge \shortcite{ccg}) is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
 
-Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and means that its argument is of type B and its return type is A. The categories A and B may themselves be either primitives or functions.
+Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and means that its argument is of type B and its return type is A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
 
 The simplest way to combine two categories is with function application. Formally, we write
 \begin{equation}
@@ -123,7 +125,7 @@ In this work, we want to use CCG parses of training data to assign syntactic lab
 \end{enumerate}
 We will discuss each point in more detail below.
 
-\subsection{Labels for more phrases}
+\subsection{Labels for phrases}
 
 The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But if we restrict the set of labels, there is a trade-off: if we have a very useful translation rule, but we can't assign it a syntactic label, we can't use it in translation. The more we restrict how labels are assigned, the more potential rules we have to throw away.
 
@@ -234,6 +236,8 @@ The Syntax-Augmented Machine Translation (SAMT) model \cite{samt-wmt06} extracts
 \item Finally, if a phrase spans three adjacent subtrees with labels A, B, and C, we assign A+B+C.
 \end{itemize}
 Only if all of these assignments fail do we throw away the potential translation rule.
+
+We note here that the slashed labels of SAMT are inspired by CCG, but they're not the same as our slashed labels: CCG function categories are used for syntactic structures that take arguments, like adjectives or verbs, but the SAMT slashed labels simply denote incomplete syntactic constituents.
 
 \subsection{CG Model 1}
 
