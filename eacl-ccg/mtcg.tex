@@ -1,0 +1,374 @@
+\documentclass{article}
+\usepackage{eacl2009}
+\usepackage{url}
+
+\author{Jonathan Weese \and Chris Callison-Burch \and Adam Lopez\\Department of Computer Science\\Johns Hopkins University\\Baltimore, MD 21218 USA\\{\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
+\title{Categorial Grammar in Machine Translation}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Abstract here.
+\end{abstract}
+
+\section{Introduction}
+
+Hierarchical phrase-based translation uses a synchronous context-free grammar (SCFG) to define translation rules that may have gaps in them.
+As an example, consider the rule
+\begin{equation}
+X \to \langle \textrm{ ne } X_1 \textrm{ pas }, \textrm{ do not } X_1 \rangle \label{rule:ne_pas}
+\end{equation}
+This rule encodes the idea that the French phrase {\em ne X pas} can be translated into English {\em do not X}, as long as the $X$ phrases are themselves translation pairs. (The correspondence between the two $X$s on the right-hand side of the rule is shown by their subscripts.)
+
+So if we are given another rule
+\begin{equation}
+X \to \langle \textrm{ mange , eat } \rangle
+\end{equation}
+we can conclude that {\em ne mange pas} should be translated into {\em do not eat}.
+
+The rules above are typical of the Hiero model \cite{chiang2005}, where all non-terminal labels have the same symbol (traditionally $X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given a Hiero rule
+\begin{equation}
+X \to \langle \textrm{ mange , house } \rangle
+\end{equation}
+we could form the English translation {\em do not house}. 
+
+We know that Rule \ref{rule:ne_pas} should only be applied when the missing phrase is a verb, but Hiero does not include any information about the syntactic type of rules or their missing phrases.
+
+We might try to assign syntactic labels by reading them from a phrase structure parse of the training data: assign labels from the parse tree where possible, and throw out all other translation rules. However, translation rules that don't correspond to these syntactic forms are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+
+Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign labels to rules: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
+
+SAMT improved performance over other syntactic models, but the improved rule coverage comes at a cost:
+\begin{itemize}
+\item The concatenated and slashed labels are not linguistically well-motivated.
+\item The number of rules in the grammar and the size of the non-terminal set are both significantly larger than their Hiero or GHKM counterparts.
+\item Because of the larger model size, translation speed decreases significantly.
+\end{itemize}
+
+Ideally, we'd like to find a rule labeling strategy that is linguistically well-motivated, uses a smaller label set than SAMT, but still allows many useful translation rules to be extracted. We show that this is possible using labels derived from {\em combinatory categorial grammar} (CCG).
+\begin{itemize}
+\item We introduce two models for labeling SCFG rules: Model 1 uses labels from a 1-best CCG parse tree of training data; Model 2 considers the top labels in each cell of a CCG parse chart.
+\item We show that Model 1 performs as well as a syntactic model using phrase structure derivations.
+\item We show that Model 2 performs slightly worse than SAMT, but the non-terminal label set is an order of magnitude smaller and translation is twice as fast.
+\end{itemize}
+
+\section{Categorial grammar}
+\label{sec:cg}
+
+\subsection{Syntactic labeling}
+
+We would like to assign syntactic labels to translation rules. If we simply assign labels from a phrase structure parse of training data, we run into a problem: many translation rules may not correspond to exact syntactic structures under this formalism.
+
+These {\em non-constituent} rules are important to translation performance; removing them hurts performance in both the phrase-based setting \cite{koehn-och-marcu-2003} and in more complex syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+
+So we'd like to have a label set that can assign labels to more fragments of language. But we also want the label set to be well-motivated: we want them to represent syntactic structure in some sense.
+
+We also want the label set to be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
+
+Luckily, there already exists a formalism that can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. That formalism is {\em combinatory categorial grammar}.
+
+\subsection{Combinatory categorial grammar}
+
+Combinatory categorial grammar (CCG) is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
+
+Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and means that its argument is of type B and its return type is A. The categories A and B may themselves be either primitives or functions.
+
+The simplest way to combine two categories is with function application. Formally, we write
+\begin{equation}
+A/B \, B \to A \label{eqn:forward-app}
+\end{equation}
+to show that a function type may be combined with its argument type to produce the result type.
+
+If we have only function application, and no other ways to combine categories, the formalism is called simply categorial grammar (CG) \cite{cg,bar-hillel-cg}.
+
+As an example, suppose we want to analyze the sentence ``Marcel proved completeness'' using the lexicon shown in Table \ref{table:lexicon}. We assign categories according to the lexicon, then combine the categories with function application to get an analysis of S for the complete sentence. Figure \ref{fig:ccg-derivation} shows the derivation tree.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Lexical item & Category \\
+\hline
+Marcel & NP \\
+completeness & NP \\
+proved & (S\textbackslash NP)/NP \\
+\hline
+\end{tabular}
+\caption{An example lexicon, mapping words to categories.\label{table:lexicon}}
+\end{table}
+
+In this work, we want to use CCG parses of training data to assign syntactic labels to translation rules. These CCG labels meet the criteria we listed at the beginning of this section:
+\begin{enumerate}
+\item Using function categories can allow us to label many more chunks of a language than if we were restricted to the label set in a phrase structure parse;
+\item Even though we're labeling more phrases, the set of categories is still small, and the categories have linguistic meaning.
+%\item CG parsing can be used to build semantic representations compositionally, so moving to a CG model will make it easier to add semantic information to MT systems.
+\end{enumerate}
+We will discuss each point in more detail below.
+
+\subsection{Labels for more phrases}
+
+The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But if we restrict the set of labels, there is a trade-off: if we have a very useful translation rule, but we can't assign it a syntactic label, we can't use it in translation. The more we restrict how labels are assigned, the more potential rules we have to throw away.
+
+Koehn et al. \shortcite{koehn-och-marcu-2003} showed that, in phrase-based translation, if we only include syntactically-well-formed phrases (phrases that correspond to a subtree of a phrase structure parse tree) in the translation table, translation performance goes down. We end up throwing away a lot of useful rules. This conclusion was supported by DeNeefe et al. \shortcite{deneefe-syntax-and-phrase-mt}.
+
+For example, consider the German--English phrase pair {\em  -- the tall man}. Since we could analyze this as a noun phrase, the phrase pair could be included in the translation table. But we couldn't include {\em -- the tall}, since it doesn't correspond to a complete subtree. But translating {\em the tall} is arguably even more useful than translating {\em the tall man}, since the former can be combined with any other noun translation.
+
+Using CG-style labels with function types, we can assign the type (for example) NP/N to {\em the tall} --- it can be combined with a noun on its right to create a complete noun phrase.
+
+More generally, allowing slashed labels allows us to annotate syntax without having to throw away as many useful translation rules.
+
+\subsection{Minimal, well-motivated label set}
+
+By allowing slashed categories with CG, we're increasing the number of labels allowed. There are other ways to create new syntactic labels for phrases like {\em the tall}, but CG is the best way for two reasons:
+\begin{enumerate}
+\item CG labels are well-motivated. Our labels are derived from CCG derivations, so phrases with slashed labels {\em really are} labeled that way in a syntactic formalism, and the categories can be naturally combined.
+\item The set of labels is still small --- it's restricted to the labels seen in CCG parses of the training data.
+\end{enumerate}
+
+Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing).
+
+In short, using CG labels allows us to keep more syntactic rules without making the set of syntactic labels too big.
+
+\section{Translation models}
+
+\subsection{Synchronous context-free grammars}
+
+Formally, an SCFG may be defined as a 5-tuple
+$$(N,S,T_\sigma,T_\tau,G)$$
+where $N$ is a set of non-terminal symbols, $S \in N$ is a distinguished start symbol, $T_\tau$ and $T_\sigma$ are the source- and target-side terminal symbol vocabularies, and $G$ is a set of production rules. Each rule in $G$ is of the form
+$$X \to \langle \alpha, \gamma, \sim \rangle$$
+where $X \in N$, $\alpha$ is a sequence of symbols drawn from $N \cup T_\sigma$, $\gamma$ is a sequence of symbols drawn from $N \cup T_\tau$, and $\sim$ is a one-to-one correspondence between the terminal symbols in $\alpha$ and $\gamma$.
+
+We may define several {\em feature functions} $\phi_i$ on rules in $G$, and assign each feature a weight $\lambda_i$. Then the {\em weight} of a rule in $G$ is
+\begin{equation}
+w(r) = \prod_i{\phi_i(r)^{\lambda_i}}
+\end{equation}
+
+The weight assigned to a derivation under this SCFG is the product of the weights of the rules used; that is, for some derivation $D$,
+\begin{equation}
+w(D) = \prod_{r \in D}{w(r)}
+\end{equation}
+
+To translate a sentence under an SCFG model, we parse an input sentence $f$ to generate translation candidates --- the set of candidates is exactly the set of strings $e$ such that the pair $(f,e)$ is licensed by the SCFG.
+
+For each candidate $e$, the weight of its derivation is just one of the features that may be added to a log-linear model to determine the most likely translation.
+
+\subsection{Extraction from parallel text}
+
+\begin{figure}
+\caption{A word-aligned sentence pair, with a box indicating a consistent phrase pair.\label{fig:aligned-sentence}}
+\end{figure}
+
+\begin{figure}
+\caption{A consistent phrase pair with a sub-phrase that is also consistent. We may extract a hierarchical SCFG rule from this training example.\label{fig:hierarchical-phrases}}
+\end{figure}
+
+To extract SCFG rules, we start with a heuristic to extract phrases from a word-aligned sentence pair \cite{tillmann-2003}. Figure \ref{fig:aligned-sentence} shows a such a pair, with a {\em consistent phrase pair} inside the box. A phrase pair $(f,e)$ is said to be consistent with the alignment if none of the words of $f$ are aligned outside the phrase $e$, and vice versa -- that is, there are no alignment points directly above, below, or to the sides of the box defined by $f$ and $e$.
+
+Given a consistent phrase pair, we can immediately extract the rule
+\begin{equation}
+X \to \langle f , e \rangle
+\end{equation}
+as we would in a phrase-based MT system. However, whenever we consistent phrase pair that is a sub-phrase of another (see Figure \ref{fig:hierarchical-phrases} for an example), we may extract a hierarchical rule by treating the inner phrase as a gap in the larger phrase. For example, we may extract the rule
+\begin{equation}
+\textsc{whatever}
+\end{equation}
+from Figure \ref{fig:hierarchical-phrases}.
+
+The focus of this paper is how to assign labels to the left-hand non-terminal $X$ and to the non-terminal gaps on the right-hand side. We discuss five models below, of which two are novel CG-based labeling schemes.
+
+\subsection{Baseline: Hiero}
+
+The Hiero model \cite{chiang2005} popularized the use of SCFGs for machine translation. It is the simplest labeling possible: there is only one non-terminal symbol, traditionally called X.
+
+Hiero has an advantage over phrase-based translation in its ability to model phrases with gaps in them, but since there's only one label, there's no way to include syntactic information in the translation rules.
+
+\subsection{Phrase structure parse tree labeling}
+
+One first step for adding syntactic information is to get syntactic labels from a phrase structure parse tree. For each word-aligned sentence pair in our training data, we also include a parse tree of the target side.
+
+Then we can assign syntactic labels like this: for each consistent phrase pair (representing either the left-hand non-terminal or a gap in the right hand side) we see if the target-language phrase is the exact span of some subtree of the parse tree.
+
+If a subtree exactly spans the phrase pair, we can use the root label of that subtree to label the non-terminal symbol. If there is no such subtree, we throw away any rules derived from the phrase pair.
+
+As an example,
+
+As we noted in Section \ref{sec:cg}, under this scheme we may throw away a lot of useful translation rules that don't translate exact syntactic constituents. We can alleviate this problem by changing the way we get syntactic labels from parse trees.
+
+\subsection{SAMT}
+
+The Syntax-Augmented Machine Translation (SAMT) model \cite{samt-wmt06} extracts more rules than the other syntactic model by allowing different labels for the rules. In SAMT, we try several different ways to get a label for a span, stopping the first time we can assign a label:
+\begin{itemize}
+\item As above, if a phrase exactly spans a subtree of the parse tree, we assign that phrase the subtree's root label.
+\item If a phrase can be covered by two adjacent subtrees with labels A and B, we assign their concatenation A+B.
+\item If a phrase spans part of a subtree labeled A that could be completed with a subtree B to its right, we assign A/B.
+\item If a phrase spans part of a subtree A but is missing a B to its left, we assign A\textbackslash B.
+\item Finally, if a phrase spans three adjacent subtrees with labels A, B, and C, we assign A+B+C.
+\end{itemize}
+Only if all of these assignments fail do we throw away the potential translation rule.
+
+\subsection{CG Model 1}
+
+Our first CG model is similar to the first phrase structure parse tree model. We start with a word-aligned sentence pair, but we parse the target sentence using a CCG parser instead of a phrase structure parser.
+
+When we extract a rule, we see if the consistent phrase pair is exactly spanned by a category generated in the 1-best CCG derivation of the target sentence. If there is such a category, we assign that category label to the non-terminal. If not, we throw away the rule.
+
+Model 1 does not take advantage of CCG's ability to label almost any fragment of speech: the fragments with labels in any particular sentence depend on the order that categories were combined in the sentence's derivation. In the next model, we increase the number of spans we can label.
+
+\subsection{CG Model 2}
+
+In Model 1, we use the 1-best CCG derivation to assign labels to spans. This means that a lot of possible rules can't be labeled, because their phrase pairs don't match up to a span in the particular derivation tree.
+
+For this model, we do not use the 1-best CCG derivation. Instead, when parsing the target sentence, for each cell in the parse chart, we read the most likely label according to the parsing model. This lets us assign a label for almost any span of the sentence just by reading the label from the parse chart.
+
+Thus, when we want to assign a label to a non-terminal on the left- or right-hand side of a rule, we determine what part of the target sentence that the non-terminal spans. Since we've read the 1-best category label from each cell of the parse chart, we have a category for every possible span of the sentence.
+
+\section{Comparison of resulting grammars}
+
+Our labeling schemes are trying to satisfy two competing desires: first, we want to keep as many rules possible, knowing that some of them will turn out to be useful in translation. Thus we want to add syntactic labels until we can label everything. On the other hand, large labeling sets lead to problems:
+\begin{enumerate}
+\item For a rule $A \to \langle f ; e \rangle$, we may want to estimate feature scores that condition on the syntactic type, such as $p(e|A)$ and $p(f|A)$. Sparse counts will make it hard to estimate this probability correctly.
+\item If an otherwise-useful translation rule is assigned a rare syntactic type, it will be used less often in translations. This is because there will be few other translation rules that expect a phrase of that type to fill a gap.
+\end{enumerate}
+What we would like is a relatively constrained non-terminal label set, so that we can estimate features with confidence, and so that translation rules have a chance of being used in more derivations. But we want the label set to be general enough that we don't throw away any more translation rules than we have to.
+
+
+\subsection{Number of rules and nonterminals}
+
+Translation with a synchronous context-free grammar requires first parsing with the source-language projection of the grammar, followed by intersection of the target-language projection of the resulting grammar with a language model. While there are many possible algorithms for these operations, they all depend on the size of the grammar.
+
+Consider for example the popular cube pruning algorithm of Chiang
+\shortcite{Chiang2007}, which is a simple extension of CKY. It works by first
+constructing a set of items of the form $\langle A, i, j \rangle$,
+where each item corresponds to (possibly many) partial analyses by
+which nonterminal $A$ generates the sequence of words from positions
+$i$ through $j$ of the source sentence. It then produces an augmented
+set of items $\langle A, i, j, u, v \rangle$, in which items of the
+first type are augmented with left and right language model states $u$
+and $v$. In each pass, the number of items is linear in the number of
+nonterminal symbols of the grammar. This observation has motivated
+work in grammar transformations that reduce the size of the
+nonterminal set, often resulting in substantial gains in parsing or
+translation speed \cite{song2008,denero-efficient-parsing,xiao2009}.
+
+More formally, the upper bound on parsing complexity is always at
+least linear in the size of the grammar constant $G$, where $G$ is
+often loosely defined as a {\it grammar constant}; Iglesias et al.
+\shortcite{iglesias2011} give a nice analysis of the most common translation algorithms
+and their dependence on $G$. Dunlop et al. \shortcite{dunlop2010} provide a more
+fine-grained analysis of $G$, showing that for a variety of
+implementation choices that it depends on either or both the number of
+rules in the grammar and the number of nonterminals in the grammar.
+Though these are worst-case analyses, it should be clear that grammars
+with fewer rules or nonterminals can generally be processed more
+efficiently.
+
+Table \ref{table:rule-count} shows the number of rules we can extract under various labeling schemes. The rules were extracted from an Urdu--English parallel corpus with 202019 sentences, or almost 2 million words in each languages.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|r|r|}
+\hline
+Model & Rules & NTs\\
+\hline
+Hiero & 4171473 & 1\\
+Syntax & 7034393 & 70\\
+SAMT & 40744439 & 18368\\
+CG Model 1 & 8042683 & 505\\
+CG Model 2 & 28961161 & 517\\
+\hline
+\end{tabular}
+\caption{Number of translation rules and non-terminal labels in an Urdu--English grammar under various models.\label{table:rule-count}}
+\end{table}
+
+%\begin{table}
+%\centering
+%\begin{tabular}{|c|c|c|}
+%\hline
+%Model & Non-terminal labels & Singletons \\
+%\hline
+%Hiero & 1 & 0 \\
+%Syntax & 70 & 0 \\
+%SAMT & 18368 & 883 \\
+%CG Model 1 & 505 & 25 \\
+%CG Model 2 & 517 & 36 \\
+%\hline
+%\end{tabular}
+%\caption{Number of non-terminal labels present in an Urdu--English grammar for various models. A singleton label is a label that only appears on the left-hand side of one rule.\label{table:nt-count}}
+%\end{table}
+
+\subsection{Sparseness of nonterminals}
+
+\section{Experiments}
+
+\subsection{Data}
+
+We tested our models on an Urdu--English translation task. The training corpus was the National Institute of Standards and Technology Open Machine Translation 2009 Evaluation (NIST Open MT09). According to the MT09 Constrained Training Conditions Resources list\footnote{\url{http://www.itl.nist.gov/iad/mig/tests/mt/2009/MT09_ConstrainedResources.pdf}} this data includes NIST Open MT08 Urdu Resources\footnote{LDC2009E12} and the NIST Open MT08 Current Test Set Urdu--English\footnote{LDC2009E11}. This gives us 202019 parallel sentences, for approximately 2 million words of training data.
+
+\subsection{Experimental design}
+
+We used the scripts included with the Moses MT toolkit \cite{moses} to tokenize and normalize both sides of the parallel data, then used GIZA++ \cite{giza} to perform word alignments.
+
+For phrase structure parses of the English data, we used the Berkeley parser \cite{berkeley}. For CCG parses, and for reading labels out of a parse chart, we used the C\&C parser \cite{candc}.
+
+After aligning and parsing the training data, we used the Thrax grammar extractor \cite{joshua3} to extract all of the translation grammars.
+
+We used the same feature set in all the translation grammars. This includes, for each rule $A \to \langle f ; e \rangle$, relative-frequency estimates of the following probabilities:
+\begin{itemize}
+\item $p(f|A)$
+\item $p(f|e)$
+\item $p(f|e,A)$
+\item $p(e|A)$
+\item $p(e|f)$
+\item $p(e|f,A)$
+\end{itemize}
+The feature set also includes lexical weighting for rules as defined by Koehn et al. \shortcite{koehn-och-marcu-2003} and various binary features as well as counters for the number of unaligned words in each rule.
+
+To train the feature weights we used the Z-MERT implementation \cite{zmert} of the Minimum Error-Rate Training algorithm \cite{mert}.
+
+To decode the test sets, we used the Joshua machine translation decoder \cite{joshua3}.
+
+\subsection{Results}
+
+We measure machine translation performance using the BLEU metric \cite{papineni-bleu}. We also report the translation time for the test set in seconds per sentence. These results are summarized in Table \ref{table:results}.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|r|r|}
+\hline
+Model & BLEU & Time (sec./sent.) \\
+\hline
+Hiero & 25.67 (0.9781) & 0.05 \\
+Syntax & 27.06 (0.9703) & 3.04 \\
+SAMT & 28.06 (0.9714) & 63.48 \\
+CG Model 1 & 27.3 (0.9770) & 5.24 \\
+CG Model 2 & 27.64 (0.9673) & 33.6 \\
+\hline
+\end{tabular}
+\caption{Results of translation experiments on Urdu--English. Higher BLEU scores are better. BLEU's brevity penalty is reported in parentheses.\label{table:results}}
+\end{table}
+
+\section{Future work}
+
+\subsection{Annotation with semantic representations}
+
+CCG has often been used as a natural interface between syntax and semantics. The combinators used in CCG parsing can be extended to operate on semantic structures as well. All we have to do is augment each lexical entry with a semantic value. The use of combinators during parsing will naturally build up a semantic representation of a sentence even as it analyzes the syntax.
+
+As an example, Table \ref{table:lexicon-semantic} adds $\lambda$-calculus semantics to our earlier example lexicon. We update the function application of Rule \ref{eqn:forward-app} to include semantic annotations:
+\begin{equation}
+X/Y:f \, Y:g \to X:fg
+\end{equation}
+Then the semantic representation of the sentence ``Marcel proved completeness'' can be built up using the rules of $\lambda$-calculus as
+\begin{equation}
+\textit{proved(Marcel, completeness)}
+\end{equation}
+
+As a first step towards semantic translation, it would be easy to include some semantic information in a future model based on CCG. 
+
+\section{Conclusion}
+
+
+\bibliographystyle{acl}
+\bibliography{ccg}
+\end{document}
