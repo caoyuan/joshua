@@ -142,15 +142,14 @@ As we will show, the labels that CCG derives for each span of the sentence meet 
 
 \subsection{Labels for phrases}
 
-The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But if we restrict the set of labels, there is a trade-off: if we have a very useful translation rule, but we can't assign it a syntactic label, we can't use it in translation. The more we restrict how labels are assigned, the more potential rules we have to throw away.
+The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But this raises a design question: what label do we assign to spans that are natural translations of each other, but have no natural labeling under a syntactic parse?
+One possibility would be to discard such translations from our model as implausible. However, such non-compositional translations are important in translation \cite{fox:2002:emnlp}, and it has been repeatedly shown that discarding potential translation rules because they do not correspond to full syntactic constituents is harmful for translation performance under a variety of models \cite{koehn-och-marcu-2003,deneefe-syntax-and-phrase-mt} 
 
-Koehn et al. \shortcite{koehn-och-marcu-2003} showed that, in phrase-based translation, if we only include syntactically-well-formed phrases (phrases that correspond to a subtree of a phrase structure parse tree) in the translation table, translation performance goes down by over 3 BLEU points on a German--English task. We end up throwing away a lot of translation rules: 80\% of all phrase pairs are eliminated from the phrase table. This conclusion was supported by DeNeefe et al. \shortcite{deneefe-syntax-and-phrase-mt}.
+Consider for example the German--English phrase pair {\em  -- the tall man}. It is easily labeled as an NP and included in the translation table. By contrast, {\em -- the tall}, doesn't typically correspond to a complete subtree in a phrase structure parse. Yet translating {\em the tall} is likely to be useful than translating {\em the tall man}, since it is more general---it can be combined with any other noun translation.
 
-For example, consider the German--English phrase pair {\em  -- the tall man}. Since we could analyze this as a noun phrase, the phrase pair could be included in the translation table. But we couldn't include {\em -- the tall}, since it doesn't correspond to a complete subtree. But translating {\em the tall} is more useful than translating {\em the tall man}, since the former is more general --- it can be combined with any other noun translation.
+Using CG-style labels with function types, we can assign the type (for example) NP/N to {\em the tall} to show that it can be combined with a noun on its right to create a complete noun phrase.\footnote{We could assign NP/N to the determiner {\em the} and N/N to the adjective {\em tall}, then combine those two categories using {\em function composition} to get a category NP/N for the two words together.}
 
-Using CG-style labels with function types, we can assign the type (for example) NP/N to {\em the tall}\footnote{We could assign NP/N to the determiner {\em the} and N/N to the adjective {\em tall}, then combine those two categories using {\em function composition} to get a category NP/N for the two words together.} to show that it can be combined with a noun on its right to create a complete noun phrase.
-
-More generally, allowing slashed labels allows us to annotate syntax without having to throw away as many useful translation rules.
+More generally, CG labels can be used annotate syntax of almost any span, while still remaining linguistically meaningful.
 
 \subsection{Minimal, well-motivated label set}
 
