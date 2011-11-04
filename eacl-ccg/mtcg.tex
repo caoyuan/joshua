@@ -262,7 +262,14 @@ Then we can assign syntactic labels to Rule \label{eqn:hiero-rule} to produce
 \textrm{PP } \to \langle \textrm{ Pour NP }; \textrm{ For NP } \rangle
 \end{equation}
 
-As we noted in Section \ref{sec:cg}, under this scheme we may throw away a lot of useful translation rules that don't translate exact syntactic constituents. We can alleviate this problem by changing the way we get syntactic labels from parse trees.
+As we noted in Section \ref{sec:cg}, under this scheme we may throw away a lot of useful translation rules that don't translate exact syntactic constituents. For example, we can't label
+\begin{equation}
+\label{eqn:bad-rule}
+X \to \langle \textrm{ Pour la majorit\'{e} des ; For most } \rangle
+\end{equation}
+because no single node exactly spans {\em For most}: the PP node includes {\em people}, and the NP node doesn't include {\em For}.
+
+We can alleviate this problem by changing the way we get syntactic labels from parse trees.
 
 \subsection{SAMT}
 
@@ -276,9 +283,15 @@ The Syntax-Augmented Machine Translation (SAMT) model \cite{samt-wmt06} extracts
 \end{itemize}
 Only if all of these assignments fail do we throw away the potential translation rule.
 
+Under SAMT, we can now label Rule \ref{eqn:bad-rule}. {\em For} is spanned by an IN node, and {\em most} is spanned by a JJ node, so we concatenate the two and label the rule as
+\begin{equation*}
+\textrm{IN+JJ} \to \langle \textrm{ Pour la majorit\'{e} des ; For most } \rangle
+\end{equation*}
+
 We note here that the slashed labels of SAMT are inspired by CCG, but they're not the same as our slashed labels: CCG function categories are used for syntactic structures that take arguments, like adjectives or verbs, but the SAMT slashed labels simply denote incomplete syntactic constituents.
 
 \subsection{CCG 1-best derivation labeling}
+\label{sec:ccg-1-best}
 
 Our first CG model is similar to the first phrase structure parse tree model. We start with a word-aligned sentence pair, but we parse the target sentence using a CCG parser instead of a phrase structure parser.
 
@@ -298,18 +311,34 @@ For & most & people \\
 \end{center}
 Then just as in the phrase structure model, we project the syntactic labels down onto the extractable rule yielding
 \begin{equation}
+\label{eqn:ccg-rule}
 \textrm{S/S } \to \langle \textrm{ Pour N }; \textrm{ For N } \rangle
 \end{equation}
 
-This does not take advantage of CCG's ability to label almost any fragment of language: the fragments with labels in any particular sentence depend on the order that categories were combined in the sentence's 1-best derivation. In the next model, we increase the number of spans we can label.
+This does not take advantage of CCG's ability to label almost any fragment of language: the fragments with labels in any particular sentence depend on the order that categories were combined in the sentence's 1-best derivation.  We can't label Rule \ref{eqn:bad-rule}, because no single category spanned {\em For most} in the derivation. In the next model, we increase the number of spans we can label.
 
 \subsection{CCG parse chart labeling}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.4\textwidth]{figures/ccg-chart}
+\caption{A portion of the parse chart for a sentence starting with ``For most people \ldots.'' Note that the gray chart cell is not included in the 1-best derivation of this fragment in Section \ref{sec:ccg-1-best}.\label{fig:chart}} 
+\end{figure}
 
 In the first CCG model, we use the 1-best CCG derivation to assign labels to spans. This means that a lot of possible rules can't be labeled, because their phrase pairs don't match up to a span in the particular derivation tree.
 
 For this model, we do not use the 1-best CCG derivation. Instead, when parsing the target sentence, for each cell in the parse chart, we read the most likely label according to the parsing model. This lets us assign a label for almost any span of the sentence just by reading the label from the parse chart.
 
-Thus, when we want to assign a label to a non-terminal on the left- or right-hand side of a rule, we determine what part of the target sentence that the non-terminal spans. Since we've read the 1-best category label from each cell of the parse chart, we have a category for every possible span of the sentence.
+For example, Figure \ref{fig:chart} represents part of a CCG parse chart for our example fragment of ``For most people.'' The white cells of the chart are in fact present in the 1-best derivation, which means we could extract Rule \ref{eqn:ccg-rule} just as in the previous model.
+
+But the 1-best derivation model cannot label Rule \ref{eqn:bad-rule}, and this model can. The shaded chart cell in Figure \ref{fig:chart} holds the most likely category for the span {\em For most}. So we assign that label to the $X$:
+\begin{equation*}
+S/S \to \langle \textrm{ Pour la majorit\'{e} des ; For most } \rangle
+\end{equation*}
+
+By including labels from cells that weren't used in the 1-best derivation, we can greatly increase the number of rules we can label.
+
+%Thus, when we want to assign a label to a non-terminal on the left- or right-hand side of a rule, we determine what part of the target sentence that the non-terminal spans. Since we've read the 1-best category label from each cell of the parse chart, we have a category for every possible span of the sentence.
 
 \section{Comparison of resulting grammars}
 \label{sec:comparison}
