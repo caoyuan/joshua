@@ -4,7 +4,8 @@ transform on each file:
 > cat ghkm.nts | awk '{print log($2)" "log($1)+0.2}' > ghkm.logscale.nts
 
 Additionally, TikZ complained about the number of datapoints for
-SAMT, so I randomly thinned out the high frequency datapoints. The plot
+SAMT, so I randomly thinned out the datapoints in the densest part of
+the graph (which still reads as completely packed on the plot). The plot
 is otherwise faithful to the data.
 
-> cat samt.logscale.nts | awk '{if ($1<6 || rand()<.5) {print $0}};' > samt.logscale.thinned.nts
+> cat samt.logscale.nts | awk '{if ($1<5 || $1>9 || rand()<.3) {print $0}};' > samt.logscale.thinned.nts
