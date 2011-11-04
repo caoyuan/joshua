@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{qtree}
 \usepackage{ccg}
+\usepackage{subfig}
 
 \author{Jonathan Weese \and Chris Callison-Burch \and Adam Lopez\\Department of Computer Science\\Johns Hopkins University\\Baltimore, MD 21218 USA\\{\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
 \title{Categorial Grammar in Machine Translation}
@@ -98,27 +99,40 @@ As an example, suppose we want to analyze the sentence ``Marcel proved completen
 \hline
 Lexical item & Category \\
 \hline
-Marcel & NP \\
-completeness & NP \\
-proved & (S\textbackslash NP)/NP \\
+and & conj \\
+cities & NP \\
+in &  (NP\textbackslash NP)/NP \\
+own & (S\textbackslash NP)/NP \\
+properties & NP \\
+they & NP \\
+various & NP/NP \\
+villages & NP \\
 \hline
 \end{tabular}
 \caption{An example lexicon, mapping words to categories.\label{table:lexicon}}
 \end{table}
 
-\begin{figure}
+\begin{figure*}
 \centering
-\deriv{3}{
-Marcel & proved & completeness \\
-\uline{1} & \uline{1} & \uline{1} \\
-NP & (S\backslash NP)/NP & NP \\
-& \fapply{2} \\
-& \cmc{2}{S\backslash NP} \\
-\bapply{3} \\
-\cmc{3}{S}
+\deriv{8}{
+They & own & properties & in & various & cities & and & villages \\
+\uline{1} & \uline{1} & \uline{1} & \uline{1} & \uline{1} & \uline{1} & \uline{1} & \uline{1} \\% & \uline{1} \\
+NP & (S\backslash NP)/NP & NP & (NP\backslash NP)/NP & NP/NP & NP & conj & NP \\%& ((S\backslash NP)/(S\backslash NP))/NP & N/N & N \\
+& & & & \fapply{2} & \conj{2} \\
+& & & & \cmc{2}{NP} & \cmc{2}{NP\backslash NP} \\
+& & & & \bapply{4} \\
+& & & & \cmc{4}{NP} \\
+& & & \fapply{5} \\
+& & & \cmc{5}{NP\backslash NP} \\
+& & \bapply{6} \\
+& & \cmc{6}{NP} \\
+& \fapply{7} \\
+& \cmc{7}{S\backslash NP} \\
+\bapply{8} \\
+\cmc{8}{S}
 }
-\caption{An example CG derivation for the sentence ``Marcel proved completeness'' using the lexicon from Table \ref{table:lexicon}.\label{fig:ccg-derivation}}
-\end{figure}
+\caption{An example CCG derivation for the sentence ``They own properties in various cities and villages'' using the lexicon from Table \ref{table:lexicon}. $\Phi$ indicates a conjunction operation; $>$ and $<$ are forward and backward function application, respectively.\label{fig:ccg-derivation}}
+\end{figure*}
 
 In this work, we want to use CCG parses of training data to assign syntactic labels to translation rules. These CCG labels meet the criteria we listed at the beginning of this section:
 \begin{enumerate}
@@ -132,7 +146,7 @@ We will discuss each point in more detail below.
 
 The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But if we restrict the set of labels, there is a trade-off: if we have a very useful translation rule, but we can't assign it a syntactic label, we can't use it in translation. The more we restrict how labels are assigned, the more potential rules we have to throw away.
 
-Koehn et al. \shortcite{koehn-och-marcu-2003} showed that, in phrase-based translation, if we only include syntactically-well-formed phrases (phrases that correspond to a subtree of a phrase structure parse tree) in the translation table, translation performance goes down. We end up throwing away a lot of useful rules. This conclusion was supported by DeNeefe et al. \shortcite{deneefe-syntax-and-phrase-mt}.
+Koehn et al. \shortcite{koehn-och-marcu-2003} showed that, in phrase-based translation, if we only include syntactically-well-formed phrases (phrases that correspond to a subtree of a phrase structure parse tree) in the translation table, translation performance goes down by over 3 BLEU points on a German--English task. We end up throwing away a lot of translation rules: 80\% of all phrase pairs are eliminated from the phrase table. This conclusion was supported by DeNeefe et al. \shortcite{deneefe-syntax-and-phrase-mt}.
 
 For example, consider the German--English phrase pair {\em  -- the tall man}. Since we could analyze this as a noun phrase, the phrase pair could be included in the translation table. But we couldn't include {\em -- the tall}, since it doesn't correspond to a complete subtree. But translating {\em the tall} is arguably even more useful than translating {\em the tall man}, since the former can be combined with any other noun translation.
 
@@ -148,7 +162,7 @@ By allowing slashed categories with CG, we're increasing the number of labels al
 \item The set of labels is still small --- it's restricted to the labels seen in CCG parses of the training data.
 \end{enumerate}
 
-Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing --- see Section \ref{sec:comparison}).
+Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' For example, exactly one rule in the SAMT grammar was labeled with ,+WDT+VBN --- a comma followed by a WH-determiner followed by a past participle verb. This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing --- see Section \ref{sec:comparison}).
 
 In short, using CG labels allows us to keep more syntactic rules without making the set of syntactic labels too big.
 
@@ -179,12 +193,12 @@ For each candidate $e$, the weight of its derivation is just one of the features
 \subsection{Extraction from parallel text}
 
 \begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{../wmt11/figures/simple-rule}
+\includegraphics[width=0.4\textwidth]{figures/simple-rule}
 \caption{A word-aligned sentence pair fragment, with a box indicating a consistent phrase pair.\label{fig:aligned-sentence}}
 \end{figure}
 
 \begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{../wmt11/figures/hierarchical-rule}
+\includegraphics[width=0.4\textwidth]{figures/hierarchical-rule}
 \caption{A consistent phrase pair with a sub-phrase that is also consistent. We may extract a hierarchical SCFG rule from this training example.\label{fig:hierarchical-phrases}}
 \end{figure}
 
@@ -286,7 +300,7 @@ Our labeling schemes are trying to satisfy two competing desires: first, we want
 What we would like is a relatively constrained non-terminal label set, so that we can estimate features with confidence, and so that translation rules have a chance of being used in more derivations. But we want the label set to be general enough that we don't throw away any more translation rules than we have to.
 
 
-\subsection{Number of rules and nonterminals}
+\subsection{Effect of grammar size and label set on parsing efficiency}
 
 There are sound theoretical reasons for reducing the number of non-terminal labels in a grammar. Translation with a synchronous context-free grammar requires first parsing with the source-language projection of the grammar, followed by intersection of the target-language projection of the resulting grammar with a language model. While there are many possible algorithms for these operations, they all depend on the size of the grammar.
 
@@ -315,6 +329,8 @@ rules in the grammar and the number of nonterminals in the grammar.
 Though these are worst-case analyses, it should be clear that grammars
 with fewer rules or nonterminals can generally be processed more
 efficiently.
+
+\subsection{Number of rules and non-terminals}
 
 Table \ref{table:rule-count} shows the number of rules we can extract under various labeling schemes. The rules were extracted from an Urdu--English parallel corpus with 202019 sentences, or almost 2 million words in each language.
 
@@ -358,25 +374,28 @@ CG Model 2 & 28961161 & 517\\
 %\caption{Number of non-terminal labels present in an Urdu--English grammar for various models. A singleton label is a label that only appears on the left-hand side of one rule.\label{table:nt-count}}
 %\end{table}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/ghkm}
-\caption{Sparsity of non-terminal symbols.\label{fig:hist1}}
-\end{figure}
+\begin{figure*}[t!]
+\subfloat[GHKM\label{fig:hist1}]{\includegraphics[width=0.5\textwidth]{figures/ghkm}}
+\subfloat[1-best CCG derivations]{\includegraphics[width=0.5\textwidth]{figures/ccg}} \\
+\subfloat[SAMT]{\includegraphics[width=0.5\textwidth]{figures/samt}}
+\subfloat[CCG parse charts\label{fig:hist4}]{\includegraphics[width=0.5\textwidth]{figures/ccg-auli}}
+\caption{Sparsity of non-terminal symbols. Note the much higher label counts for the SAMT histogram.}
+\end{figure*}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/ccg}
-\caption{Sparsity of non-terminal symbols.}
-\end{figure}
+%\begin{figure}[t]
+%\includegraphics[width=0.5\textwidth]{figures/ccg}
+%\caption{Sparsity of non-terminal symbols.}
+%\end{figure}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/samt}
-\caption{Sparsity of non-terminal symbols.}
-\end{figure}
+%\begin{figure}[t]
+%\includegraphics[width=0.5\textwidth]{figures/samt}
+%\caption{Sparsity of non-terminal symbols.}
+%\end{figure}
 
-\begin{figure}[t]
-\includegraphics[width=0.5\textwidth]{figures/ccg-auli}
-\caption{Sparsity of non-terminal symbols.\label{fig:hist4}}
-\end{figure}
+%\begin{figure}[t]
+%\includegraphics[width=0.5\textwidth]{figures/ccg-auli}
+%\caption{Sparsity of non-terminal symbols.\label{fig:hist4}}
+%\end{figure}
 
 \subsection{Sparseness of nonterminals}
 
@@ -402,12 +421,12 @@ After aligning and parsing the training data, we used the Thrax grammar extracto
 
 We used the same feature set in all the translation grammars. This includes, for each rule $A \to \langle f ; e \rangle$, relative-frequency estimates of the following probabilities:
 \begin{itemize}
-\item $p(f|A)$
-\item $p(f|e)$
-\item $p(f|e,A)$
-\item $p(e|A)$
-\item $p(e|f)$
-\item $p(e|f,A)$
+\item $p(f|A)$, the probability of producing the foreign phrase $f$ given that the generating label is $A$
+\item $p(f|e)$, the probability that the foreign phrase $f$ is a translation of the target phrase $e$
+\item $p(f|e,A)$, the probability that the foreign phrase $f$ is a translation of $e$ given that the syntactic type is also $A$
+\item $p(e|A)$, the probability of producing the target phrase $e$ from the syntactic label $A$
+\item $p(e|f)$, the probability that the target phrase $e$ is a translation of the foreign phrase $f$
+\item $p(e|f,A)$, the probability that $e$ is a translation of $f$ given that the syntactic type is also $A$
 \end{itemize}
 The feature set also includes lexical weighting for rules as defined by Koehn et al. \shortcite{koehn-och-marcu-2003} and various binary features as well as counters for the number of unaligned words in each rule.
 
@@ -423,19 +442,19 @@ We measure machine translation performance using the BLEU metric \cite{papineni-
 \centering
 \begin{tabular}{|c|r|r|}
 \hline
-Model & BLEU & Time (sec./sent.) \\
+Model & BLEU & sec./sent. \\
 \hline
 Hiero & 25.67 (0.9781) & 0.05 \\
 Syntax & 27.06 (0.9703) & 3.04 \\
 SAMT & 28.06 (0.9714) & 63.48 \\
-CG Model 1 & 27.3 (0.9770) & 5.24 \\
-CG Model 2 & 27.64 (0.9673) & 33.6 \\
+CCG derivations & 27.3 (0.9770) & 5.24 \\
+CCG chart cells & 27.64 (0.9673) & 33.6 \\
 \hline
 \end{tabular}
 \caption{Results of translation experiments on Urdu--English. Higher BLEU scores are better. BLEU's brevity penalty is reported in parentheses.\label{table:results}}
 \end{table}
 
-All of the syntactic labeling schemes show an improvement over the Hiero model.
+All of the syntactic labeling schemes show an improvement over the Hiero model. Indeed, all the syntactic labeling schemes fall in the range of approximately 27--28 BLEU.
 
 \section{Future work}
 
