@@ -27,7 +27,7 @@ Baltimore, MD 21218 USA\\
 \maketitle
 
 \begin{abstract}
-Adding syntactic labels to synchronous context-free translation rules can improve performance, but only using phrase structure constituents, as in GHKM \cite{ghkm}, excludes potentially useful translation rules. SAMT \cite{samt-wmt06} introduces heuristics to create new non-constituent labels, but these heuristics introduce many complex labels and tend to add rarely-applicable rules to the translation grammar. We introduce a new labeling scheme based on categorial grammar, which allows syntactic labeling of many rules with a minimal, well-motivated label set. We show that our labeling scheme performs comparably to SAMT on an Urdu--English translation task, yet the label set is an order of magnitude smaller, and translation is twice as fast.
+Adding syntactic labels to synchronous context-free translation rules can improve performance, but labeling with phrase structure constituents, as in GHKM \cite{ghkm}, excludes potentially useful translation rules. SAMT \cite{samt-wmt06} introduces heuristics to create new non-constituent labels, but these heuristics introduce many complex labels and tend to add rarely-applicable rules to the translation grammar. We introduce a new labeling scheme based on categorial grammar, which allows syntactic labeling of many rules with a minimal, well-motivated label set. We show that our labeling scheme performs comparably to SAMT on an Urdu--English translation task, yet the label set is an order of magnitude smaller, and translation is twice as fast.
 \end{abstract}
 
 \section{Introduction}
@@ -48,7 +48,7 @@ We could simply throw away any rules that can't be labeled syntactically, but th
 
 Syntax-Augmented Machine Translation 
 (SAMT; Zollmann and Venugopal, 2006) \nocite{samt-wmt06} % stupid style file is stupid; should work with \cite[before text][after text]{citename} but doesn't
-solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is dissatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. This inflates grammar size, hampers effective parameter estimation due to feature sparsity, and slows translation speed.
+solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is unsatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. This inflates grammar size, hampers effective parameter estimation due to feature sparsity, and slows translation speed.
 
 We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) satisfies these requirements.
 
@@ -170,7 +170,7 @@ As we will show, the labels that CCG derives for each span of the sentence meet 
 The motivation for assigning new labels to translation rules is to annotate the rules with syntactic information. But this raises a design question: what label do we assign to spans that are natural translations of each other, but have no natural labeling under a syntactic parse?
 One possibility would be to discard such translations from our model as implausible. However, such non-compositional translations are important in translation \cite{fox:2002:emnlp}, and it has been repeatedly shown that discarding potential translation rules because they do not correspond to full syntactic constituents is harmful for translation performance under a variety of models \cite{koehn-och-marcu-2003,deneefe-syntax-and-phrase-mt} 
 
-Consider for example the German--English phrase pair {\em  -- the tall man}. It is easily labeled as an NP and included in the translation table. By contrast, {\em -- the tall}, doesn't typically correspond to a complete subtree in a phrase structure parse. Yet translating {\em the tall} is likely to be useful than translating {\em the tall man}, since it is more general---it can be combined with any other noun translation.
+Consider for example the German--English phrase pair {\em der gro\ss{}e Mann -- the tall man}. It is easily labeled as an NP and included in the translation table. By contrast, {\em der gro\ss{}e-- the tall}, doesn't typically correspond to a complete subtree in a phrase structure parse. Yet translating {\em the tall} is likely to be more useful than translating {\em the tall man}, since it is more general---it can be combined with any other noun translation.
 
 Using CG-style labels with function types, we can assign the type (for example) NP/N to {\em the tall} to show that it can be combined with a noun on its right to create a complete noun phrase.\footnote{We could assign NP/N to the determiner {\em the} and N/N to the adjective {\em tall}, then combine those two categories using {\em function composition} to get a category NP/N for the two words together.}
 
@@ -489,7 +489,7 @@ The feature set also includes lexical weighting for rules as defined by Koehn et
 
 To train the feature weights we used the Z-MERT implementation \cite{zmert} of the Minimum Error-Rate Training algorithm \cite{mert}.
 
-To decode the test sets, we used the Joshua machine translation decoder \cite{joshua3}.
+To decode the test sets, we used the Joshua machine translation decoder \cite{joshua3}. The language model is a 5-gram LM trained on English GigaWord Fourth Edition.\footnote{LDC2009T13}
 
 \subsection{Evaluation criteria}
 
