@@ -10,7 +10,7 @@
 
 % use this macro to hide things for anonymous review
 \newcommand\anonymize[1]{}
-\renewcommand\anonymize[1]{#1} % uncomment to de-anonymize
+%\renewcommand\anonymize[1]{#1} % uncomment to de-anonymize
 
 \author{
 \anonymize{
@@ -32,7 +32,7 @@ Adding syntactic labels to synchronous context-free translation rules can improv
 
 \section{Introduction}
 
-The Hiero model of Chiang \shortcite{chiang2005} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. With an SCFG, translation can be modeled under the assumption that the source- and target-language sentences share a similar hidden tree-like structure. But the Hiero model only allows one non-terminal label $X$ in its SCFG; the tree structure of the translation does not carry any syntactic information. Rule \ref{eqn:hiero}, below, is an example of an $X$ rule of Hiero.
+The Hiero model of \newcite{chiang2005} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. SCFGs model translation as a process of isomorphic syntactic derivation in the source and target language. But the Hiero model is formally, not linguistically syntactic. Its derivation trees carry only a single non-terminal label $X$, carrying no linguistic information. Consider Rule \ref{eqn:hiero}.
 \begin{equation}
 X \to \langle \textrm{ maison ; house } \rangle\label{eqn:hiero}
 \end{equation}
@@ -46,13 +46,13 @@ But we quickly run into trouble: how should we label a rule that translates {\em
 
 We could simply throw away any rules that can't be labeled syntactically, but that hurts translation performance \cite{koehn-och-marcu-2003,deneefe-syntax-and-phrase-mt}.
 
-The solution of Syntax-Augmented Machine Translation (SAMT) \cite{samt-wmt06} is to use heuristics to create new labels from the phrase structure parse: {\em for the establishment of} can be labeled IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side.
+Syntax-Augmented Machine Translation 
+(SAMT; Zollmann and Venugopal, 2006) \nocite{samt-wmt06} % stupid style file is stupid; should work with \cite[before text][after text]{citename} but doesn't
+solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is dissatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. This inflates grammar size, hampers effective parameter estimation due to feature sparsity, and slows translation speed.
 
-Under the SAMT heuristics, we may introduce many thousands of new labels, most of which are seen very few times. This makes it difficult to estimate features conditioned on labels, and the large label set slows down translation. Further, the heuristically-defined labels don't fit into the phrase structure formalism.
+We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) satisfies these requirements.
 
-We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) will satisfy our requirements.
-
-Under CCG, {\em for the establishment of} is labeled with ((S\textbackslash NP)\textbackslash (S\textbackslash NP))/NP. This seems complex, but it describes exactly how the fragment should combine with other English words to create a complete sentence. We show that CCG is a viable alternative formalism to add syntax to SCFG-based translation.
+Under CCG, {\em for the establishment of} is labeled with ((S\textbackslash NP)\textbackslash (S\textbackslash NP))/NP. This seems complex, but it describes exactly how the fragment should combine with other English words to create a complete sentence in a linguistically meaningful way. We show that CCG is a viable  formalism to add syntax to SCFG-based translation.
 
 %%% THIS IS THE OLD INTRODUCTION
 %
@@ -95,9 +95,9 @@ Under CCG, {\em for the establishment of} is labeled with ((S\textbackslash NP)\
 %
 %, we can devise a set of labels that satisfy these principles and still allow many translation rules to be extracted.
 \begin{itemize}
-\item We introduce two models for labeling SCFG rules: one uses labels from a 1-best CCG parse tree of training data; the other uses the top labels in each cell of a CCG parse chart.
+\item We introduce two models for labeling SCFG rules. One uses labels from a 1-best CCG parse tree of training data; the second uses the top labels in each cell of a CCG parse chart.
 \item We show that using 1-best parses performs as well as a syntactic model using phrase structure derivations.
-\item We show that using chart cell labels performs slightly worse than SAMT, but the non-terminal label set is an order of magnitude smaller and translation is twice as fast.
+\item We show that using chart cell labels performs almost as well than SAMT, but the non-terminal label set is an order of magnitude smaller and translation is twice as fast.
 \end{itemize}
 
 \section{Categorial grammar}
