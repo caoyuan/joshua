@@ -7,7 +7,19 @@
 \usepackage{subfig}
 \usepackage{tikz}
 
-\author{Jonathan Weese \and Chris Callison-Burch \and Adam Lopez\\Department of Computer Science\\Johns Hopkins University\\Baltimore, MD 21218 USA\\{\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
+% use this macro to hide things for anonymous review
+\newcommand\anonymize[1]{}
+%\renewcommand\anonymize[1]{#1} % uncomment to de-anonymize
+
+\author{
+\anonymize{
+Jonathan Weese \and Chris Callison-Burch \and Adam Lopez\\
+Department of Computer Science\\
+Human Language Technology Center of Excellence\\ % are we all in HLTCOE, or just Chris and Adam?
+Johns Hopkins University\\
+Baltimore, MD 21218 USA\\
+{\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
+}
 \title{Categorial Grammar in Machine Translation}
 
 \begin{document}
@@ -485,6 +497,10 @@ We have introduced a way to label translation rules with syntactic information d
 
 Our model allows us to extract almost as many rules as the SAMT model, but the label set is an order of magnitude smaller, and many
 
+\anonymize{
+\section{Acknowledgements*}
+Michael Auli, ???, funding sources
+}
 
 \bibliographystyle{acl}
 \bibliography{ccg}
