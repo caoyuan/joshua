@@ -462,9 +462,9 @@ We tested our models on an Urdu--English translation task. The training corpus w
 
 \subsection{Experimental design}
 
-We used the scripts included with the Moses MT toolkit \cite{moses} to tokenize and normalize both sides of the parallel data, then used GIZA++ \cite{giza} to perform word alignments.
+We used the scripts included with the Moses MT toolkit \cite{moses} to tokenize and normalize the English data. We used a tokenizer and normalizer developed at the SCALE 2009 workshop \cite{scale09} to preprocess the Urdu data. We used GIZA++ \cite{giza} to perform word alignments.
 
-For phrase structure parses of the English data, we used the Berkeley parser \cite{berkeley}. For CCG parses, and for reading labels out of a parse chart, we used the C\&C parser \cite{candc}.
+For phrase structure parses of the English data, we used the Berkeley parser \cite{Petrov-Klein-Inference}. For CCG parses, and for reading labels out of a parse chart, we used the C\&C parser \cite{candc}.
 
 After aligning and parsing the training data, we used the Thrax grammar extractor \cite{joshua3} to extract all of the translation grammars.
 
