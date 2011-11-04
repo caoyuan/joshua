@@ -9,7 +9,7 @@
 
 % use this macro to hide things for anonymous review
 \newcommand\anonymize[1]{}
-%\renewcommand\anonymize[1]{#1} % uncomment to de-anonymize
+\renewcommand\anonymize[1]{#1} % uncomment to de-anonymize
 
 \author{
 \anonymize{
@@ -78,23 +78,9 @@ We show that by using {\em combinatory categorial grammar} (CCG), we can devise 
 \section{Categorial grammar}
 \label{sec:cg}
 
-%\subsection{Syntactic labeling}
+Categorial grammar (CG) \cite{cg,bar-hillel-cg} is a grammar formalism in which words are assigned grammatical types, or {\em categories}. Once categories are assigned to each word of a sentence, a small set of universal combinatory rules uses them to derive a sentence-spanning syntactic structure.
 
-%We would like to assign syntactic labels to translation rules. If we simply assign labels from a phrase structure parse of training data, we run into a problem: many translation rules may not correspond to exact syntactic structures under this formalism.
-
-%These {\em non-constituent} rules are important to translation performance; removing them hurts performance in both the phrase-based setting \cite{koehn-och-marcu-2003} and in more complex syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
-
-%An improved label set that would assign labels to more fragments of language. It would also be well-motivated: the labels should represent actual syntactic structure in some sense.
-
-%The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient.
-
-%The formalism of {\em combinatory categorial grammar} can assign many parts of language a syntactically-meaningful label, drawn from a relatively small set. 
-
-%\subsection{Combinatory categorial grammar}
-
-Categorial grammar (CG) \cite{cg,bar-hillel-cg} is a lexicalized grammar formalism where lexical items are assigned types, or {\em categories}. Once categories are assigned, syntactic combinatory rules can be applied based only on these types, without taking into account other structure.
-
-Categories may be either primitives, like N, VP, S, and so on, or they may be complex {\em function types}. A function type looks like A/B and takes an of type B and returns a type A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
+Categories may be either atomic, like N, VP, S, and other familiar types, or they may be complex {\em function types}. A function type looks like A/B and takes an of type B and returns a type A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
 
 We can combine two categories with {\em function application}. Formally, we write
 \begin{equation}
@@ -148,13 +134,11 @@ NP & (S\backslash NP)/NP & NP & (NP\backslash NP)/NP & NP/NP & NP & conj & NP \\
 \caption{An example CCG derivation for the sentence ``They own properties in various cities and villages'' using the lexicon from Table \ref{table:lexicon}. $\Phi$ indicates a conjunction operation; $>$ and $<$ are forward and backward function application, respectively.\label{fig:ccg-derivation}}
 \end{figure*}
 
-In this work, we want to use CCG parses of training data to assign syntactic labels to translation rules. These CCG labels meet the criteria we listed at the beginning of this section:
+As we will show, the labels that CCG derives for each span of the sentence meet the criteria we listed at the beginning of this section:
 \begin{enumerate}
-\item Using function categories can allow us to label many more chunks of a language than if we were restricted to the label set in a phrase structure parse;
-\item Even though we're labeling more phrases, the set of categories is still small, and the categories have linguistic meaning.
-%\item CG parsing can be used to build semantic representations compositionally, so moving to a CG model will make it easier to add semantic information to MT systems.
+\item They naturally provide labels for many more spans of an input sentence than a phrase structure parse does.
+\item Despite this increase in labeled spans, the set of categories remains small and linguistically meaningful.
 \end{enumerate}
-We will discuss each point in more detail below.
 
 \subsection{Labels for phrases}
 
