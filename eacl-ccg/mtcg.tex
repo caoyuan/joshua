@@ -5,6 +5,7 @@
 \usepackage{qtree}
 \usepackage{ccg}
 \usepackage{subfig}
+\usepackage{tikz}
 
 \author{Jonathan Weese \and Chris Callison-Burch \and Adam Lopez\\Department of Computer Science\\Johns Hopkins University\\Baltimore, MD 21218 USA\\{\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
 \title{Categorial Grammar in Machine Translation}
@@ -375,12 +376,47 @@ CG Model 2 & 28961161 & 517\\
 %\end{table}
 
 \begin{figure*}[t!]
-\subfloat[GHKM\label{fig:hist1}]{\includegraphics[width=0.5\textwidth]{figures/ghkm}}
-\subfloat[1-best CCG derivations]{\includegraphics[width=0.5\textwidth]{figures/ccg}} \\
-\subfloat[SAMT]{\includegraphics[width=0.5\textwidth]{figures/samt}}
-\subfloat[CCG parse charts\label{fig:hist4}]{\includegraphics[width=0.5\textwidth]{figures/ccg-auli}}
-\caption{Sparsity of non-terminal symbols. Note the much higher label counts for the SAMT histogram.}
+%\subfloat[GHKM\label{fig:hist1}]{\includegraphics[width=0.5\textwidth]{figures/ghkm}}
+%\subfloat[1-best CCG derivations]{\includegraphics[width=0.5\textwidth]{figures/ccg}} \\
+%\subfloat[SAMT]{\includegraphics[width=0.5\textwidth]{figures/samt}}
+%\subfloat[CCG parse charts\label{fig:hist4}]{\includegraphics[width=0.5\textwidth]{figures/ccg-auli}}
+%\caption{Sparsity of non-terminal symbols. Note the much higher label counts for the SAMT histogram.}
+\begin{center}
+\begin{tikzpicture}[x=0.7cm,y=0.2cm]
+    \draw[gray,<->,yshift=1cm] (0,0) -- (15.5,0);
+	\node[gray,anchor=south,yshift=1cm] at (1,0) {More sparse};
+	\node[gray,anchor=south,yshift=1cm] at (14,0) {Less sparse};
+    \draw[->,yshift=-4.1cm] (0,0) -- (15.5,0);
+	\foreach \x/\xtext in {0/1,2.30259/10,4.60517/10^2,6.90776/10^3,9.21034/10^4,11.5129/10^5,13.8155/10^6}
+		\draw[yshift=-4.1cm] (\x,0) -- (\x,-0.02cm) node[anchor=north] {$\xtext$};
+	\draw[->,xshift=-0.1cm] (0,0) -- (0,4);
+	\draw[->,xshift=-0.1cm,yshift=-1cm] (0,0) -- (0,4);
+	\draw[->,xshift=-0.1cm,yshift=-2cm] (0,0) -- (0,4);
+	\draw[->,xshift=-0.1cm,yshift=-4cm] (0,0) -- (0,7);
+	\node[anchor=north,yshift=-5cm] at (7.5,0) {Label Frequency (logscale)};
+	\foreach \y/\ytext in {0.5/1,2.30259/10}
+		\draw[xshift=-0.1cm] (0,\y) -- (-0.1,\y) node[anchor=east] {$\ytext$};
+	\foreach \y/\ytext in {0.5/1,2.30259/10}
+		\draw[yshift=-1cm,xshift=-0.1cm] (0,\y) -- (-0.1,\y) node[anchor=east] {$\ytext$};
+	\foreach \y/\ytext in {0.5/1,2.30259/10}
+		\draw[yshift=-2cm,xshift=-0.1cm] (0,\y) -- (-0.1,\y) node[anchor=east] {$\ytext$};
+	\foreach \y/\ytext in {0.5/1,2.30259/10,4.60517/10^2,6.90776/10^3}
+		\draw[yshift=-4cm,xshift=-0.1cm] (0,\y) -- (-0.1,\y) node[anchor=east] {$\ytext$};
+	
+	\node[rotate=90,anchor=south,yshift=1cm,xshift=-2cm] at (0,0) {Number of Labels (logscale)};
+    \draw[black,thick,ycomb] plot file {data/ghkm.logscale.nts};
+    \draw[black,thick,ycomb] plot[yshift=-1cm] file {data/ccg.logscale.nts};
+    \draw[black,thick,ycomb] plot[yshift=-2cm] file {data/ccg-auli.logscale.nts};
+    \draw[black,thick,ycomb] plot[yshift=-4cm] file {data/samt.logscale.thinned.nts};
+	\node[anchor=west,yshift=0.5cm] at (15.5,0) {GHKM};
+	\node[anchor=west,yshift=-0.5cm] at (15.5,0) {CCG Model 1};
+	\node[anchor=west,yshift=-1.5cm] at (15.5,0) {CCG Model 2};
+	\node[anchor=west,yshift=-3.5cm] at (15.5,0) {SAMT};
+\end{tikzpicture}
+\caption{Histograms of label frequency for each model, illustrating the sparsity of each model.}
+\end{center}
 \end{figure*}
+
 
 %\begin{figure}[t]
 %\includegraphics[width=0.5\textwidth]{figures/ccg}
