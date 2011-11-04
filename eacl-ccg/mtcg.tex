@@ -6,6 +6,7 @@
 \usepackage{ccg}
 \usepackage{subfig}
 \usepackage{tikz}
+\usepackage{amsmath}
 
 % use this macro to hide things for anonymous review
 \newcommand\anonymize[1]{}
@@ -20,7 +21,7 @@ Johns Hopkins University\\
 Baltimore, MD 21218 USA\\
 {\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
 }
-\title{Categorial Grammar in Machine Translation}
+\title{Label Elegance in Statistical Machine Translation}
 
 \begin{document}
 \maketitle
@@ -31,35 +32,59 @@ Adding syntactic labels to synchronous context-free translation rules can improv
 
 \section{Introduction}
 
-Synchronous context-free grammars (SCFGs) were popularized for statistical machine translation by Chiang with his Hiero model \shortcite{chiang2005}. An SCFG is used to define translation rules that may have gaps in them.
-As an example, consider the rule
+The Hiero model of Chiang \shortcite{chiang2005} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. With an SCFG, translation can be modeled under the assumption that the source- and target-language sentences share a similar hidden tree-like structure. But the Hiero model only allows one non-terminal label $X$ in its SCFG; the tree structure of the translation does not carry any syntactic information. Rule \ref{eqn:hiero}, below, is an example of an $X$ rule of Hiero.
 \begin{equation}
-X \to \langle \textrm{ do not } X_1 ; \textrm{ ne } X_1 \textrm{ pas } \rangle \label{rule:ne_pas}
+X \to \langle \textrm{ maison ; house } \rangle\label{eqn:hiero}
 \end{equation}
-This rule encodes the idea that the English phrase {\em do not X} can be translated into French {\em ne X pas}, as long as the $X$ phrases are themselves translation pairs. (The correspondence between the two $X$s on the right-hand side of the rule is shown by their subscripts.)
 
-So if we are given another rule
-\begin{equation}
-X \to \langle \textrm{ house ; loge } \rangle
-\end{equation}
-where ``house'' is used in the sense of the verb ``to shelter something'' we can conclude that {\em do not house} should be translated into {\em ne loge pas}.
+We may try to add syntactic information to the SCG rules by parsing the parallel training data and projecting that information down. For example, if we knew from a phrase structure parse that {\em house} was a noun, we could rewrite Rule \ref{eqn:hiero} as
+\begin{equation*}
+N \to \langle \textrm{ maison ; house } \rangle
+\end{equation*}
 
-The rules above are typical of the Hiero model, where all non-terminal labels have the same symbol ($X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given a (more common) Hiero rule for the noun ``house''
-\begin{equation}
-X \to \langle \textrm{ house , maison } \rangle
-\end{equation}
-we could form the French translation {\em ne maison pas}. 
+But we quickly run into trouble: how should we label a rule that translates {\em pour l'\'{e}tablissement de} into {\em for the establishment of}? There is no phrase structure constituent that corresponds to this English fragment.
 
-We know that Rule \ref{rule:ne_pas} should only be applied when the missing phrase is a verb, but Hiero does not include any information about the syntactic type of rules or their missing phrases.
+We could simply throw away any rules that can't be labeled syntactically, but that hurts translation performance \cite{koehn-och-marcu-2003,deneefe-syntax-and-phrase-mt}.
 
-To improve this SCFG model, we want to assign labels to the rules that describe their syntactic roles. However, if the set of labels is too restrictive, we may not be able to label all translation rules. These non-syntactic rules are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+The solution of Syntax-Augmented Machine Translation (SAMT) \cite{samt-wmt06} is to use heuristics to create new labels from the phrase structure parse: {\em for the establishment of} can be labeled IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side.
 
+Under the SAMT heuristics, we may introduce many thousands of new labels, most of which are seen very few times. This makes it difficult to estimate features conditioned on labels, and the large label set slows down translation. Further, the heuristically-defined labels don't fit into the phrase structure formalism.
+
+We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) will satisfy our requirements.
+
+Under CCG, {\em for the establishment of} is labeled with ((S\textbackslash NP)\textbackslash (S\textbackslash NP))/NP. This seems complex, but it describes exactly how the fragment should combine with other English words to create a complete sentence. We show that CCG is a viable alternative formalism to add syntax to SCFG-based translation.
+
+%%% THIS IS THE OLD INTRODUCTION
+%
+%Synchronous context-free grammars (SCFGs) were popularized for statistical machine translation by Chiang with his Hiero model \shortcite{chiang2005}. An SCFG is used to define translation rules that may have gaps in them.
+%As an example, consider the rule
+%\begin{equation}
+%X \to \langle \textrm{ do not } X_1 ; \textrm{ ne } X_1 \textrm{ pas } \rangle \label{rule:ne_pas}
+%\end{equation}
+%This rule encodes the idea that the English phrase {\em do not X} can be translated into French {\em ne X pas}, as long as the $X$ phrases are themselves translation pairs. (The correspondence between the two $X$s on the right-hand side of the rule is shown by their subscripts.)
+
+%So if we are given another rule
+%\begin{equation}
+%X \to \langle \textrm{ house ; loge } \rangle
+%\end{equation}
+%where ``house'' is used in the sense of the verb ``to shelter something'' we can conclude that {\em do not house} should be translated into {\em ne loge pas}.
+
+%The rules above are typical of the Hiero model, where all non-terminal labels have the same symbol ($X$). However, this simple model has drawbacks. Since every non-terminal is an $X$, every phrase may theoretically fit into any slot. If we were given a (more common) Hiero rule for the noun ``house''
+%\begin{equation}
+%X \to \langle \textrm{ house , maison } \rangle
+%\end{equation}
+%we could form the French translation {\em ne maison pas}. 
+%
+%We know that Rule \ref{rule:ne_pas} should only be applied when the missing phrase is a verb, but Hiero does not include any information about the syntactic type of rules or their missing phrases.
+%
+%To improve this SCFG model, we want to assign labels to the rules that describe their syntactic roles. However, if the set of labels is too restrictive, we may not be able to label all translation rules. These non-syntactic rules are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
+%
 % We might try to assign syntactic labels by reading them from a phrase structure parse of the training data: assign labels from the parse tree where possible, and throw out all other translation rules. However, translation rules that don't correspond to these syntactic forms are essential to translation performance in both phrase-based \cite{koehn-och-marcu-2003} and syntactic MT models \cite{deneefe-syntax-and-phrase-mt}.
-
-Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign complex labels to rules. %: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
-SAMT improved performance over other syntactic models, but the heuristic label set violates some principles about what a syntactic labeling scheme should look like:
-
-The label set should be well-motivated: the labels should represent actual syntactic structure under some accepted model of syntax. The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient. 
+%
+%Syntax-augmented Machine Translation (SAMT) \cite{samt-wmt06} increases rule coverage by using heuristics to assign complex labels to rules. %: if a rule can't be assigned a simple syntactic form, we may assign a new label by concatenating labels or by introducing {\em slashed} labels for incomplete rules.
+%SAMT improved performance over other syntactic models, but the heuristic label set violates some principles about what a syntactic labeling scheme should look like:
+%
+%The label set should be well-motivated: the labels should represent actual syntactic structure under some accepted model of syntax. The label set should also be small: a smaller non-terminal set allows for better estimation of features that depend on these labels, and keeps translation efficient. 
 %\begin{itemize}
 %\item The concatenated and slashed labels are not common linguistic labels; they're introduced solely to increase the number of extractable rules.
 %\item The number of rules in the grammar and the size of the non-terminal set are both significantly larger than their Hiero or GHKM counterparts.
@@ -67,8 +92,8 @@ The label set should be well-motivated: the labels should represent actual synta
 %\end{itemize}
 %
 %Ideally, we'd like to find a rule labeling strategy that is linguistically well-motivated, uses a smaller label set than SAMT, but still allows many useful translation rules to be extracted.
-
-We show that by using {\em combinatory categorial grammar} (CCG), we can devise a set of labels that satisfy these principles and still allow many translation rules to be extracted.
+%
+%, we can devise a set of labels that satisfy these principles and still allow many translation rules to be extracted.
 \begin{itemize}
 \item We introduce two models for labeling SCFG rules: one uses labels from a 1-best CCG parse tree of training data; the other uses the top labels in each cell of a CCG parse chart.
 \item We show that using 1-best parses performs as well as a syntactic model using phrase structure derivations.
