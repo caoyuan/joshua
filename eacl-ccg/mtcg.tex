@@ -399,11 +399,11 @@ But by using the chart cells, we are able to assign syntactic information to man
 \hline
 Model & Rules & NTs\\
 \hline
-Hiero & 4171473 & 1\\
-Syntax & 7034393 & 70\\
-SAMT & 40744439 & 18368\\
-CG Model 1 & 8042683 & 505\\
-CG Model 2 & 28961161 & 517\\
+Hiero & 4,171,473 & 1\\
+Syntax & 7,034,393 & 70\\
+SAMT & 40,744,439 & 18,368\\
+CG derivations & 8,042,683 & 505\\
+CG parse chart & 28,961,161 & 517\\
 \hline
 \end{tabular}
 \caption{Number of translation rules and non-terminal labels in an Urdu--English grammar under various models.\label{table:rule-count}}
@@ -491,6 +491,8 @@ For the phrase structure syntax model, we see there are maybe 20 labels out of 7
 
 Moving to SAMT, with its heuristically-defined labels, shows a very different story. Not only does the model have over 18,000 non-terminal labels, but thousands of them show up on fewer than 30 rules apiece. If we look at the rare label types, we see that a lot of them are three way concatenations A+B+C that are unlikely to show up a lot in translation. 
 
+The two CCG models have similar sparseness profiles. We do see some rare labels occurring only a few times in the grammars, but the number of singleton labels is an order of magnitude smaller than SAMT. Most of the CCG labels show up in the long tail of very common occurrences.
+
 \section{Experiments}
 
 \subsection{Data}
@@ -534,15 +536,29 @@ Hiero & 25.67 (0.9781) & 0.05 \\
 Syntax & 27.06 (0.9703) & 3.04 \\
 SAMT & 28.06 (0.9714) & 63.48 \\
 CCG derivations & 27.3 (0.9770) & 5.24 \\
-CCG chart cells & 27.64 (0.9673) & 33.6 \\
+CCG parse chart & 27.64 (0.9673) & 33.6 \\
 \hline
 \end{tabular}
 \caption{Results of translation experiments on Urdu--English. Higher BLEU scores are better. BLEU's brevity penalty is reported in parentheses.\label{table:results}}
 \end{table}
 
-All of the syntactic labeling schemes show an improvement over the Hiero model. Indeed, all the syntactic labeling schemes fall in the range of approximately 27--28 BLEU.
+All of the syntactic labeling schemes show an improvement over the Hiero model. Indeed, they all fall in the range of approximately 27--28 BLEU. We can see that the 1-best derivation CCG model performs slightly better than the phrase structure model, and the CCG parse chart model performs a little better than that. SAMT has the highest BLEU score. The models with a larger number of rules perform better; this supports our assertion that we shouldn't throw away too many rules.
+
+When it comes to translation time, the three smaller models (Hiero, phrase structure syntax, and CCG 1-best derivations) are significantly faster than the two larger ones. However, even though the CCG parse chart model is almost $\frac{3}{4}$ the size of SAMT in terms of number of rules, it doesn't take $\frac{3}{4}$ of the time. In fact, it takes only half the time of the SAMT model, thanks to the smaller rule label set.
 
 \section{Future work}
+
+\subsection{Investigation of CCG combinators and reordering}
+
+When assigning CCG labels to translation rules, we may extract rules such as
+\begin{equation*}
+A \to \langle A/B_1 \, B_2 ; A/B_1 \, B2 \rangle
+\end{equation*}
+which simulate the application of combinators (in this case, function application).
+
+If we were to restrict our extracted grammar to non-hierarchical rules --- like the lexical entries of Table \ref{table:lexicon}, but bilingual --- and combinator-simulating rules, the resulting model would simulate a synchronous CCG.
+
+An important question, then, would be when combinators are allowed to reorder subtrees in a translation. We hope to build off of work by Mylonakis and Sima'an \shortcite{mylonakis2011} and their development of Hierarchical Reordering SCFGs.
 
 \subsection{Annotation with semantic representations}
 
@@ -551,17 +567,17 @@ CCG has often been used as a natural interface between syntax and semantics. The
 A CCG with semantic annotations has been used for tasks like unsupervised semantic parsing
 
 We can update the function application of Rule \ref{eqn:forward-app} to include semantic annotations:
-\begin{equation}
+\begin{equation*}
 \binaryruleSimple{X/Y:f}{Y:g}{X:fg}
-\end{equation}
+\end{equation*}
 
-As a first step towards semantic translation, it would be easy to include some semantic information in a future model based on CCG. 
+If we could build a translation model based on a CCG, it would be plausible to try to include some semantic information to guide the translation process. 
 
 \section{Conclusion}
 
 We have introduced a way to label translation rules with syntactic information drawn from categorial grammar. We have shown that the label scheme allows us to keep many more translation rules than labels based on phrase structure syntax.
 
-Our model allows us to extract almost as many rules as the SAMT model, but the label set is an order of magnitude smaller, and many
+Our model allows us to extract almost as many rules as the SAMT model, but the label set is an order of magnitude smaller. We find that these linguistically-plausible labels give comparable translation performance to the heuristic SAMT labels with more efficient decoding.
 
 \anonymize{
 \section{Acknowledgements*}
