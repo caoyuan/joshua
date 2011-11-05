@@ -32,7 +32,7 @@ Adding syntactic labels to synchronous context-free translation rules can improv
 
 \section{Introduction}
 
-The Hiero model of \newcite{chiang2005} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. SCFGs model translation as a process of isomorphic syntactic derivation in the source and target language. But the Hiero model is formally, not linguistically syntactic. Its derivation trees carry only a single non-terminal label $X$, carrying no linguistic information. Consider Rule \ref{eqn:hiero}.
+The Hiero model of \newcite{Chiang2007} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. SCFGs model translation as a process of isomorphic syntactic derivation in the source and target language. But the Hiero model is formally, not linguistically syntactic. Its derivation trees carry only a single non-terminal label $X$, carrying no linguistic information. Consider Rule \ref{eqn:hiero}.
 \begin{equation}
 X \to \langle \textrm{ maison ; house } \rangle\label{eqn:hiero}
 \end{equation}
@@ -48,7 +48,7 @@ We could simply throw away any rules that can't be labeled syntactically, but th
 
 Syntax-Augmented Machine Translation 
 (SAMT; Zollmann and Venugopal, 2006) \nocite{samt-wmt06} % stupid style file is stupid; should work with \cite[before text][after text]{citename} but doesn't
-solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is dissatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. This inflates grammar size, hampers effective parameter estimation due to feature sparsity, and slows translation speed.
+solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is dissatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. While these heuristics are effective \cite{zollmann+etal:2008:coling}, they inflate grammar size, hamper effective parameter estimation due to feature sparsity, and slow translation speed.
 
 We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) satisfies these requirements.
 
@@ -241,9 +241,7 @@ The focus of this paper is how to assign labels to the left-hand non-terminal $X
 
 \subsection{Baseline: Hiero}
 
-The Hiero model \cite{chiang2005} popularized the use of SCFGs for machine translation. It is the simplest labeling possible: there is only one non-terminal symbol, X, for all rules.
-
-Hiero has an advantage over phrase-based translation in its ability to model phrases with gaps in them, but since there's only one label, there's no way to include syntactic information in the translation rules.
+Hiero \cite{Chiang2007} uses the simplest labeling possible: there is only one non-terminal symbol, X, for all rules.  Its advantage over phrase-based translation in its ability to model phrases with gaps in them, enabling phrases to reorder subphrases. However, since there's only one label, there's no way to include syntactic information in its translation rules.
 
 \subsection{Phrase structure parse tree labeling}
 
@@ -262,6 +260,7 @@ Then we can assign syntactic labels to Rule \label{eqn:hiero-rule} to produce
 \textrm{PP } \to \langle \textrm{ Pour NP }; \textrm{ For NP } \rangle
 \end{equation}
 
+The rules extracted by this scheme are very similar to those produced by GHKM \cite{ghkm}, in particular resulting in the "composed rules" of \newcite{ghkm-scalable-inference}, though we use simpler heuristics for handling of unaligned words and scoring in order to bring the model in line with both Hiero and SAMT baselines.
 As we noted in Section \ref{sec:cg}, under this scheme we may throw away a lot of useful translation rules that don't translate exact syntactic constituents. We can alleviate this problem by changing the way we get syntactic labels from parse trees.
 
 \subsection{SAMT}
@@ -513,26 +512,38 @@ CCG chart cells & 27.64 (0.9673) & 33.6 \\
 
 All of the syntactic labeling schemes show an improvement over the Hiero model. Indeed, all the syntactic labeling schemes fall in the range of approximately 27--28 BLEU.
 
-\section{Future work}
+\section{Discussion and Future Work}
 
-\subsection{Annotation with semantic representations}
+Finding an appropriate mechanism to inform phrase-based translation models and their hierarchical variants with linguistic
+syntax is a difficult problem that has attracted intense interest, with a variety of promising approaches including
+unsupervised clustering \cite{zollmann+vogel:2011:acl}, merging \cite{hanneman+etal:2011}, and selection \cite{hassan+etal:2007:acl}
+of labels derived from phrase-structure parse trees very much like those used by our baseline systems. What we find
+particularly attractive about CCG is that it naturally assigns linguistically-motivated labels to most spans of a
+sentence using a reasonably concise label set, possibility obviating the need for further refinement. Indeed, the 
+analytical flexibility of CCG has motivated its increasing use in MT, from applications in language modeling
+\cite{birch+etal:2007:wmt,hassan+etal:2007:acl} to more recent proposals to incorporate it into phrase-based
+\cite{mehay:2010:proposal} and hierarchical translation systems \cite{auli:2009:first-year}. 
 
-CCG has often been used as a natural interface between syntax and semantics. The combinators used in CCG parsing can be extended to operate on semantic structures as well. All we have to do is augment each lexical entry with a semantic value. The use of combinators during parsing will naturally build up a semantic representation of a sentence even as it analyzes the syntax.
+Our new model builds on these past efforts, representing a more fully instantiated model of CCG-based
+translation. We have shown that the label scheme allows us to keep many more translation rules than labels based on phrase 
+structure syntax, extracting almost as many rules as the SAMT model, but keeping the label set an order of
+magnitude smaller, which leads to more efficient translation. This simply scratches the surface of possible
+uses of CCG in translation. In future work, we plan to move from a formally context-free to a formally CCG-based
+model of translation, implementing combinatorial rules such as application, composition, and type-raising. 
 
-A CCG with semantic annotations has been used for tasks like unsupervised semantic parsing
+An additional intriguing possibility is to develop a CCG-based model of translation that incorporates semantics,
+something that is beginning to attract interest in the translation community \cite{wu+fung:2009:naacl}.
+CCG offers a natural interface between syntax and semantics, a property which has been exploited for
+a variety of purposes \cite{bos+etal:2004:coling,white+baldridge:2003:enlg,zettlemoyer+collins:2005:uai}.
+The key idea is to augment each lexical entry with a semantic value. The use of combinators during parsing then 
+naturally builds a semantic representation of a sentence even as it analyzes the syntax.
 
 We can update the function application of Rule \ref{eqn:forward-app} to include semantic annotations:
 \begin{equation}
 \binaryruleSimple{X/Y:f}{Y:g}{X:fg}
 \end{equation}
 
-As a first step towards semantic translation, it would be easy to include some semantic information in a future model based on CCG. 
-
-\section{Conclusion}
-
-We have introduced a way to label translation rules with syntactic information drawn from categorial grammar. We have shown that the label scheme allows us to keep many more translation rules than labels based on phrase structure syntax.
-
-Our model allows us to extract almost as many rules as the SAMT model, but the label set is an order of magnitude smaller, and many
+We anticipate that augmenting CCG-based translation models with semantic representations will be a rich area for future work.
 
 \anonymize{
 \section{Acknowledgements*}
