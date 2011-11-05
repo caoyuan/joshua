@@ -21,7 +21,7 @@ Johns Hopkins University\\
 Baltimore, MD 21218 USA\\
 {\tt \{jonny,ccb,alopez\}@cs.jhu.edu}}
 }
-\title{Label Elegance in Statistical Machine Translation}
+\title{Smaller and Faster: Using Categorial Grammar to Label Translation Rules}
 
 \begin{document}
 \maketitle
@@ -32,7 +32,7 @@ Adding syntactic labels to synchronous context-free translation rules can improv
 
 \section{Introduction}
 
-The Hiero model of \newcite{Chiang2007} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. SCFGs model translation as a process of isomorphic syntactic derivation in the source and target language. But the Hiero model is formally, not linguistically syntactic. Its derivation trees carry only a single non-terminal label $X$, carrying no linguistic information. Consider Rule \ref{eqn:hiero}.
+The Hiero model of \newcite{Chiang2007} popularized the usage of synchronous context-free grammars (SCFGs) for machine translation. SCFGs model translation as a process of isomorphic syntactic derivation in the source and target language. But the Hiero model is formally, not linguistically syntactic. Its derivation trees use only a single non-terminal label $X$, carrying no linguistic information. Consider Rule \ref{eqn:hiero}.
 \begin{equation}
 X \to \langle \textrm{ maison ; house } \rangle\label{eqn:hiero}
 \end{equation}
@@ -48,7 +48,7 @@ We could simply throw away any rules that can't be labeled syntactically, but th
 
 Syntax-Augmented Machine Translation 
 (SAMT; Zollmann and Venugopal, 2006) \nocite{samt-wmt06} % stupid style file is stupid; should work with \cite[before text][after text]{citename} but doesn't
-solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is dissatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. While these heuristics are effective \cite{zollmann+etal:2008:coling}, they inflate grammar size, hamper effective parameter estimation due to feature sparsity, and slow translation speed.
+solves this problem with heuristics that create new labels from the phrase structure parse: it labels {\em for the establishment of} as IN+NP+IN to show that it is the concatenation of a noun phrase with a preposition on either side. While descriptive, this label is unsatisfying as a concise description of linguistic function, fitting uneasily alongside more natural labels in the phrase structure formalism. SAMT introduces many thousands of such labels, most of which are seen very few times. While these heuristics are effective \cite{zollmann+etal:2008:coling}, they inflate grammar size, hamper effective parameter estimation due to feature sparsity, and slow translation speed.
 
 We would like to find another syntactic formalism that will allow us to label most translation rules without relying on heuristics. Further, we'd like the label set to be small in order to improve feature estimation and reduce translation time. We show that {\em combinatory categorial grammar} (CCG) satisfies these requirements.
 
@@ -105,7 +105,7 @@ Under CCG, {\em for the establishment of} is labeled with ((S\textbackslash NP)\
 
 Categorial grammar (CG) \cite{cg,bar-hillel-cg} is a grammar formalism in which words are assigned grammatical types, or {\em categories}. Once categories are assigned to each word of a sentence, a small set of universal combinatory rules uses them to derive a sentence-spanning syntactic structure.
 
-Categories may be either atomic, like N, VP, S, and other familiar types, or they may be complex {\em function types}. A function type looks like A/B and takes an of type B and returns a type A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
+Categories may be either atomic, like N, VP, S, and other familiar types, or they may be complex {\em function types}. A function type looks like A/B and takes an argument of type B and returns a type A. The categories A and B may themselves be either primitives or functions. A lexical item is assigned a function category when it takes an {\em argument} --- for example, a verb may be function that needs to be combined with its subject and object, or an a adjective may be a function that takes the noun it modifies as an argument.
 
 We can combine two categories with {\em function application}. Formally, we write
 \begin{equation}
@@ -184,7 +184,7 @@ By allowing slashed categories with CG, we're increasing the number of labels al
 \item The set of labels is still small --- it's restricted to the labels seen in CCG parses of the training data.
 \end{enumerate}
 
-Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' For example, exactly one rule in the SAMT grammar was labeled with ,+WDT+VBN --- a comma followed by a WH-determiner followed by a past participle verb. This greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing --- see Section \ref{sec:comparison}).
+Another way to grow the label is set is to use the strategy of the Syntax-Augmented Machine Translation model (SAMT) \cite{samt-wmt06}. SAMT allows arbitrary concatenation of labels and arbitrary ``slashing.'' For example, exactly one rule in the SAMT grammar that we extracted was labeled with ,+WDT+VBN --- a comma followed by a WH-determiner followed by a past participle verb. Applying these heuristics greatly increases the size of the label set, and adds a lot of labels are only seen once in the entire grammar. This causes problems both for feature estimation (since label counts are now sparse) and for decoding time (since the non-terminal set affects the grammar constant for parsing --- see Section \ref{sec:comparison}).
 
 In short, using CG labels allows us to keep more syntactic rules without making the set of syntactic labels too big.
 
@@ -255,7 +255,7 @@ As an example, suppose the English side of the phrase pair in Figure \ref{fig:hi
 \begin{center}
 \Tree [.PP [.IN For ] [.NP [.JJ most ] [.NN people ] ] ]
 \end{center}
-Then we can assign syntactic labels to Rule \label{eqn:hiero-rule} to produce
+Then we can assign syntactic labels to Rule \ref{eqn:hiero-rule} to produce
 \begin{equation}
 \textrm{PP } \to \langle \textrm{ Pour NP }; \textrm{ For NP } \rangle
 \end{equation}
@@ -287,7 +287,7 @@ Under SAMT, we can now label Rule \ref{eqn:bad-rule}. {\em For} is spanned by an
 \textrm{IN+JJ} \to \langle \textrm{ Pour la majorit\'{e} des ; For most } \rangle
 \end{equation*}
 
-We note here that the slashed labels of SAMT are inspired by CCG, but they're not the same as our slashed labels: CCG function categories are used for syntactic structures that take arguments, like adjectives or verbs, but the SAMT slashed labels simply denote incomplete syntactic constituents.
+We note here that the slashed labels of SAMT are inspired by CCG, but they are not the same as our slashed labels: CCG function categories are used for syntactic structures that take arguments, like adjectives or verbs, but the SAMT slashed labels simply denote incomplete syntactic constituents.
 
 \subsection{CCG 1-best derivation labeling}
 \label{sec:ccg-1-best}
@@ -328,7 +328,7 @@ In the first CCG model, we use the 1-best CCG derivation to assign labels to spa
 
 For this model, we do not use the 1-best CCG derivation. Instead, when parsing the target sentence, for each cell in the parse chart, we read the most likely label according to the parsing model. This lets us assign a label for almost any span of the sentence just by reading the label from the parse chart.
 
-For example, Figure \ref{fig:chart} represents part of a CCG parse chart for our example fragment of ``For most people.'' The white cells of the chart are in fact present in the 1-best derivation, which means we could extract Rule \ref{eqn:ccg-rule} just as in the previous model.
+For example, Figure \ref{fig:chart} represents part of a CCG parse chart for our example fragment of ``For most people.'' Each cell in the chart shows the most probable label for its span. The white cells of the chart are in fact present in the 1-best derivation, which means we could extract Rule \ref{eqn:ccg-rule} just as in the previous model.
 
 But the 1-best derivation model cannot label Rule \ref{eqn:bad-rule}, and this model can. The shaded chart cell in Figure \ref{fig:chart} holds the most likely category for the span {\em For most}. So we assign that label to the $X$:
 \begin{equation*}
@@ -388,7 +388,7 @@ As we described before, moving from the phrase-structure syntactic model to the 
 
 Comparing the phrase structure syntax model to the 1-best CCG derivation model, we see that the number of extracted rules increases slightly, and the grammar uses a set of about 500 non-terminal labels. This does not seem like a good trade-off; since we are extracting from the 1-best CCG derivation there really aren't many more rules we can label than with a 1-best phrase structure derivation.
 
-But when we move to the full CCG parse chart model, we see a significant difference: when reading labels off of the entire parse chart, instead of the 1-best derivation, we don't see a significant increase in the non-terminal label set. That is, most of the labels we see in parse charts of the training data already show up in the top derivations: we're not making up new labels that have never been seen before.
+But when we move to the full CCG parse chart model, we see a significant difference: when reading labels off of the entire parse chart, instead of the 1-best derivation, we don't see a significant increase in the non-terminal label set. That is, most of the labels we see in parse charts of the training data already show up in the top derivations: the complete chart doesn't contain many new labels that have never been seen before.
 
 But by using the chart cells, we are able to assign syntactic information to many more translation rules: over 28 million rules, for a grammar about $\frac{3}{4}$ the size of SAMT's. The parse chart lets us extract many more rules without significantly increasing the size of the syntactic label set.
 
@@ -484,11 +484,11 @@ CG parse chart & 28,961,161 & 517\\
 
 \subsection{Sparseness of nonterminals}
 
-Examining the histograms in Figure \ref{fig:histogram} gives us a better idea of the non-terminal label sets in our models. In each histogram, the horizontal axis measures the number of times a label appears in the corpus. The height of each bar shows the number of non-terminals that appeared that many times. %The count of rules is scaled logarithmically; therefore, the bar above 0 shows how many non-terminals appear in only one rule in the grammar.
+Examining the histograms in Figure \ref{fig:histogram} gives us a different view of the non-terminal label sets in our models. In each histogram, the horizontal axis measures the number of times a label appears in the corpus. The height of each bar shows the number of non-terminals that appeared that many times. %The count of rules is scaled logarithmically; therefore, the bar above 0 shows how many non-terminals appear in only one rule in the grammar.
 
 For the phrase structure syntax model, we see there are maybe 20 labels out of 70 that show up on rules less than 1000 times. All the other labels show up on very many rules.
 
-Moving to SAMT, with its heuristically-defined labels, shows a very different story. Not only does the model have over 18,000 non-terminal labels, but thousands of them show up on fewer than 30 rules apiece. If we look at the rare label types, we see that a lot of them are three way concatenations A+B+C that are unlikely to show up a lot in translation. 
+Moving to SAMT, with its heuristically-defined labels, shows a very different story. Not only does the model have over 18,000 non-terminal labels, but thousands of them show up on fewer than 10 rules apiece. If we look at the rare label types, we see that a lot of them are three way concatenations A+B+C that are unlikely to show up a lot in translation. 
 
 The two CCG models have similar sparseness profiles. We do see some rare labels occurring only a few times in the grammars, but the number of singleton labels is an order of magnitude smaller than SAMT. Most of the CCG labels show up in the long tail of very common occurrences.
 
