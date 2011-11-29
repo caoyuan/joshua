@@ -1,6 +1,6 @@
 ### Part 1: parameters similar to Z-MERT
 # target sentences file name (in this case, file name prefix)
--r	 ./devset1_2.lc.en
+-r	 ./ref.en
 -rps	 4			# references per sentence
 -p	 ./params.txt	  	# parameter file
 
