@@ -2,7 +2,7 @@
 # target sentences file name (in this case, file name prefix)
 -r	 ./devset1_2.lc.en
 -rps	 4			# references per sentence
--p	 ./params.txt	  # parameter file
+-p	 ./params.txt	  	# parameter file
 
 #metric setting:
 -m	 BLEU 4 closest
@@ -11,13 +11,13 @@
 #-m	 METEOR en norm_yes keepPunc 2  #old meteor interface  #Z-MERT Meteor interface(not working)
 #-m	 Meteor en lowercase '0.5 1.0 0.5 0.5' 'exact stem synonym paraphrase' '1.0 0.5 0.5 0.5' #CMU meteor interface
 
--maxIt	 30   			    # maximum PRO iterations
--cmd	 ./decoder_command    # file containing commands to run decoder
--decOut	 ./output.nbest     # file prodcued by decoder
--dcfg	 ./joshua.config      # decoder config file
--N	 300                     # size of N-best list
--v	 1                       # verbosity level (0-2; higher value => more verbose)
--seed    12341234                # random number generator seed
+-maxIt	 30	   	     # maximum PRO iterations
+-cmd	 ./decoder_command   # file containing commands to run decoder
+-decOut	 ./output.nbest      # file prodcued by decoder
+-dcfg	 ./joshua.config     # decoder config file
+-N	 300                 # size of N-best list
+-v	 1                   # verbosity level (0-2; higher value => more verbose)
+-seed    12341234            # random number generator seed
 
 ### Part2: PRO parameters
 #use one of the classifiers(and the corresponding parameter setting) below:
@@ -40,6 +40,6 @@
 
 -Tau	8000		#num of candidate samples
 -Xi	50		#num of top candidates
--interCoef	0.5	#linearn interpolation coef. range:[0,1]. 1=using new weights only; 0=using previous weights only
+-interCoef	0.5	#linear interpolation coef. range:[0,1]. 1=using new weights only; 0=using previous weights only
 -metricDiff	0.05	#threshold for sample selection
 
