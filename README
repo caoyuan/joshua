@@ -1,0 +1,13 @@
+pro.config.example:	PRO configuration file example
+run.sh.example:		PRO command line example
+
+====== Classifier-specific command/config files ======
+
+(average-perceptron:			built in PRO, no external files required)
+stanford_maxent_prop_file.example:	Stanford MaxEnt classifier property file
+megam_command.example:			MegaM classifier command line
+libsvm_command.example:			LibSVM classifier command line
+
+====== To use your own classifier =======
+
+Simply implement the simple interface "joshua.pro.ClassifierInterface", see comments in the code.
