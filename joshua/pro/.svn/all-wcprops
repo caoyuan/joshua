@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/joshua/!svn/ver/1781/trunk/src/joshua/zmert
+END
+ZMERT.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/1781/trunk/src/joshua/zmert/ZMERT.java
+END
+NewMetric.java.template
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/joshua/!svn/ver/1095/trunk/src/joshua/zmert/NewMetric.java.template
+END
+EvaluationMetric.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/joshua/!svn/ver/1777/trunk/src/joshua/zmert/EvaluationMetric.java
+END
+IntermediateOptimizer.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svnroot/joshua/!svn/ver/1228/trunk/src/joshua/zmert/IntermediateOptimizer.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/joshua/!svn/ver/607/trunk/src/joshua/zmert/package.html
+END
+TERMinusBLEU.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/joshua/!svn/ver/1779/trunk/src/joshua/zmert/TERMinusBLEU.java
+END
+MertCore.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/joshua/!svn/ver/1314/trunk/src/joshua/zmert/MertCore.java
+END
+ZeroOneLoss.java
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/joshua/!svn/ver/1095/trunk/src/joshua/zmert/ZeroOneLoss.java
+END
+TercomRunner.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/joshua/!svn/ver/1148/trunk/src/joshua/zmert/TercomRunner.java
+END
+BLEU_thresholdedTER.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/joshua/!svn/ver/1777/trunk/src/joshua/zmert/BLEU_thresholdedTER.java
+END
+BLEU.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/joshua/!svn/ver/1154/trunk/src/joshua/zmert/BLEU.java
+END
+TER.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/joshua/!svn/ver/1147/trunk/src/joshua/zmert/TER.java
+END
+METEOR.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/joshua/!svn/ver/1095/trunk/src/joshua/zmert/METEOR.java
+END
+BLEU_SBP.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/joshua/!svn/ver/607/trunk/src/joshua/zmert/BLEU_SBP.java
+END
+ParaphraseBLEU.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnroot/joshua/!svn/ver/1766/trunk/src/joshua/zmert/ParaphraseBLEU.java
+END
