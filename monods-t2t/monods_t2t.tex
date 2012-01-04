@@ -1,0 +1,142 @@
+\documentclass[11pt]{article}
+\usepackage{naaclhlt2012}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{subfig}
+
+\author{Juri Ganitkevitch, Benjamin Van Durme \and
+  Chris Callison-Burch \\
+  Department of Computer Science, Johns Hopkins University \\
+  Baltimore, MD 21218, USA}
+
+\title{Monolingual Distributional Similarity for Texty Text Generation}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Previous work obtained collections of paraphrases by either relying
+  on sentence-aligned parallel datasets, or by using distributional
+  similarity metrics over large text corpora. Our approach combines
+  these two orthogonal sources of information by directly integrating
+  them into the decoding algorithm. We hope to report significant
+  improvements in output quality on an array of text-to-text
+  generation tasks.
+\end{abstract}
+
+\section{Introduction}
+
+A wide variety of tasks in text-to-text generation can
+straightforwardly be cast as paraphrasing problems. Paraphrasing
+techniques have successfully been applied to applications such as
+document summarization \cite{Barzilay1999,BarzilayThesis}, text
+simplification, sentence compression, as well as information
+retrieval tasks like query expansion and question generation
+\cite{mckeown:1979:ACL,Anick1999,Ravichandran2002,Riezler2007}.
+
+A major challenge in building a paraphrase-based text-to-text
+generation system is the \emph{extraction} (and scoring) of a set of
+paraphrases (a \emph{paraphrase table} or \emph{grammar}) from
+data. In the past, each paraphrase extraction approach has focussed on
+a single type of dataset. Methods based on sentence-aligned parallel
+corpora, both monolingual and bilingual, successfully leveraged the
+equivalence in meaning implied by the parallelism of the data
+\cite{Barzilay2001,Pang2003,Callison-Burch2005,Madnani2007,cohn-lapata:2008,Zhao2008}.
+
+Approaches drawing from plain monolingual text, on the other hand,
+rely on distributional similarity metrics as their semantic
+equivalency cue. These methods use the vast amounts of data available
+to them to make up for the noise in the resulting signal
+\cite{Lin2001,Bhagat2008}.
+
+However, alignments and distributional similarity are based on
+orthogonal information. In fact, previous work on both machine
+translation and paraphrasing has shown that adding features based on
+distributional similarity yields significant improvements over their
+alignment-based baseline systems \cite{Chan2011,Klementiev2012}.
+
+Expanding on these impressive improvements over purely alignment-based
+baselines, we present a the deeper integration of distributional
+similarity measures into our paraphrasing system. More precisely, we
+present the following contributions:
+\begin{itemize}
+\item We define the notion of distributional similarity for paraphrase
+  patterns that contain multi-word gaps. This generalizes over
+  previous approaches that defined the notion for pairs of contiguous
+  phrases \cite{Chan2011}, and single-word gaps
+  \cite{Lin2001,Bhagat2008}. We extend a previously presented rich
+  SCFG-based paraphrase extraction method \cite{Ganitkevitch2011} to
+  compute distributional signatures for the paraphrases.
+
+\item We present a text-to-text generation approach that integrates
+  similarity metrics directly into the decoding procedure. Contextual
+  similarity is evaluated for both the paraphrase patterns applied in
+  the text-to-text derivation and contiguous target-side phrases
+  generated when combining rules in our paraphrastic SCFG.
+
+\item Finally, we compare the effectiveness of out method against a
+  variety of baselines on an example text-to-text generation task,
+  sentence compression. We show improvements in quality over both a
+  purely alignment-based paraphrasing system and an ILP-based
+  compression model.
+\end{itemize}
+
+
+\section{Notes}
+
+What is our claim? Monolingual distributional similarity and
+pivot-based methods are orthogonal sources of information. Combining
+them yields improvements.
+
+How do we implement it? Need to conceptually separate decoding from
+grammar extraction (to me both are ``from MT'', but here they are
+separate things: 
+
+How do we back it up? Show results wherein the combination improves
+over both.
+
+
+\section{Todo}
+
+Write up what I've done so far:
+\begin{itemize}
+\item Similarity features, scores, setup
+\item Subtleties and ``design decisions'' in scoring the rules
+\end{itemize}
+
+\section{Model}
+
+Outer and inner context matching? Think about how differently defined
+contexts can combine in SCFG derivations, go from there.
+
+Sparsity is an issue.
+
+\section{Outline}
+
+Main contribution: tight integration of monolingual similarity into
+both paraphrase extraction and generation (decoding).
+
+Challenges: stateful feature, efficient extraction of signatures,
+compare (?) to phrase-to-phrase similarity as a feature.
+
+Comparisons: no MonoDS, reranking approaches.
+
+Statistic: how many pairs of phrases do we see in decoding?
+
+Review paraphrase-based text-to-text generation.
+
+Highlight the ability to incorporate feature functions.
+
+Previously: pivot-derived feature functions and a language model.
+
+Papers and stuff:
+
+\cite{langkilde1998practical}
+
+\cite{langkilde1998generation}
+
+\bibliographystyle{naaclhlt2012}
+\bibliography{monods_t2t}
+\end{document}
