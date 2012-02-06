@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
 
+//sparse feature representation version
 public class ClassifierMegaM implements ClassifierInterface 
 {
 	@Override
@@ -23,18 +24,27 @@ public class ClassifierMegaM implements ClassifierInterface
 			//prepare training file for MegaM
 			//PrintWriter prt = new PrintWriter(new FileOutputStream(root_dir+"megam_train.data"));
 			PrintWriter prt = new PrintWriter(new FileOutputStream(trainingFilePath));
+			String[] feat;
+			String[] featInfo;
 			
 			for(String line : samples)
 			{
-				String[] feat = line.split("\\s+");
+				feat = line.split("\\s+");
 				
 				if( feat[feat.length-1].equals("1") )
 					prt.print("1 ");
 				else
 					prt.print("0 ");
 				
+				//only for dense representation
+				//for(int i=0; i<feat.length-1; i++)
+					//prt.print( (i+1) + " " + feat[i]+" ");  //feat id starts from 1!
+				
 				for(int i=0; i<feat.length-1; i++)
-					prt.print( (i+1) + " " + feat[i]+" ");  //feat id starts from 1!
+				{	
+					featInfo = feat[i].split(":");
+					prt.print( featInfo[0] + " " + featInfo[1]+" " );
+				}
 				
 				prt.println();
 			}

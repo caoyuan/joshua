@@ -16,18 +16,49 @@ import joshua.zmert.*;
 //this class implements the PRO tuning method
 public class Optimizer 
 {
-	public Optimizer( long _seed, int _sentNum, Vector<String> _output, double[] _initialLambda, 
+	public Optimizer( long _seed, int _sentNum, Vector<String> _output, double[] _initialTotalLambda, 
 					  HashMap<String,String>[] _feat_hash, HashMap<String,String>[] _stats_hash, 
 					  double _finalScore, EvaluationMetric _evalMetric, int _Tau, int _Xi, double _metricDiff, 
-					  double[] _normalizationOptions, String _classifierAlg, String[] _classifierParam )
+					  double[] _normalizationOptions, String _classifierAlg, String[] _classifierParam, 
+					  String _trainMode, int _numSparseParam, int _numRegParam, String _nbestFormat )
 	{
 		sentNum	=	_sentNum;  //total number of training sentences
 		output	=	_output;  //(not used for now)
-		initialLambda	=	_initialLambda;  //initial weights array
+		trainMode = _trainMode;
+		nbestFormat = _nbestFormat;
+		
+		if( trainMode.equals("1") || trainMode.equals("2") || trainMode.equals("4") )
+		{
+			initialLambda	=	_initialTotalLambda;  //initial weights array
+			paramDim	=	initialLambda.length-1; //because in ZMERT lambda array is given length paramNum+1
+			
+			regParamDim = _numRegParam-1; //only for printing information in mode 2
+		}
+		else if( trainMode.equals("3") )
+		{
+			//initialLambda is only the disc feature weights
+			//paramDim = disc feature weights;
+			if( _numSparseParam == 0 )
+			{
+				System.err.println("Mode 3: sparse feature number equals to 0, exiting ...");
+				System.exit(35);
+			}
+			
+			paramDim =  _numSparseParam;
+			regParamDim = _numRegParam-1;
+			initialLambda = new double[paramDim+1];
+			int total_len = _initialTotalLambda.length;
+			
+			for( int i=0; i<paramDim; i++ )
+				initialLambda[paramDim-i] = _initialTotalLambda[total_len-1-i];
+			
+			copyLambda = _initialTotalLambda;
+		}
+					
 		finalScore	=	_finalScore;  //(not used for now)
 		feat_hash 	=	_feat_hash;  //feature hash table
 		stats_hash	=	_stats_hash;  //suff. stats hash table
-		paramDim	=	initialLambda.length-1; //because in ZMERT lambda array is given length paramNum+1
+		
 		evalMetric	=	_evalMetric;  //evaluation metric
 		Tau	=	_Tau;  //param Tau in PRO
 		Xi	=	_Xi;  //param Xi in PRO
@@ -49,21 +80,74 @@ public class Optimizer
 			ClassifierInterface myClassifier = (ClassifierInterface) Class.forName(classifierAlg).newInstance();
 			System.out.println("Total training samples(class +1 & class -1): "+allSamples.size());
 			
+			//thet intitialLambda & finalLambda are all trainable parameters
 			myClassifier.setClassifierParam(classifierParam);  //set classifier parameters
 			finalLambda = myClassifier.runClassifier(allSamples, initialLambda, paramDim);  //run classifier
-			normalizeLambda(finalLambda);
+			
+			if( !trainMode.equals("3") )  //for mode 3, no need to normalize sparse feature weights 
+				normalizeLambda(finalLambda);
+			else
+				normalizeLambda_mode3(finalLambda);
+			
+			/*for( int i=0; i<finalLambda.length; i++ )
+				System.out.print(finalLambda[i]+" ");
+			System.out.println();
+			System.exit(0);*/
 			
 			double initMetricScore = computeCorpusMetricScore(initialLambda);  //compute the initial corpus-level metric score
 			double finalMetricScore = computeCorpusMetricScore(finalLambda);  //compute the final corpus-level metric score
 			
-			int numParamToPrint = paramDim > 10 ? 10 : paramDim;  //how many parameters to print
-			String result = paramDim > 10 ? "Final lambda(first 10): {" : "Final lambda: {";
+			//prepare the printing info
+			int numParamToPrint = 0;
+			String result = "";
 			
-			for( int i=1; i<numParamToPrint; i++ )  //in ZMERT finalLambda[0] is not used
-				result += finalLambda[i]+" ";
+			if( trainMode.equals("1") || trainMode.equals("4") )
+			{
+				numParamToPrint = paramDim > 10 ? 10 : paramDim;  //how many parameters to print
+				result = paramDim > 10 ? "Final lambda(first 10): {" : "Final lambda: {";
+				
+				for( int i=1; i<numParamToPrint; i++ )  //in ZMERT finalLambda[0] is not used
+					result += finalLambda[i]+" ";
+			}
+			else	
+			{	
+				int sparseNumToPrint = 0;
+				if( trainMode.equals("2") )
+				{
+					result = "Final lambda(regular feats + first 5 sparse feats): {";
+					for (int i = 1; i <= regParamDim; ++i)
+						result += finalLambda[i]+" ";
+					
+					result += "||| ";
+					
+					sparseNumToPrint = 5 < (paramDim-regParamDim) ? 5 : (paramDim-regParamDim);
+					
+					for(int i=1; i<=sparseNumToPrint; i++)
+						result += finalLambda[regParamDim+i]+" ";
+				}
+				else
+				{
+					result = "Final lambda(first 10 sparse feats): {";
+					sparseNumToPrint = 10 < paramDim ? 10 : paramDim;
+					
+					for(int i=1; i<sparseNumToPrint; i++)
+						result += finalLambda[i]+" ";
+				}
+			}
 			
 			output.add(result+finalLambda[numParamToPrint]+"}\n"+"Initial "+evalMetric.get_metricName()
 					+": "+initMetricScore + "\nFinal "+evalMetric.get_metricName()+": "+finalMetricScore);
+			
+			//System.out.println(output);
+			
+			if( trainMode.equals("3") )
+			{
+				//finalLambda = baseline(unchanged)+disc
+				for( int i=0; i<paramDim; i++ )
+					copyLambda[i+regParamDim+1] = finalLambda[i];
+				
+				finalLambda = copyLambda;
+			}
 			
 			return finalLambda;
 		} 
@@ -104,6 +188,7 @@ public class Optimizer
 			candSet = feat_hash[i].keySet();
 			
 			//find out the 1-best candidate for each sentence
+			//this depends on the training mode
 			maxModelScore = -99999999999.0;
 			for(Iterator it=candSet.iterator(); it.hasNext(); )
 			{
@@ -112,8 +197,43 @@ public class Optimizer
 						
 				feat_str = feat_hash[i].get(candStr).split("\\s+");
 				
-				for(int f=0; f<feat_str.length; f++)
-					modelScore += Double.parseDouble(feat_str[f])*finalLambda[f+1];
+				if( nbestFormat.equals("dense") )
+				{
+					for(int f=0; f<feat_str.length; f++)
+						modelScore += Double.parseDouble(feat_str[f])*finalLambda[f+1];
+				}
+				else
+				{
+					String[] feat_info;
+					
+					if( !trainMode.equals("3") )
+					{
+						for( int f=0; f<feat_str.length; f++ )
+						{
+							feat_info = feat_str[f].split(":");
+							modelScore += Double.parseDouble(feat_info[1])*finalLambda[Integer.parseInt(feat_info[0])];
+						}
+					}
+					else
+					{
+						int new_feat_id = 0;
+						
+						for( int f=0; f<feat_str.length; f++ )
+						{
+							feat_info = feat_str[f].split(":");
+							
+							//System.out.println(feat_info[0]+" "+Double.parseDouble(feat_info[1]));
+							
+							new_feat_id = Integer.parseInt(feat_info[0])-regParamDim; //for mode 3, re-index the sparse feature
+																					  //to make it start from 1, so as to match
+																					  //the lambda vector
+							
+							//only care about sparse features
+							if( new_feat_id>=1 )
+								modelScore += Double.parseDouble(feat_info[1])*finalLambda[new_feat_id];
+						}
+					}
+				}
 				
 				if( maxModelScore < modelScore )
 				{
@@ -124,7 +244,7 @@ public class Optimizer
 			
 			for( int j=0; j<suffStatsCount; j++ )
 				corpusStatsVal[j] += Integer.parseInt(tmpStatsVal[j]);  //accumulate corpus-leve suff stats
-		}
+		} //for( int i=0; i<sentNum; i++ )
 		
 		return evalMetric.score(corpusStatsVal);
 	}
@@ -253,11 +373,64 @@ public class Optimizer
 	
 				featDiff = "";
 				neg_featDiff = "";
-				for( int i=0; i<feat_str_j1.length; i++ )
+				
+				if( nbestFormat.equals("dense") )
 				{
-					featDiff += ( Double.parseDouble(feat_str_j1[i]) - Double.parseDouble(feat_str_j2[i]) ) + " ";
-					neg_featDiff += ( Double.parseDouble(feat_str_j2[i]) - Double.parseDouble(feat_str_j1[i]) ) + " ";
+					for( int i=0; i<feat_str_j1.length; i++ )
+					{
+						featDiff += (i+1)+":"+( Double.parseDouble(feat_str_j1[i]) - Double.parseDouble(feat_str_j2[i]) ) + " ";
+						neg_featDiff += (i+1)+":"+( Double.parseDouble(feat_str_j2[i]) - Double.parseDouble(feat_str_j1[i]) ) + " ";
+					}
 				}
+				else
+				{
+					HashMap<String, String> firing_feat = new HashMap<String, String>();
+					String[] feat_info;
+					
+					for( int i=0; i<feat_str_j1.length; i++ )
+					{
+						feat_info = feat_str_j1[i].split(":");
+						firing_feat.put(feat_info[0], feat_info[1]);
+					}
+					
+					if( !trainMode.equals("3") )
+					{
+						for( int i=0; i<feat_str_j2.length; i++ )
+						{
+							feat_info = feat_str_j2[i].split(":");
+							
+							if( firing_feat.containsKey(feat_info[0]) )
+							{
+								featDiff += feat_info[0]+":"+( Double.parseDouble(firing_feat.get(feat_info[0])) - 
+										Double.parseDouble(feat_info[1]) )  + " ";
+								neg_featDiff += feat_info[0]+":"+( Double.parseDouble(feat_info[1]) - 
+										Double.parseDouble(firing_feat.get(feat_info[0])) )  + " ";
+							}
+						}
+					}
+					else
+					{
+						int new_feat_id = 0;
+						
+						for( int i=0; i<feat_str_j2.length; i++ )
+						{
+							feat_info = feat_str_j2[i].split(":");
+							new_feat_id = Integer.parseInt(feat_info[0])-regParamDim; //for mode 3, re-index the sparse feature
+																					  //to make it start from 1, so as to match
+																					  //the lambda vector
+							
+							//only cares about sparse features
+							if( firing_feat.containsKey(feat_info[0]) && new_feat_id>=1 )
+							{
+								featDiff += new_feat_id+":"+( Double.parseDouble(firing_feat.get(feat_info[0])) - 
+										Double.parseDouble(feat_info[1]) )  + " ";
+								neg_featDiff += new_feat_id+":"+( Double.parseDouble(feat_info[1]) - 
+										Double.parseDouble(firing_feat.get(feat_info[0])) )  + " ";
+							}
+						}
+					}
+				}
+					
 				featDiff += label;
 				neg_featDiff += -label;
 				
@@ -268,7 +441,7 @@ public class Optimizer
 				
 				sampleVec.add(featDiff);
 				sampleVec.add(neg_featDiff);
-	
+				
 				//both (j1,j2) and (j2,j1) have been added to training set
 				added.add(key);
 				added.add(pair_str[1]+" "+pair_str[0]);
@@ -389,21 +562,63 @@ public class Optimizer
 	    return Math.pow(sum,1/pow);
 	}
 	
+	//simply limit the sparse feature weight range to [-1,1]
+	private void normalizeLambda_mode3(double[] origLambda)
+	{
+		double max = NegInf;
+		double min = PosInf;
+		double scaling = 0.0;
+		
+		for( int i=1; i<origLambda.length; i++ )
+		{
+			if( origLambda[i] > max )
+				max = origLambda[i];
+			if( origLambda[i] < min )
+				min = origLambda[i];
+		}
+		
+		if( Math.abs(max)>1e-30 || Math.abs(min)>1e-30 ) //not all weights are zero
+		{
+			if( max>0 && min>0 )
+				scaling = max;
+			else if( max>0 && min<0 )
+			{
+				if( Math.abs(max) > Math.abs(min) )
+					scaling = max;
+				else
+					scaling = Math.abs(min);
+			}
+			else if( max<=0 )
+				scaling = Math.abs(min);
+			
+			for( int i=1; i<origLambda.length; i++ )
+				origLambda[i] /= scaling;
+		}
+	}
+	
 	private EvaluationMetric evalMetric;
 	private Vector<String> output;
-	private double[] initialLambda;
-	private double[] finalLambda;
+	private double[] initialLambda; //the Lambdas should correspond to those trainable features
+	private double[] finalLambda; //the Lambdas should correspond to those trainable features
+	private double[] copyLambda; //only used in mode 3
 	private double finalScore;
 	private double[] normalizationOptions;
 	private HashMap<String, String>[] feat_hash;
 	private HashMap<String, String>[] stats_hash;
 	private Random randgen;
-	private int paramDim;
+	private int paramDim; //this should be the dimension of parameters that are TRAINABLE
+						  //mode 1: paramDim = regular feat num
+						  //mode 2: paramDim = regular feat num + disc feat num
+						  //mode 3: paramDim = disc feat num
+						  //mode 4: paramDim = regular feat num + 1
+	private int regParamDim; //sparse feat dim - only used for mode 3
 	private int sentNum;
+	private String trainMode; //training mode
 	private int Tau; //size of sampled candidate set(say 5000)
 	private int Xi; //choose top Xi candidates from sampled set(say 50)
 	private double metricDiff; //metric difference threshold(to select the qualified candidates)
 	private String classifierAlg; //optimization algorithm
+	private String nbestFormat;
 	private String[] classifierParam;
 	
 	private final static double NegInf = (-1.0 / 0.0);

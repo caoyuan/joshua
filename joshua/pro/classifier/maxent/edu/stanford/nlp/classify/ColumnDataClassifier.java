@@ -298,8 +298,10 @@ public class ColumnDataClassifier {
   }
 
   //public GeneralDataset<String,String> readTrainingExamples(String fileName) {
-  public GeneralDataset<String,String> readTrainingExamples(Vector<String> train_data) {
-    if (globalFlags.printFeatures != null) {
+  public GeneralDataset<String,String> readTrainingExamples(Vector<String> train_data) 
+  {
+    if (globalFlags.printFeatures != null) 
+    {
       newFeaturePrinter(globalFlags.printFeatures, "train");
     }
     
@@ -341,7 +343,8 @@ public class ColumnDataClassifier {
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
   //private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
-  private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(Vector<String> train_data, boolean inTestPhase) {
+  private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(Vector<String> train_data, boolean inTestPhase) 
+  {
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     
@@ -362,6 +365,10 @@ public class ColumnDataClassifier {
     } 
     else 
     {*/
+    
+    dataset = RVFDataset.readSVMLightFormat_new(train_data, null);
+    
+    /*
       try {
         if(inTestPhase) {
           lineInfos = new ArrayList<String[]>();
@@ -389,7 +396,7 @@ public class ColumnDataClassifier {
       } catch(Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Training set could not be found:"+e);
-      }
+      }*/
     //}
 
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
@@ -1574,7 +1581,7 @@ public class ColumnDataClassifier {
     }*/
     
     //to be called by external classes
-    public static double[] run(String args, Vector<String> _train_data ) throws IOException 
+    public static double[] run(String args, Vector<String> _train_data, int param_num ) throws IOException 
     {
     	//System.err.println(StringUtils.toInvocationString("ColumnDataClassifier", args));
         String[] internal_args = new String[6];
@@ -1588,13 +1595,13 @@ public class ColumnDataClassifier {
         ColumnDataClassifier cdc = new ColumnDataClassifier(StringUtils.argsToProperties(internal_args));
         
         //if (cdc.globalFlags.loadClassifier == null)
-        return cdc.trainClassifier(_train_data); 
+        return cdc.trainClassifier(_train_data, param_num); 
     } // end run()
 
 
     //MODIFIED
     //private boolean trainClassifier() throws IOException {
-  private double[] trainClassifier(Vector<String> train_data) throws IOException {
+  private double[] trainClassifier(Vector<String> train_data, int param_num) throws IOException {
     
 	/*  
 	String trainFile = Flags.trainFile;
@@ -1609,7 +1616,8 @@ public class ColumnDataClassifier {
     }*/
 
     // build the classifier
-    //MODIFIED TO READ IN STRING VECTOR OF TRAINING DATA DIRECTLY
+	  
+    //MODIFIED TO READ STRING VECTOR OF TRAINING DATA DIRECTLY
     //GeneralDataset<String,String> train = readTrainingExamples(trainFile);
     GeneralDataset<String,String> train = readTrainingExamples( train_data );
     // print any binned value histograms
@@ -1686,17 +1694,29 @@ public class ColumnDataClassifier {
     
     //PARSE CLASS STRING
     
+    //System.out.println(classString);
+    
     String[] line = classString.split("\\n");
-    int feat_num = line.length;
-    double[] weights = new double[feat_num+1];  //IN ZMERT lambda[0] IS NOT USED
-     
-    for( String col:line )
+    double[] weights = new double[param_num+1];  //IN ZMERT lambda[0] IS NOT USED
+    
+    for( int i=0; i<param_num+1; i++ )
+    	weights[i] = 0.0;
+    
+    /*
+    for( String result:line )
     {
     	String[] pair = col.split("\\s+");
     	String[] for_id = pair[0].split("\\-");
     	int id = Integer.parseInt(for_id[0]);
     	double wt = Double.parseDouble(pair[1]);
     	weights[id+1] = wt;
+    }*/
+    
+    String[] feat_info = null;
+    for( String feat_val : line )
+    {
+    	feat_info = feat_val.split("\\s+");
+    	weights[Integer.parseInt(feat_info[0])] = Double.parseDouble(feat_info[1]);
     }
     
     return weights;

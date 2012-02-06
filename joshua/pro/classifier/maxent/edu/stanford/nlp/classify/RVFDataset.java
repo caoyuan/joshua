@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.Vector;
 
 import joshua.pro.classifier.maxent.edu.stanford.nlp.io.IOUtils;
 import joshua.pro.classifier.maxent.edu.stanford.nlp.ling.Datum;
@@ -570,6 +571,11 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> implements Iterable<R
    * The lines parameter is filled with the lines of the file for further processing
    * (if lines is null, it is assumed no line information is desired)
    */
+  public static RVFDataset<String, String> readSVMLightFormat_new(Vector<String> train_data, List<String> lines) {
+	  //return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>(), lines);
+	  return readSVMLightFormat_new(train_data, new HashIndex<String>(), new HashIndex<String>(), lines);
+  }
+  
   public static RVFDataset<String, String> readSVMLightFormat(String filename, List<String> lines) {
     return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>(), lines);
   }
@@ -730,6 +736,35 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> implements Iterable<R
     return dataset;
   }
 
+  private static RVFDataset<String, String> readSVMLightFormat_new(Vector<String> train_data, Index<String> featureIndex, Index<String> labelIndex, List<String> lines) 
+  {
+	  //BufferedReader in = null;
+	  RVFDataset<String, String> dataset;
+
+	  dataset = new RVFDataset<String, String>(10, featureIndex, labelIndex);
+	  //in = new BufferedReader(new FileReader(filename));
+
+	  String new_line = "";
+	  String[] line_array = null;
+	  
+	  for(String line: train_data)
+	  {
+		  if(lines != null)
+			  lines.add(line);
+
+		  //SHIFT THE LABEL TO THE 1ST COLUMN
+		  line_array = line.split("\\s+");
+		  new_line = line_array[line_array.length-1]; 
+		  
+		  for( int i=0; i<line_array.length-1; i++ )
+			  new_line += " "+line_array[i];
+		  
+		  dataset.add(svmLightLineToRVFDatum(new_line));
+	  }
+	  
+	  return dataset;
+}
+  
   public static RVFDatum<String, String> svmLightLineToRVFDatum(String l) {
     l = l.replaceAll("#.*", ""); // remove any trailing comments
     String[] line = l.split("\\s+");

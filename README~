@@ -2,7 +2,6 @@ pro.config.example:	PRO configuration file example
 run.sh.example:		PRO command line example
 params.txt.example:	File specifying parameters to train
 sparse_feat.example:	Sparse feature definition file example(only useful for training mode 2-4)
-joshua.config.example:	Joshua decoder example file(for mode 2-4 only)
 
 ====== Requirement for the decoder ======
 For training mode 2-4(in which sparse features are involved in training), the decoder is required to output the n-best file in the following format(sparse feature representation):

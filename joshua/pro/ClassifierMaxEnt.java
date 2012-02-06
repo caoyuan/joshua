@@ -17,7 +17,7 @@ public class ClassifierMaxEnt implements ClassifierInterface
 				
 		try
 		{
-			lambda = ColumnDataClassifier.run(propFilePath, samples);
+			lambda = ColumnDataClassifier.run(propFilePath, samples, featDim);
 		}
 		catch(IOException e)
 		{

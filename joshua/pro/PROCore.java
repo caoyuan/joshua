@@ -85,6 +85,14 @@ public class PROCore
   private int numParams;
     // number of features for the log-linear model
 
+  private int numSparseParams = 0; //NUM OF SPARSE FEATURES
+  
+  private int numParamsInFile; //= THE NON-EMPTY LINE NUM IN THE PARAMS CONFIGURATION FILE - 1
+  
+  private String discDefFile; //SPARSE(DISCRIMINATIVE) FEATURES DEF FILE
+  
+  private double[] sparseFeatWeights; //SPARSE FEATURE WEIGHTS
+    
   private double[] normalizationOptions;
     // How should a lambda[] vector be normalized (before decoding)?
     //   nO[0] = 0: no normalization
@@ -210,6 +218,8 @@ public class PROCore
   
   //USED FOR PRO
   private String classifierAlg;  //THE CLASSIFICATION ALGORITHM(PERCEP, MEGAM, MAXENT ...)
+  private String trainingMode;
+  private String nbestFormat;  //NBEST FILE FORMAT: dense or sparse
   private String[] classifierParams = null;  //THE PARAM ARRAY FOR EACH CLASSIFIER
   private int Tau;
   private int Xi;
@@ -278,37 +288,60 @@ public class PROCore
     set_docSubsetInfo(docSubsetInfo);
 
     //COUNT THE NUMBER OF PARAMETERS
-    numParams = countNonEmptyLines(paramsFileName) - 1;
-      // the parameter file contains one line per parameter
-      // and one line for the normalization method
-
-    paramNames = new String[1+numParams];
-    lambda = new double[1+numParams]; // indexing starts at 1 in these arrays
-    isOptimizable = new boolean[1+numParams];
-    minThValue = new double[1+numParams];
-    maxThValue = new double[1+numParams];
-    minRandValue = new double[1+numParams];
-    maxRandValue = new double[1+numParams];
-//    precision = new double[1+numParams];
-    defaultLambda = new double[1+numParams];
-    normalizationOptions = new double[3];
-
+    numParamsInFile = countNonEmptyLines(paramsFileName) - 1;
     
+    paramNames = new String[1+numParamsInFile];
+    		 
     //START TO READ IN PARAMETER DEFINITION AND INITIALIZATION INFO
-    try {
+    try 
+    {
       // read parameter names
       BufferedReader inFile_names = new BufferedReader(new FileReader(paramsFileName));
 
-      for (int c = 1; c <= numParams; ++c) {
-        String line = "";
-        while (line != null && line.length() == 0) { // skip empty lines
-          line = inFile_names.readLine();
-        }
-        
-        //SAVE THE PARAMETER NAMES
-        paramNames[c] = (line.substring(0,line.indexOf("|||"))).trim();
+      if( trainingMode.equals("1") )
+      {
+	      for (int c = 1; c <= numParamsInFile; ++c) 
+	      {
+	        String line = "";
+	        while (line != null && line.length() == 0) 
+	        { // skip empty lines
+	          line = inFile_names.readLine();
+	        }
+	        
+	        //SAVE THE PARAMETER NAMES
+	        paramNames[c] = (line.substring(0,line.indexOf("|||"))).trim();
+	      }
       }
-
+      else if( trainingMode.equals("2") || trainingMode.equals("3") || trainingMode.equals("4") )
+      {
+    	  for (int c = 1; c <= numParamsInFile; ++c)  //REGULAR FEATURES + DISC 
+	      {
+	        String line = "";
+	        while (line != null && line.length() == 0) 
+	        { // skip empty lines
+	          line = inFile_names.readLine();
+	        }
+	        
+	        //SAVE THE PARAMETER NAMES
+	        paramNames[c] = (line.substring(0,line.indexOf("|||"))).trim();
+	        
+	        if( c==numParamsInFile ) //READ THE DISC DEF FILE
+	        {
+	        	String[] discFeatFields = (line.substring(0,line.indexOf("|||"))).trim().split("\\s+");
+	        	String discDefFile = discFeatFields[1];
+	        	  
+	        	//READ DISC FEATURE WEIGHTS
+	        	InputStream discFileInputStream;
+				discFileInputStream = new FileInputStream(discDefFile);
+				BufferedReader discFeatFile = new BufferedReader(new InputStreamReader(discFileInputStream, "utf8"));
+					
+				String line2;
+				while( (line2 = discFeatFile.readLine()) != null )
+					numSparseParams++;
+	        }	
+	     }
+      }
+      
       inFile_names.close();
     } catch (FileNotFoundException e) {
       System.err.println("FileNotFoundException in PROCore.initialize(int): " + e.getMessage());
@@ -317,13 +350,35 @@ public class PROCore
       System.err.println("IOException in PROCore.initialize(int): " + e.getMessage());
       System.exit(99902);
     }
+	    
+    if( trainingMode.equals("1") || trainingMode.equals("4") )
+    {
+    	numParams = numParamsInFile;
+    }
+    else if( trainingMode.equals("2") || trainingMode.equals("3") )
+    	numParams = numParamsInFile - 1 + numSparseParams;
+    
+    // the parameter file contains one line per parameter
+    // and one line for the normalization method
+
+    lambda = new double[1+numParams]; // indexing starts at 1 in these arrays
+    isOptimizable = new boolean[1+numParams];
+    minThValue = new double[1+numParams];
+    maxThValue = new double[1+numParams];
+    minRandValue = new double[1+numParams];
+    maxRandValue = new double[1+numParams];
+    //  precision = new double[1+numParams];
+    defaultLambda = new double[1+numParams];
+    normalizationOptions = new double[3];
+    
+    sparseFeatWeights = new double[numSparseParams];
 
     //READ IN PARAMETER INITIALIZATION INFO
     processParamFile();
       // sets the arrays declared just above
 
 //    SentenceInfo.createV(); // uncomment ONLY IF using vocabulary implementation of SentenceInfo
-
+    
     String[][] refSentences = new String[numSentences][refsPerSen];
 
     try {
@@ -401,27 +456,41 @@ println(docSubsetInfo[6] + "}",1);
 
       println("Number of features: " + numParams,1);
       print("Feature names: {",1);
-      for (int c = 1; c <= numParams; ++c) {
+      for (int c = 1; c <= numParamsInFile; ++c) {
         print("\"" + paramNames[c] + "\"",1);
         if (c < numParams) print(",",1);
       }
       println("}",1);
       println("",1);
 
+      //TODO just print the correct info 
       println("c    Default value\tOptimizable?\tCrit. val. range\tRand. val. range",1);
 
-      for (int c = 1; c <= numParams; ++c) {
-        print(c + "     " + f4.format(lambda[c]) + "\t\t",1);
-        if (!isOptimizable[c]) {
-          println(" No",1);
-        } else {
-          print(" Yes\t\t",1);
-  //        print("[" + minThValue[c] + "," + maxThValue[c] + "] @ " + precision[c] + " precision",1);
-          print(" [" + minThValue[c] + "," + maxThValue[c] + "]",1);
-          print("\t\t",1);
-          print(" [" + minRandValue[c] + "," + maxRandValue[c] + "]",1);
-          println("",1);
-        }
+      for (int c = 1; c <= numParamsInFile; ++c) 
+      {
+    	  if( trainingMode.equals("1") || trainingMode.equals("4") )
+    		  print(c + "     " + f4.format(lambda[c]) + "\t\t",1);
+    	  else
+    	  {
+    		  if( c!=numParamsInFile )
+    			  print(c + "     " + f4.format(lambda[c]) + "\t\t",1);
+    		  else
+    			  print(c + "(sparse)     " + "1.0" + "\t\t",1);
+    	  }
+    		  
+    	  if (!isOptimizable[c]) 
+    	  {
+    		  println(" No",1);
+    	  }
+    	  else 
+    	  {
+	          print(" Yes\t\t",1);
+	  //        print("[" + minThValue[c] + "," + maxThValue[c] + "] @ " + precision[c] + " precision",1);
+	          print(" [" + minThValue[c] + "," + maxThValue[c] + "]",1);
+	          print("\t\t",1);
+	          print(" [" + minRandValue[c] + "," + maxRandValue[c] + "]",1);
+	          println("",1);
+    	  }
       }
 
       println("",1);
@@ -450,9 +519,10 @@ println(docSubsetInfo[6] + "}",1);
       // rename original config file so it doesn't get overwritten
       // (original name will be restored in finish())
       renameFile(decoderConfigFileName,decoderConfigFileName+".PRO.orig");
-
+      
+      if( trainingMode.equals("2") || trainingMode.equals("3") )
+    	  renameFile(discDefFile,discDefFile+".PRO.orig");
     } // if (randsToSkip == 0)
-
 
     //BY DEFAULT, LOAD JOSHUA DECODER
     if (decoderCommand == null && fakeFileNameTemplate == null) {
@@ -586,9 +656,7 @@ println(docSubsetInfo[6] + "}",1);
         }
       }
     }
-
   } // void run_PRO(int maxIts)
-
 
   //THIS IS THE KEY FUNCTION!
   @SuppressWarnings("unchecked")
@@ -681,6 +749,11 @@ public double[] run_single_iteration(
         if (!copyFile(decoderConfigFileName,decoderConfigFileName+".PRO.it"+iteration)) {
           println("Warning: attempt to make copy of decoder config file (to create" + decoderConfigFileName+".PRO.it"+iteration + ") was unsuccessful!",1);
         }
+        
+        if( trainingMode.equals("2") || trainingMode.equals("3") )
+        if (!copyFile(discDefFile,discDefFile+".PRO.it"+iteration)) {
+            println("Warning: attempt to make copy of sparse feature definition file (to create" + discDefFile+".PRO.it"+iteration + ") was unsuccessful!",1);
+          }
       }
       
       //SAVE output.nest.PRO.it?
@@ -726,8 +799,11 @@ public double[] run_single_iteration(
         // the intermediate "final" lambdas
 
       //INITIALIZE SET OF WEIGHT VECTOR CANDIDATES, THE 1ST ONE BEING THE lambda FROM LAST ITERATION
+      //OTHERS ARE RANDOMLY GENERATED LAMBDAS
       // set initialLambda[][]
+            
       System.arraycopy(lambda,1,initialLambda[1],1,numParams);
+      
       for (int j = 2; j <= initsPerIt; ++j) {
         if (damianos_method == 0) {
           initialLambda[j] = randomLambda();
@@ -936,20 +1012,63 @@ public double[] run_single_iteration(
 	            	  //EXTRACT FEATURE VALUE
 	            	  featVal_str = feats_str.split("\\s+");
 	
-	            	  for (int c = 1; c <= numParams; ++c) {
-	            		  currFeatVal[c] = Double.parseDouble(featVal_str[c-1]);
-	//                  	print("fV[" + c + "]=" + currFeatVal[c] + " ",4);
+	            	  if( nbestFormat.equals("dense") ) //FOR MODE 1
+	            	  {
+		            	  for (int c = 1; c <= numParams; ++c) 
+		            	  {
+		            		  currFeatVal[c] = Double.parseDouble(featVal_str[c-1]);
+		//                  	print("fV[" + c + "]=" + currFeatVal[c] + " ",4);
+		            	  }
 	            	  }
-	//               	 println("",4);
-	
-	
+	            	  else
+	            	  {
+	            		  for( int c=1; c<=numParams; c++ )
+	            			  currFeatVal[c] = 0.0;
+	            					  
+	            		  String[] feat_info;
+	            		  
+	            		  if( !trainingMode.equals("4") )
+	            		  {
+		            		  for( int c=0; c<featVal_str.length; c++ )
+		            		  {
+		            			  feat_info = featVal_str[c].split(":");
+		            			  currFeatVal[Integer.parseInt(feat_info[0])] = Double.parseDouble(feat_info[1]); //INDEX STARTS FROM 1
+		            		  }
+	            		  }
+	            		  else //FOR MODE 4, NEED TO COMPUTE THE SUMMARY FEATURE VAL
+	            		  {
+	            			  double sumFeatVal = 0.0;
+	            			  int featId = 0;
+	            			  String updated_feat_str = "";
+	            			  
+	            			  for( int c=0; c<featVal_str.length; c++ )
+	            			  {
+	            				  feat_info = featVal_str[c].split(":");
+	            				  featId = Integer.parseInt(feat_info[0]);
+	            				  
+	            				  if( 1<=featId && featId<=(numParamsInFile-1) ) //REGULAR FEATURE
+	            				  {
+	            				    currFeatVal[featId] = Double.parseDouble(feat_info[1]);
+	            				    updated_feat_str += (featId+":"+feat_info[1]+" "); //FEATURE ID ORDER DOESN'T MATTER
+	            				  }
+	            				  else
+	            				    sumFeatVal += Double.parseDouble(feat_info[1])*sparseFeatWeights[featId-numParamsInFile];
+	            			  }
+	            			  
+	            			  currFeatVal[numParamsInFile] = sumFeatVal;
+	            			  updated_feat_str += (numParamsInFile+":"+sumFeatVal);
+	            			  
+	            			  feat_hash[i].put(sents_str, updated_feat_str); //UPDATE THE FEATURE HASH, NOW THE SPARSE FEATURES ARE TREATED AS ONE REGULAR FEATURE
+	            		  }
+	            	  }
+	            	  
 	            	  for (int j = 1; j <= initsPerIt; ++j) 
 	            	  {
 	            		  double score = 0; // i.e. score assigned by decoder
+	            		 
 	            		  for (int c = 1; c <= numParams; ++c)
-	            		  {
-	            			  score += initialLambda[j][c] * currFeatVal[c];
-	            		  }
+	            		    score += initialLambda[j][c] * currFeatVal[c];  
+	            		    
 	            		  if (score > best1Score[j][i]) 
 	            		  {
 	            			  best1Score[j][i] = score;  //COMOPUTE 1-BEST MODEL SCORE USING j^th WEIGHT VEC CANDIDATE
@@ -1172,29 +1291,82 @@ public double[] run_single_iteration(
               outFile_statsMerged.println(stats_str);
               
               //SAVE FEATS & STATS
+              //System.out.println(sents_str+" "+feats_str);
+              
               feat_hash[i].put(sents_str, feats_str);
               stats_hash[i].put(sents_str, stats_str);
 
               featVal_str = feats_str.split("\\s+");
 
+              /*
               for (int c = 1; c <= numParams; ++c)
               {
                 currFeatVal[c] = Double.parseDouble(featVal_str[c-1]);
 //                print("fV[" + c + "]=" + currFeatVal[c] + " ",4);
               }
-//              println("",4);
+//              println("",4);*/
 
-
-              for (int j = 1; j <= initsPerIt; ++j) {
+              if( nbestFormat.equals("dense") )
+        	  {
+            	  for (int c = 1; c <= numParams; ++c) 
+            	  {
+            		  currFeatVal[c] = Double.parseDouble(featVal_str[c-1]);
+//                  	print("fV[" + c + "]=" + currFeatVal[c] + " ",4);
+            	  }
+        	  }
+        	  else
+        	  {
+        		  for( int c=1; c<=numParams; c++ )
+        			  currFeatVal[c] = 0.0;
+        					  
+        		  String[] feat_info;
+        		  
+        		  if( !trainingMode.equals("4") )
+        		  {
+            		  for( int c=0; c<featVal_str.length; c++ )
+            		  {
+            			  feat_info = featVal_str[c].split(":");
+            			  currFeatVal[Integer.parseInt(feat_info[0])] = Double.parseDouble(feat_info[1]); //INDEX STARTS FROM 1
+            		  }
+        		  }
+        		  else //FOR MODE 4, NEED TO COMPUTE THE SUMMARY FEATURE VAL
+        		  {
+        			  double sumFeatVal = 0.0;
+        			  int featId = 0;
+        			  String updated_feat_str = "";
+        			  
+        			  for( int c=0; c<featVal_str.length; c++ )
+        			  {
+        				  feat_info = featVal_str[c].split(":");
+        				  featId = Integer.parseInt(feat_info[0]);
+        				  
+        				  if( 1<=featId && featId<=(numParamsInFile-1) ) //REGULAR FEATURE
+        				  {
+        				    currFeatVal[featId] = Double.parseDouble(feat_info[1]);
+        				    updated_feat_str += (featId+":"+feat_info[1]+" "); //FEATURE ID ORDER DOESN'T MATTER
+        				  }
+        				  else
+        				    sumFeatVal += Double.parseDouble(feat_info[1])*sparseFeatWeights[featId-numParamsInFile];
+        			  }
+        			  
+        			  currFeatVal[numParamsInFile] = sumFeatVal;
+        			  updated_feat_str += (numParamsInFile+":"+sumFeatVal);
+        			  feat_hash[i].put(sents_str, updated_feat_str); //UPDATE THE FEATURE HASH, NOW THE SPARSE FEATURES ARE TREATED AS ONE REGULAR FEATURE
+        		  }
+        	  }
+              
+              for (int j = 1; j <= initsPerIt; ++j) 
+              {
                 double score = 0; // i.e. score assigned by decoder
-                for (int c = 1; c <= numParams; ++c) {
+                for (int c = 1; c <= numParams; ++c) 
+                {
                   score += initialLambda[j][c] * currFeatVal[c];
                 }
-                if (score > best1Score[j][i]) {
+                if (score > best1Score[j][i]) 
+                {
                   best1Score[j][i] = score;
                   for (int s = 0; s < suffStatsCount; ++s)
                     best1Cand_suffStats[j][i][s] = stats[s];
-                	  
                 }
               } // for (j)
 
@@ -1210,7 +1382,6 @@ public double[] run_single_iteration(
               
 //              newCandidatesAdded[iteration] += 1;
               // moved to code above detecting new candidates
-
             } 
             else 
             {
@@ -1322,12 +1493,27 @@ public double[] run_single_iteration(
         }
       }
      
+      //FOR MODE 2&3: BOTH INITIAL/FINAL LAMBDA INCLUDE REGULAR+SPARSE FEATURE WEIGHTS(REGULAR FEATURE WEIGHTS NOT UPDATED IN MODE 3)
+      //FOR MODE 1&4: ONLY REGULAR FEATURE WEIGHTS ARE INCLUDED AND UPDATED
+      //THIS NEEDS TO BE HANDLED BY Optimizer, AND FOR MODE 3, 1-BEST IS COMPUTED ONLY ACCORDING TO DISC FEATURE WEIGHTS
+      
+      /*for( int v=1; v<initialLambda[1].length; v++ )
+    	  System.out.print(initialLambda[1][v]+" ");
+      System.exit(0);*/
+      
       Vector<String> output = new Vector<String>();
       double score = 0;
-      Optimizer opt = new Optimizer(seed, numSentences, output, initialLambda[1], feat_hash, stats_hash, 
-    		  score, evalMetric, Tau, Xi, metricDiff, normalizationOptions, classifierAlg, classifierParams);
       
-      finalLambda[1] = opt.run_Optimizer();
+      Optimizer opt = new Optimizer(seed+iteration, numSentences, output, initialLambda[1], 
+    		  feat_hash, stats_hash, score, evalMetric, Tau, Xi, metricDiff, 
+    		  normalizationOptions, classifierAlg, classifierParams, trainingMode, 
+    		  numSparseParams, numParamsInFile, nbestFormat);
+      
+      finalLambda[1] = opt.run_Optimizer(); //FOR MODE 3, THE REGULAR WEIGHTS ARE NOT UPDATED
+      
+      /*System.out.println(finalLambda[1].length);
+      for( int i=0; i<finalLambda[1].length-1; i++ )
+    	  System.out.println(finalLambda[1][i+1]);*/
       
       for( int i=0; i<output.size(); i++ )
     	  println(output.get(i));
@@ -1448,10 +1634,50 @@ public double[] run_single_iteration(
   private String lambdaToString(double[] lambdaA)
   {
     String retStr = "{";
-    for (int c = 1; c <= numParams-1; ++c) {
-      retStr += "" + lambdaA[c] + ", ";
+    
+    if( trainingMode.equals("1") || trainingMode.equals("4") )
+    {
+    	retStr += "(Mode "+trainingMode+": listing all lambdas)";
+	    for (int c = 1; c <= numParams-1; ++c) 
+	    {
+	      retStr += "" + lambdaA[c] + ", ";
+	    }
+	    retStr += "" + lambdaA[numParams] + "}";
     }
-    retStr += "" + lambdaA[numParams] + "}";
+    else
+    {
+    	if( trainingMode.equals("2") )
+    	{
+	    	retStr += "(Mode "+trainingMode+": listing all regular feature weights + first 5 sparse feature weights)";
+	    	for (int c = 1; c < numParamsInFile-1; ++c) 
+	    	{
+	  	      retStr += "" + lambdaA[c] + ", ";
+	  	    }
+	  	    //retStr += "" + lambdaA[numParamsInFile-1] + "}";
+	  	    
+	    	retStr += "" + lambdaA[numParamsInFile-1] + " ||| ";
+	    	
+	  	    int numToPrint = 5 < numSparseParams ? 5 : numSparseParams;
+	  	    for( int c = 0; c < numToPrint-1; c++ )
+	  	    {
+	  	      retStr += lambdaA[c+numParamsInFile]+", ";
+	  	    }
+	  	    
+	  	    retStr += lambdaA[numParamsInFile+numToPrint-1] + "}";
+    	}
+    	else
+    	{
+    		retStr += "(Mode "+trainingMode+": listing first 10 sparse feature weights)";
+	    	
+	  	    int numToPrint = 10 < numSparseParams ? 10 : numSparseParams;
+	  	    for( int c = 0; c < numToPrint-1; c++ )
+	  	    {
+	  	      retStr += lambdaA[c+numParamsInFile]+", ";
+	  	    }
+	  	    
+	  	    retStr += lambdaA[numParamsInFile+numToPrint-1] + "}";
+    	}
+    }
 
     return retStr;
   }
@@ -1650,29 +1876,90 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
     try {
       // i.e. create cfgFileName, which is similar to templateFileName, but with
       // params[] as parameter values
-
+    	
       BufferedReader inFile = new BufferedReader(new FileReader(templateFileName));
       PrintWriter outFile = new PrintWriter(cfgFileName);
-
+      
+      BufferedReader inFeatDefFile = null;
+      PrintWriter outFeatDefFile = null;
+      
+      if( (trainingMode.equals("2") || trainingMode.equals("3")) )
+      {
+	      inFeatDefFile = new BufferedReader(new FileReader(discDefFile+".PRO.orig"));
+	      outFeatDefFile = new PrintWriter(discDefFile);
+      }
+      
       String line = inFile.readLine();
+      
+      if( trainingMode.equals("1") || trainingMode.equals("4") )
+      {
+	      while (line != null) {
+	        int c_match = -1;
+	        for (int c = 1; c <= numParamsInFile; ++c) {
+	          if (line.startsWith(paramNames[c] + " ")) { c_match = c; break; }
+	        }
+	
+	        if (c_match == -1) {
+	          outFile.println(line);
+	        } else {
+	          outFile.println(paramNames[c_match] + " " + params[c_match]);
+	        }
+	
+	        line = inFile.readLine();
+	      }
+      }
+      else
+      {
+    	  //FOR MODE 2,3, NEED TO WRITE SPARSE FEATURE WEIGHTS TO ITS FILE
+    	  //NOTE THAT THE DISCRIMINATIVE SUMMARY FEATURE WEIGHT IS SET TO 1.0, NO MATTER WHAT NUMBER THE USER SPECIFIED 
 
-      while (line != null) {
-        int c_match = -1;
-        for (int c = 1; c <= numParams; ++c) {
-          if (line.startsWith(paramNames[c] + " ")) { c_match = c; break; }
-        }
-
-        if (c_match == -1) {
-          outFile.println(line);
-        } else {
-          outFile.println(paramNames[c_match] + " " + params[c_match]);
-        }
-
-        line = inFile.readLine();
+    	  while (line != null) {
+  	        int c_match = -1;
+  	        for (int c = 1; c <= numParamsInFile; ++c) {
+  	          if (line.startsWith(paramNames[c] + " ")) { c_match = c; break; }
+  	        }
+  	
+  	        if (c_match == -1) {
+  	          outFile.println(line);
+  	        } else {
+  	        	if( c_match == numParamsInFile )
+  	        		outFile.println(paramNames[c_match] + " " + 1.0); //DISC SUMMARY FEATURE WEIGHT
+  	        	else
+  	        		outFile.println(paramNames[c_match] + " " + params[c_match]);
+  	        }
+  	
+  	        line = inFile.readLine();
+  	      }
+    	  
+    	  //NOW WRITE THE SPARSE FEATURE WEIGHTS TO ITS DEF FILE
+    	  String new_line;
+    	  String[] line_info;
+    	  int featID = 0;
+    	  while( (line = inFeatDefFile.readLine()) != null )
+    	  {
+    		  new_line = "";
+    		  line = line.trim();
+    		  line_info = line.split("\\s+");
+	    		  
+    		  for( int p=0; p<line_info.length-1; p++ )
+    			  new_line += (line_info[p]+" ");
+	    		  
+    		  new_line += params[numParamsInFile+featID];
+    		  outFeatDefFile.println(new_line);
+	    				  
+    		  featID++;
+    	  }
       }
 
       inFile.close();
       outFile.close();
+      	
+      if( (trainingMode.equals("2") || trainingMode.equals("3")) )
+      {
+    	  inFeatDefFile.close();
+    	  outFeatDefFile.close();
+      }
+      
     } catch (IOException e) {
       System.err.println("IOException in PROCore.createConfigFile(double[],String,String): " + e.getMessage());
       System.exit(99902);
@@ -1693,13 +1980,66 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
     String dummy = "";
 
     // initialize lambda[] and other related arrays
-    for (int c = 1; c <= numParams; ++c) {
+    for (int c = 1; c <= numParamsInFile; ++c) 
+    {
       // skip parameter name
       while (!dummy.equals("|||")) { dummy = inFile_init.next(); }
 
       // read default value
-      lambda[c] = inFile_init.nextDouble();
-      defaultLambda[c] = lambda[c];
+      if( trainingMode.equals("1") || trainingMode.equals("4")  )
+      {
+    	  lambda[c] = inFile_init.nextDouble();
+    	  defaultLambda[c] = lambda[c];
+      }
+      else //HANDLING DISC FEATURES IF IN MODE 2,3
+      {
+    	  if( c<numParamsInFile )
+    	  {
+    		  lambda[c] = inFile_init.nextDouble();
+        	  defaultLambda[c] = lambda[c];
+    	  }
+    	  else
+    	  {
+    		  String[] discFeatFields = paramNames[numParamsInFile].split("\\s+");
+    		  discDefFile = discFeatFields[1];
+	        	  
+    		  //READ DISC FEATURE WEIGHTS
+    		  try
+    		  {
+	    		  InputStream discFileInputStream;
+	    		  discFileInputStream = new FileInputStream(discDefFile);
+	    		  BufferedReader discFeatFile = new BufferedReader(new InputStreamReader(discFileInputStream, "utf8"));
+						
+	    		  String line2;
+	    		  String[] lineArray;
+	    		  int featCount = 0;
+	    		  while( (line2 = discFeatFile.readLine()) != null )
+	    		  {
+	    			  lineArray = line2.split("\\s+");
+	    			  sparseFeatWeights[featCount] = Double.parseDouble(lineArray[lineArray.length-1]);
+					  featCount++;
+	    		  }
+    		  }
+    		  catch (FileNotFoundException e) 
+    		  {
+    		      System.err.println("FileNotFoundException in processParamFile(): " + e.getMessage());
+    		      System.exit(99901);
+    		  }
+    		  catch (IOException e) 
+    		  {
+    		      System.err.println("IOException in PROCore.processParamFile(): " + e.getMessage());
+    		      System.exit(99902);
+    		  }
+			  
+    		  for( int s=0; s<numSparseParams; s++)
+    		  {
+    			  lambda[s+numParamsInFile] = sparseFeatWeights[s];  //IN MODE 2,3, ASSUMING DISC FEAT OVERALL WEIGHT = 1.0 
+    			  defaultLambda[s+numParamsInFile] = lambda[s+numParamsInFile];
+    		  }
+    			  
+    		  inFile_init.nextDouble();  //JUST TO SKIP THE DISC WEIGHT COLUMN
+    	  }
+      }
 
       // read isOptimizable
       dummy = inFile_init.next();
@@ -1715,22 +2055,67 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
         dummy = inFile_init.next();
         dummy = inFile_init.next();
         dummy = inFile_init.next();
-      } else {
+      } 
+      else 
+      {
+    	  //MODE 2&3: THIS IS THE THRESHOLD FOR DISCRIMINATIVE FEATURES ONLY
+    	  //MODE 1&4: THRESHOLD FOR REGULAR FEATURES
+    	  
         // set minThValue[c] and maxThValue[c] (range for thresholds to investigate)
         dummy = inFile_init.next();
-        if (dummy.equals("-Inf")) { minThValue[c] = NegInf; }
-        else if (dummy.equals("+Inf")) {
+        if (dummy.equals("-Inf")) 
+        { 
+        	minThValue[c] = NegInf;
+        	
+        	if( c==numParamsInFile && (trainingMode.equals("3") || trainingMode.equals("2")) )
+        	{
+        		for( int t=0; t<numSparseParams; t++ )
+        			minThValue[c+t] =  NegInf;
+        	}
+        }
+        else if (dummy.equals("+Inf")) 
+        {
           println("minThValue[" + c + "] cannot be +Inf!");
           System.exit(21);
-        } else { minThValue[c] = Double.parseDouble(dummy); }
+        } 
+        else 
+        { 
+        	minThValue[c] = Double.parseDouble(dummy);
+        	
+        	if( c==numParamsInFile && (trainingMode.equals("3") || trainingMode.equals("2")) )
+        	{
+        		for( int t=0; t<numSparseParams; t++ )
+        			minThValue[c+t] =  Double.parseDouble(dummy);
+        	}
+        }
 
         dummy = inFile_init.next();
-        if (dummy.equals("-Inf")) {
+        if (dummy.equals("-Inf")) 
+        {
           println("maxThValue[" + c + "] cannot be -Inf!");
           System.exit(21);
-        } else if (dummy.equals("+Inf")) { maxThValue[c] = PosInf; }
-        else { maxThValue[c] = Double.parseDouble(dummy); }
-
+        } 
+        else if (dummy.equals("+Inf")) 
+        { 
+        	maxThValue[c] = PosInf;
+        	
+        	if( c==numParamsInFile && (trainingMode.equals("3") || trainingMode.equals("2")) )
+        	{
+        		for( int t=0; t<numSparseParams; t++ )
+        			maxThValue[c+t] =  PosInf;
+        	}
+        }
+        else 
+        { 
+        	maxThValue[c] = Double.parseDouble(dummy);
+        	
+        	if( c==numParamsInFile && (trainingMode.equals("3") || trainingMode.equals("2")) )
+        	{
+        		for( int t=0; t<numSparseParams; t++ )
+        			maxThValue[c+t] =  Double.parseDouble(dummy);
+        	}
+        }
+        
         // set minRandValue[c] and maxRandValue[c] (range for random values)
         dummy = inFile_init.next();
         if (dummy.equals("-Inf") || dummy.equals("+Inf")) {
@@ -1744,7 +2129,6 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
           System.exit(21);
         } else { maxRandValue[c] = Double.parseDouble(dummy); }
 
-  
         // check for illogical values
         if (minThValue[c] > maxThValue[c]) {
           println("minThValue[" + c + "]=" + minThValue[c]
@@ -1779,7 +2163,6 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
           println("Warning: The random value range for lambda[" + c + "] is not contained",1);
           println("         within its critical value range.",1);
         }
-
       } // if (!isOptimizable[c])
 
 /*
@@ -1862,7 +2245,7 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
     } // if (dummyA[0])
 
     inFile_init.close();
-  }
+  } //processParamsFile()
 
   private void processDocInfo()
   {
@@ -2051,6 +2434,7 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
     writer.flush();
   }
 
+  //NEED TO RE-WRITE TO HANDLE DIFFERENT FORMS OF LAMBDA
   public void finish()
   {
     if (myDecoder != null) {
@@ -2059,7 +2443,7 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
 
     // create config file with final values
     createConfigFile(lambda, decoderConfigFileName+".PRO.final",decoderConfigFileName+".PRO.orig");
-
+        
     // delete current decoder config file and decoder output
     deleteFile(decoderConfigFileName);
     deleteFile(decoderOutFileName);
@@ -2067,6 +2451,13 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
     // restore original name for config file (name was changed
     // in initialize() so it doesn't get overwritten)
     renameFile(decoderConfigFileName+".PRO.orig",decoderConfigFileName);
+    
+    if( trainingMode.equals("3") || trainingMode.equals("2") )
+    {
+    	copyFile(discDefFile, discDefFile+".PRO.final");
+    	deleteFile(discDefFile);
+    	renameFile(discDefFile+".PRO.orig",discDefFile);
+    }
 
     if (finalLambdaFileName != null) {
       try {
@@ -2439,6 +2830,20 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
 		
 		//FOR PRO: 
 		//CLASSIFICATION ALGORITHM CLASS PATH
+		else if (option.equals("-trainingMode"))
+		{
+			trainingMode = args[i+1];
+		}	
+		else if (option.equals("-nbestFormat"))
+		{
+			nbestFormat = args[i+1];
+			
+			if( (!nbestFormat.equals("sparse")) && (!nbestFormat.equals("dense")) )
+			{
+				System.err.println("nbestFormat can only be \"dense\" or \"sparse\"!");
+				System.exit(31);
+			}
+		}
 		else if (option.equals("-classifierClass"))
 		{
 			classifierAlg = args[i+1];
@@ -2531,6 +2936,18 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
 		
 	} // while (i)
 
+	if( Integer.parseInt(trainingMode) > 4 || Integer.parseInt(trainingMode) < 0 )
+	{
+		System.out.println("Unrecognized training mode(should be 1-4), exiting ...");
+		System.exit(31);
+	}
+	
+	if( nbestFormat.equals("dense") && (!trainingMode.equals("1")) )
+	{
+		System.err.println("Training mode is not 1, but the n-best is in dense format, exiting ...");
+		System.exit(30);
+	}
+	
     if (maxMERTIterations < minMERTIterations) {
 
       if (firstTime)
@@ -2982,8 +3399,6 @@ i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numPar
         }
       }
     }
-
-
 
     str = str.replaceAll("\\s+"," ");
 

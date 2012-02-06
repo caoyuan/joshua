@@ -21,18 +21,13 @@
 
 ### Part2: PRO parameters
 #-trainingMode can be 1,2,3,4
-#1: train dense feature weights only
-#2: train dense & sparse feature weights together
-#3: train sparse feature weights only(with dense feature weights fixed) also works)
+#1: train dense feature weights only, nbestFormat can be "dense" or "sparse"
+#2: train dense & sparse feature weights together, nbestFormat should be "sparse"(although "dense" also works)
+#3: train sparse feature weights only(with dense feature weights fixed), nbestFormat should be "sparse"(although "dense" also works)
 #4: treat sparse features as one component(summary feature), train dense and summary feature weights together
 
 -trainingMode	2
-
-#-nbestFormat can be "sparse" or "dense"
-#for trainingMode 1: either "dense" or "sparse"
-#for trainingMode 2-4: use "sparse" format
-
--nbestFormat	sparse	#dense or sparse
+-nbestFormat	sparse	#dense or sparse (mode 1: dense or sparse; mode 2-4: sparse only)
 
 #use one of the classifiers(and the corresponding parameter setting) below:
 #1.perceptron paramters
