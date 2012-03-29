@@ -5,6 +5,11 @@
 \usepackage{url}
 \usepackage{graphicx}
 \usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{rotating}
+
 
 \author{Juri Ganitkevitch, Benjamin Van Durme \and
   Chris Callison-Burch \\
@@ -28,114 +33,293 @@
 
 \section{Introduction}
 
-A wide variety of tasks in text-to-text generation can
-straightforwardly be cast as paraphrasing problems. Paraphrasing
-techniques have successfully been applied to applications such as
-document summarization \cite{Barzilay1999,BarzilayThesis}, text
-simplification, sentence compression, as well as information
-retrieval tasks like query expansion and question generation
-\cite{mckeown:1979:ACL,Anick1999,Ravichandran2002,Riezler2007}.
+A wide variety of applications in natural language processing can be
+cast in terms of text-to-text generation. Given input in the form of
+natural language, a text-to-text generation system produces natural
+language output that fulfills previously defined constraints and
+objectives on both the text's surface form and meaning. Paraphrases,
+i.e.\ differing textual realizations of the same meaning, are a
+crucial components of text-to-text generation systems, and have been
+successfully applied to tasks such as multi-document summarization,
+query expansion, question answering, sentence compression and
+simplification
+\cite{Barzilay1999,BarzilayThesis,mckeown:1979:ACL,Anick1999,Ravichandran2002,Riezler2007}.
 
-A major challenge in building a paraphrase-based text-to-text
-generation system is the \emph{extraction} (and scoring) of a set of
-paraphrases (a \emph{paraphrase table} or \emph{grammar}) from
-data. In the past, each paraphrase extraction approach has focussed on
-a single type of dataset. Methods based on sentence-aligned parallel
-corpora, both monolingual and bilingual, successfully leveraged the
-equivalence in meaning implied by the parallelism of the data
-\cite{Barzilay2001,Pang2003,Callison-Burch2005,Madnani2007,cohn-lapata:2008,Zhao2008}.
+Recently, \newcite{Ganitkevitch2011} presented an approach for
+sentential paraphrasing derived from state-of-the-art statistical
+machine translation systems. They described a large-scale extraction
+method for syntactically annotated paraphrases from bilingual parallel
+corpora, as well as an adaptation framework that allowed for
+straight-forward, non-naive adaptation of the system to any given
+sentential text-to-text generation task.
 
-Approaches drawing from plain monolingual text, on the other hand,
-rely on distributional similarity metrics as their semantic
-equivalency cue. These methods use the vast amounts of data available
-to them to make up for the noise in the resulting signal
-\cite{Lin2001,Bhagat2008}.
+In this paper, we describe an extension of
+\newcite{Ganitkevitch2011}'s approach by introducing a new component
+into the paraphrasing system that is not derived from the statistical
+machine translation domain and present an orthogonal source of
+information: monolingual distributional similarity. More specifically,
+we show that:
 
-However, alignments and distributional similarity are based on
-orthogonal information. In fact, previous work on both machine
-translation and paraphrasing has shown that adding features based on
-distributional similarity yields significant improvements over their
-alignment-based baseline systems \cite{Chan2011,Klementiev2012}.
-
-Expanding on these impressive improvements over purely alignment-based
-baselines, we present a the deeper integration of distributional
-similarity measures into our paraphrasing system. More precisely, we
-present the following contributions:
 \begin{itemize}
+
+\item Using monolingual distributional similarity features improves
+  paraphrase quality past what we can achieve with features estimated
+  from bilingual data. We demonstrate that different types of
+  monolingual distributional information can be used to achieve
+  differing effects such as improvements in grammaticality or word
+  sense disambiguation, and discuss the trade-off between data sources
+  with high-coverage versus smaller, more richly annotated corpora.
+
 \item We define the notion of distributional similarity for paraphrase
   patterns that contain multi-word gaps. This generalizes over
-  previous approaches that defined the notion for pairs of contiguous
-  phrases \cite{Chan2011}, and single-word gaps
-  \cite{Lin2001,Bhagat2008}. We extend a previously presented rich
-  SCFG-based paraphrase extraction method \cite{Ganitkevitch2011} to
-  compute distributional signatures for the paraphrases.
-
-\item We present a text-to-text generation approach that integrates
-  similarity metrics directly into the decoding procedure. Contextual
-  similarity is evaluated for both the paraphrase patterns applied in
-  the text-to-text derivation and contiguous target-side phrases
-  generated when combining rules in our paraphrastic SCFG.
+  previous approaches that defined the notion for contiguous phrases
+  or single-word gaps.
 
 \item Finally, we compare the effectiveness of out method against a
   variety of baselines on an example text-to-text generation task,
   sentence compression. We show improvements in quality over both a
-  purely alignment-based paraphrasing system and an ILP-based
+  purely bilingually sourced paraphrasing system and an ILP-based
   compression model.
 \end{itemize}
 
+In the following, we will give an overview of SCFG-based paraphrase
+extraction (Section~\ref{sec-scfgs}) and monolingual distributional
+similarity (Section~\ref{sec-mds}). Section~\ref{sec-scoring} presents
+our rescoring model. We discuss the reranking results in
+Section~\ref{sec-ranking}. We relate our work to prior research in
+Section~\ref{sec-related-work}. Finally, Sections~\ref{sec-setup} and
+\ref{sec-results} present our experimental setup and the results
+obtained for the sentence compression task. We conclude in
+Section~\ref{sec-conclusion}.
 
-\section{Notes}
+\section{Synchronous Context-Free Grammars}
+\label{sec-scfgs}
 
-What is our claim? Monolingual distributional similarity and
-pivot-based methods are orthogonal sources of information. Combining
-them yields improvements.
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/syntactic_pivoting.pdf}
+\end{center}
+\caption{An example of syntactic paraphrase extraction and feature
+  estimation via the pivoting approach.}\label{fig-syntactic-pivoting}
+\end{figure}
 
-How do we implement it? Need to conceptually separate decoding from
-grammar extraction (to me both are ``from MT'', but here they are
-separate things: 
+Following \newcite{Ganitkevitch2011}, we formulate our paraphrases as
+a syntactically annotated \emph{ synchronous context-free grammar}
+(SCFG) \cite{Aho1972,Chiang2005}.  An SCFG rule has the form:
+\begin{equation*}
+  \mathbf{r} = C \rightarrow \langle f, e, \sim, \vec{\varphi} \rangle ,
+\end{equation*}
+where the left-hand side of the rule, $C$, is a nonterminal and the
+right-hand sides $f$ and $e$ are strings of terminal and nonterminal
+symbols with an equal number of nonterminals. The function $\sim$
+defines a one-to-one correspondency function between the nonterminals
+in $f$ and $e$. Drawing on machine translation terminology, we refer
+to $f$ as the \emph{source} and $e$ as the \emph{target}
+side of the rule.
 
-How do we back it up? Show results wherein the combination improves
-over both.
+Each rule is annotated with a vector of feature functions
+$\vec{\varphi} = \{\varphi_1 ... \varphi_N \}$ that, using a
+corresponding weight vector $\vec{\lambda}$, are combined in a
+log-linear model to compute the \emph{cost} of applying $\mathbf{r}$:
+\begin{equation}
+  \mathit{cost}(\mathbf{r}) = -\sum_{i=1}^N \lambda_i \log \varphi_i .
+\end{equation}
+Typical features used in the statistical machine translation models
+that our system builds on are conditional phrasal, lexical and
+left-hand side label probabilities, as well as a variety of count and
+indicator features. We detail the feature set used in our experiments
+in Section~\ref{sec-setup}.
 
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/example_compression.pdf}
+\end{center}
+\caption{An example of a synchronous paraphrastic derivation.}
+\label{fig-example-compression}
+\end{figure}
 
-\section{Todo}
+To obtain a paraphrase grammar, we first must extract a translation
+grammar that translates any given foreign language into English. Then,
+for each pair of translation rules where the left-hand side $C$ and
+foreign string $f$ match:
+\begin{eqnarray*}
+    \mathbf{r}_1 = C \rightarrow \langle f, e_1, \sim_1, \vec{\varphi}_1
+  \rangle \phantom{,} \\
+  \mathbf{r}_2 = C \rightarrow \langle f, e_2, \sim_2, \vec{\varphi}_2
+  \rangle ,
+\end{eqnarray*}
+we use the intuition that two english strings $e_1$ and $e_2$ that
+translate to the same foreign string $f$ are equivalent in meaning,
+and \emph{pivot} over $f$ to create a paraphrase rule
+\cite{Ganitkevitch2011,Callison-Burch2008,Callison-Burch2005}:
+\begin{equation*}
+  \mathbf{r}_p = C \rightarrow \langle e_1, e_2, \sim_p, \vec{\varphi}_p \rangle ,
+\end{equation*}
+with a combined nonterminal correspondency function $\sim_p$.
+Similarly, the paraphrase feature vector $\vec{\varphi}_p$ is computed
+from the translation feature vectors $\vec{\varphi}_1$ and
+$\vec{\varphi}_2$ by following the pivoting idea. For instance, we
+estimate the conditional paraphrase probability $p(e_2 | e_1)$ by
+marginalizing over all shared foreign-language translations $f$:
+\begin{eqnarray}
+  p(e_2|e_1) &=& \sum_f p(e_2,f|e_1)\\
+  &=& \sum_f p(e_2|f,e_1) p(f|e_1) \\
+  &\approx& \sum_f p(e_2|f) p(f|e_1) .
+\label{eq-paraphrase-probability}
+\end{eqnarray}
+Figure~\ref{fig-syntactic-pivoting} illustrates syntax-constrained
+pivoting and feature aggregation over multiple foreign language
+translations for a paraphrase pattern.
+Figure~\ref{fig-example-compression} shows an example for a
+synchronous paraphrastic derivation produced as a result of applying
+our grammar in the decoding process.
 
-Write up what I've done so far:
+The approach we outlined in this section relies on supervised
+sentence-level parallelism to identify phrases and patterns that are
+equivalent in meaning. When extracting paraphrases from monolingual
+text, we have to rely on an entirely different set of semantic cues
+and features.
+
+\section{Monolingual Distributional Similarity}
+\label{sec-mds}
+
+In absence of other correspondency information, paraphrase extraction
+from monolingual corpora relies on contextual features. To describe a
+phrase $e$, we define a set of features that describe the context of
+an occurrence of $e$ in our corpus. The resulting feature vectors
+$\vec{s}_{e,i}$ are aggregated over all occurrences of $e$, resulting
+in a \emph{distributional} signature for $e$, $\vec{s}_e = \sum_i
+\vec{s}_{e,i}$.  Following the intuition that phrases with similar
+meanings occur in similar contexts, we can then identify $e'$ as a
+paraphrase of $e$ by computing the cosine similarity between their
+distributional signatures:
+\begin{equation*}
+  \mathit{sim}(e, e') = \frac{\vec{s}_e \cdot \vec{s}_{e'}}{|\vec{s}_e||\vec{s}_{e'}|}.
+\end{equation*}
+
+The features used to describe the context of a phrase differ by
+application and data source. Both \newcite{Lin2001} and
+\newcite{ChurchHanks91} use a rich feature set based on constituency
+and dependency parses of the text corpora they extract paraphrases
+from. In their work, a phrase is described by the various syntactic
+relations it has with lexical items in its context, such as the set of
+verbs it appears is seen as the subject of, or the set of adjectives
+that modify it. 
+
+However, when moving to vast text collections or collapsed
+representations of large text corpora, parsing can become impractical
+or even impossible. In these cases using simple features based on
+lexical $n$-grams has proven to be effective
+\cite{LapataKellerSaLP05,Bhagat2008,LinEtAlLREC10,VanDurmeLallACL10}.
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/ngram_context.pdf}
+\end{center}
+\caption{An example of immediate lexical context acquisition over
+  n-gram corpora.}\label{fig-ngram-context}
+\end{figure}
+
+In order to investigate the impact of the feature set used, we chose
+to extract two collections of distributional similarity-based
+paraphrases. Using a web-scale $n$-gram corpus
+\cite{GoogleNgrams,LinEtAlLREC10}, we extract unigram features for the
+words to the left and right for phrases up to a length of 4. The
+features are weighed with the $n$-gram count given by the dataset. The
+resulting collection comprised context vectors for the 200 million
+most frequent 1- to 4-grams in the dataset.
+
+For contrast, we use the constituency- and dependency-parsed Los
+Angeles Times/Washington Post portion of the Gigaword corpus
+\cite{Gigaword}. The following feature set is used to compute phrase
+contexts over this dataset:
 \begin{itemize}
-\item Similarity features, scores, setup
-\item Subtleties and ``design decisions'' in scoring the rules
+\item Lexical and part-of-speech unigram and bigram features,
+  drawn from a three-word window to the right and left of the phrase. 
+\item Features based on dependencies for both links into and out of
+  the phrase, labeled with the corresponding lexical item and POS. If
+  the phrase is syntactically well-formed we additionally include
+  lexical and POS features for its head.
+\item Syntactic features for constituents governing the phrase, as
+  well as for CCG-style slashed constituent labels for the phrase,
+  split by governing constituent and missing constituent. 
+\end{itemize}
+Figure~\ref{fig-rich-context} illustrates our choice of feature
+set. As a result we obtain context information for over 12 million 1-
+to 4-gram phrases.
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/rich_context.pdf}
+\end{center}
+\caption{An example of rich monolingual distributional features over a
+parsed text corpus.}\label{fig-rich-context}
+\end{figure}
+
+Much like \newcite{Ravichandran2005} and \newcite{Bhagat2008}, we
+relied on Locality Sensitive Hashing (LSH), to make the use of these
+large collections practical. In order to avoid explicitly computing
+the feature vectors, which can be memory intensive for frequent
+phrases, we chose the online LSH variant described in
+\cite{VanDurmeLallACL10}. This method, based on the earlier work of
+\newcite{IndykSTOC98} and \newcite{Charikar02}, approximates the
+cosine similarity between two feature vectors based on the Hamming
+distance in a dimensionality-reduced bitwise representation. Two
+feature vectors $u$, $v$ each of dimension $d$ are first projected
+through a $d \times b$ random matrix populated with draws from
+$\mathcal{N}(0,1)$. We then convert the resulting $b$-dimensional
+vectors into bit-vectors by setting each bit of the signature
+conditioned on whether the corresponding projected value is less than
+0. Now, given the bit signatures $h(\vec{u})$ and $h(\vec{v})$, we
+approximate the cosine similarity of $u$ and $v$ as:
+\begin{equation*}
+  \mathit{sim'}(u, v) =
+  \cos\Big(\frac{D(h(\vec{u}),h(\vec{v}))}{b}\pi\Big) ,
+\end{equation*}
+where $D()$ is the Hamming distance.
+
+
+
+\section{Incorporating Distributional Similarity}
+\label{sec-scoring}
+
+The approach to paraphrase extraction we outlined above relies on
+bitexts and the semantic cues we gather from the sentence-level
+alignments.
+
+vast amounts of data
+
+contextual information versus alignment
+
+
+\section{Paraphrase Ranking}
+\label{sec-ranking}
+
+
+
+\section{Related Work}
+\label{sec-related-work}
+
+In this section we refer back to some prior work on
+\begin{itemize}
+\item Distributional similarity metrics in paraphrase acquisition.
+\item Use of distributional approaches in text-to-text and machine translation.
 \end{itemize}
 
-\section{Model}
+Some papers to be mentioning are here
+\cite{langkilde1998practical,langkilde1998generation,Lin2001,Bhagat2008}.
 
-Outer and inner context matching? Think about how differently defined
-contexts can combine in SCFG derivations, go from there.
+\section{Experimental Setup}
+\label{sec-setup}
 
-Sparsity is an issue.
 
-\section{Outline}
 
-Main contribution: tight integration of monolingual similarity into
-both paraphrase extraction and generation (decoding).
+\section{Sentence Compression Results}
+\label{sec-results}
 
-Challenges: stateful feature, efficient extraction of signatures,
-compare (?) to phrase-to-phrase similarity as a feature.
 
-Comparisons: no MonoDS, reranking approaches.
-
-Statistic: how many pairs of phrases do we see in decoding?
-
-Review paraphrase-based text-to-text generation.
-
-Highlight the ability to incorporate feature functions.
-
-Previously: pivot-derived feature functions and a language model.
-
-Papers and stuff:
-
-\cite{langkilde1998practical}
-
-\cite{langkilde1998generation}
+\section{Conclusion}
+\label{sec-conclusion}
 
 \bibliographystyle{naaclhlt2012}
 \bibliography{monods_t2t}
