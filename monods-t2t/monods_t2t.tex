@@ -283,43 +283,312 @@ where $D()$ is the Hamming distance.
 \section{Incorporating Distributional Similarity}
 \label{sec-scoring}
 
-The approach to paraphrase extraction we outlined above relies on
-bitexts and the semantic cues we gather from the sentence-level
-alignments.
+In order for us to make the distributional similarity information
+accessible to the paraphrasing system, we need to calculate similarity
+scores for the paraphrastic SCFG rules in our grammar. However, the
+similarity information we obtain from our monolingual sources is
+defined for lexical $n$-grams only, not for patterns with gaps in
+them.  
 
-vast amounts of data
+We close this gap, by decomposing the discontinuous patterns that make
+up the right-hand sides of a rule $\mathbf{r}$ into pairs of
+contiguous phrases $P(\mathbf{r}) = (\bar{e}, \bar{e}')$, for which we
+can look up distributional signatures and compute similarity
+scores. This decomposition into phrases is non-trivial, since our
+sentential paraphrase rules often involve significant reordering or
+structural changes. To avoid comparing unrelated phrase pairs, we
+require $P(\mathbf{r})$ to be consistent with a token alignment
+$\mathbf{a}$. We define and compute $\mathbf{a}$ analogously to the
+word alignments used in statistical machine
+translation. Figure~\ref{fig-pattern-scoring} shows an aligned rule
+and the phrase pairs we extract from it.
 
-contextual information versus alignment
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.70\linewidth]{figures/pattern_scoring.pdf}
+\end{center}
+\caption{Scoring a rule by extracting and scoring contiguous phrases
+  consistent with the alignment.}\label{fig-pattern-scoring}
+\end{figure}
+
+We define the overall similarity score of the rule to be the average
+of the similarity scores of all extracted phrase pairs:
+\begin{equation*}
+  \mathit{sim}(\mathbf{r}, \mathbf{a}) = \frac{1}{|P(\mathbf{a})|}
+  \sum_{(e, e') \in P(\mathbf{a})}\mathit{sim}(e, e') .
+\end{equation*}
+This is done to achieve a sparsity-reducing effect similar to backing
+off in statistical $n$-gram language models. Since the distributional
+signatures for long, rare phrases may be computed from only a handful
+of occurrences, we additionally query for the shorter sub-phrases that
+are more likely to have been observed often enough for reliable
+signature and thus similarity estimates.
+
+The similarity score is incorporated into our paraphraser as an
+additional rule-level feature $\varphi_{\mathit{sim}}$, and the
+corresponding weight $\lambda_{\mathit{sim}}$ is estimated along with
+the other $\lambda_i$ in our training framework, detailed in
+Section~\ref{sec-setup}. We keep track of the $n$-gram-based
+similarity scores and the richer feature set separately.
 
 
 \section{Paraphrase Ranking}
 \label{sec-ranking}
 
+We investigate the effect of combining distributional similarity 
+
+\begin{table*}[t]
+\small
+\begin{center}
+\begin{tabular}{|cl|cl|cl|cl|}
+  \hline
+  \multicolumn{8}{|c|}{phrase!} \\
+  \hline
+  baseline 1 & 0.96 &
+  ngrams 1 & 0.9 &
+  rich 1 & 0.96 &
+  combined 1 & 0.9 \\
+
+  baseline 2 & 0.96 &
+  ngrams 2 & 0.9 &
+  rich 2 & 0.96 &
+  combined 2 & 0.9 \\
+
+  baseline 3 & 0.96 &
+  ngrams 3 & 0.9 &
+  rich 3 & 0.96 &
+  combined 3 & 0.9 \\
 
 
-\section{Related Work}
-\label{sec-related-work}
+  baseline 4 & 0.96 &
+  ngrams 4 & 0.9 &
+  rich 4 & 0.96 &
+  combined 4 & 0.9 \\
 
-In this section we refer back to some prior work on
-\begin{itemize}
-\item Distributional similarity metrics in paraphrase acquisition.
-\item Use of distributional approaches in text-to-text and machine translation.
-\end{itemize}
 
-Some papers to be mentioning are here
-\cite{langkilde1998practical,langkilde1998generation,Lin2001,Bhagat2008}.
+  baseline 5 & 0.96 &
+  ngrams 5 & 0.9 &
+  rich 5 & 0.96 &
+  combined 5 & 0.9 \\
+
+  \hline
+  \multicolumn{8}{c}{} \\
+  \hline
+  \multicolumn{8}{|c|}{different phrase!} \\
+  \hline
+  baseline 1 & 0.96 &
+  ngrams 1 & 0.9 &
+  rich 1 & 0.96 &
+  combined 1 & 0.9 \\
+
+  baseline 2 & 0.96 &
+  ngrams 2 & 0.9 &
+  rich 2 & 0.96 &
+  combined 2 & 0.9 \\
+
+  baseline 3 & 0.96 &
+  ngrams 3 & 0.9 &
+  rich 3 & 0.96 &
+  combined 3 & 0.9 \\
+
+
+  baseline 4 & 0.96 &
+  ngrams 4 & 0.9 &
+  rich 4 & 0.96 &
+  combined 4 & 0.9 \\
+
+
+  baseline 5 & 0.96 &
+  ngrams 5 & 0.9 &
+  rich 5 & 0.96 &
+  combined 5 & 0.9 \\
+
+  \hline
+\end{tabular}
+\end{center}
+\normalsize
+\caption{Comparison of paraphrase rankings for }
+\label{grammar_stats}
+\end{table*}
+
 
 \section{Experimental Setup}
 \label{sec-setup}
 
+\begin{table}
+\small
+\begin{center}
+\begin{tabular}{|c|r|}
+  \hline
+  Grammar & \multicolumn{1}{c|}{\# Rules} \\
+  \hline
+  total & 42,353,318 \\
+  w/o identity & 23,641,016 \\
+  w/o complex constituents & 6,439,923 \\
+  w/o complex const.\ \& identity & 5,097,250 \\
+  \hline
+\end{tabular}
+\end{center}
+\normalsize
+\caption{Number and distribution of rules in our paraphrase
+  grammar. Note the significant number of identity paraphrases and
+  rules with complex nonterminal labels.}
+\label{grammar_stats}
+\end{table}
+
+We extracted our paraphrase grammar from the French--English portion
+of the Europarl corpus (version 5). The Berkeley aligner and the
+Berkeley parser were used to align the bitext and parse the English
+side, respectively. The paraphrase grammar was produced using the
+Hadoop-based Thrax grammar extractor's paraphrase mode. The syntactic
+nonterminal labels we allowed in the grammar were limited to
+constituent labels and CCG-style slashed categories. Paraphrase
+grammars extracted via pivoting tend to grow very large. To keep the
+grammar size manageable, we pruned away all paraphrase rules whose
+phrasal paraphrase probabilities $p(e_1|e_2)$ or $p(e_2|e_1)$ were
+smaller than $0.001$.
+
+We extended the feature set used by \newcite{Ganitkevitch2011} with a
+number of features that aim to better describe a rule's compressive
+power: on top of the word count features $c_{\mathit{src}}$ and
+$c_{\mathit{tgt}}$ and the word count difference feature
+$c_{\mathit{diff}}$, we add character based count and difference
+features $\mathit{char}_{\mathit{src}}$,
+$\mathit{char}_{\mathit{tgt}}$, and $\mathit{char}_{\mathit{diff}}$,
+as well as log-compression ratio features $c_{\mathit{cr}} = \log
+\frac{c_{\mathit{tgt}}}{c_{\mathit{src}}}$ and the analogously defined
+$\mathit{char}_{\mathit{cr}}$.
+
+For model tuning and decoding, we used the Joshua machine translation
+system \cite{Joshua-3.0}. The model weights were estimated using an
+implementation of the PRO tuning algorithm \cite{PRO2011}, with
+\textsc{Pr\'ecis} as our objective function \cite{Ganitkevitch2011}.  The
+language model used in our paraphraser and the \newcite{Clarke2008}
+baseline system is a Kneser-Ney discounted 5-gram model estimated on
+the Gigaword corpus using the SRILM toolkit \cite{SRILM}.
 
 
 \section{Sentence Compression Results}
 \label{sec-results}
 
+We adopt the text-to-text evaluation task used by
+\newcite{Ganitkevitch2011} and assess the output quality of our
+paraphrasing system by using it to perform sentence compression. We
+contrast our distributional similarity-informed paraphrase system with
+an uninformed pivoting-only baseline, as well as an implementation of
+\newcite{Clarke2008}'s state-of-the-art compression model which uses a
+series of constraints in an integer linear programming (ILP) solver.
+
+%TODO: start back up here.
+
+We solicit human judgments of the compressions along two five-point
+scales: grammaticality and meaning. Judges are instructed to decide
+how much the meaning from a reference translation is retained in the
+compressed sentence, with a score of 5 indicating that all of the
+important information is present, and 1 being that the compression
+does not retain any of the original meaning. Similarly, a grammar
+score of 5 indicates perfect grammaticality, and a grammar score of 1
+is assigned to sentences that are entirely ungrammatical. To ensure
+fairness, we perform pairwise system comparisons with compression
+rates strictly tied on the sentence-level. For any comparison, a
+sentence is only included in the computation of average scores if the
+difference between both systems' compression rates is
+$<0.05$.\footnote{Because evaluation quality correlates linearly with
+  compression rate, the community-accepted practice of not comparing
+  based on a closely tied compression rate is potentially subject to
+  erroneous interpretation \cite{Napoles2011}.}
+
+Table~\ref{comparison} shows a set of pairwise comparisons for
+compression rates $\approx 0.5$. We see that going from a Hiero-based
+to a syntactic paraphrase grammar yields a significant improvement in
+grammaticality. Adding compression-specific features improves
+grammaticality even further. Further augmenting the grammar with
+deletion rules significantly helps retain the core meaning at
+compression rates this high, however compared to the un-augmented
+syntactic system grammaticality scores drop. While our approach
+significantly outperforms the T3 system, we are not able to match
+ILP's results in grammaticality.
+
+
+In Table~\ref{human_judgments} we compare our system to the ILP
+approach at a modest compression rate of $\approx 0.8$.  Here, we
+significantly outperform ILP in meaning retention while achieving
+comparable results in grammaticality.
+
+These results indicate that, over a variety of compression rates, our
+framework for text-to-text generation is performing as well as or
+better than specifically tailored state-of-the-art methods.
+
+Table~\ref{test_examples} shows an example sentence drawn from our
+test set and the compressions produced by the different systems. We
+see that both the paraphrase and ILP systems produce good quality
+results, with the paraphrase system retaining the meaning of the
+source sentence more accurately.
+
+
+ \begin{table}
+   \small
+   \begin{center}
+     \begin{tabular}{|c|c|c|c|}
+       \hline
+       & CR & Meaning & Grammar \\
+       \hline
+       Reference & 0.73 &  4.80 & 4.53 \\
+       \hline
+       \hline
+       Paraphrase + $n$-gram & 0.78 & {\bf 3.85} & 3.28 \\
+       ILP & 0.78 & 3.58 & {\bf 3.51} \\
+       Paraphrase & 0.78 & 3.73 & 3.13 \\
+       \hline
+       \hline
+       Random Deletions & 0.78 & 3.19 & 2.57 \\
+       \hline
+     \end{tabular}
+   \end{center}
+   \normalsize
+   \caption{Results of the human evaluation on longer compressions:
+     pairwise compression rates (CR), meaning and grammaticality scores. 
+     Bold indicates a statistically significance difference at $p <
+     0.05$.}
+   \label{human_judgments}
+ \end{table}
+
+\begin{table}
+   \small
+   \begin{center}
+     \begin{tabular}{|l|c|c|c|}
+       \hline
+       & CR & Meaning & Grammar \\
+       \hline
+       Paraphrase + $n$-gram & 0.77 & 3.79 & {\bf 3.16} \\
+       Paraphrase & 0.77 & 3.78 & 3.08 \\
+       \hline
+       \hline
+       Paraphrase + $n$-gram & 0.76 & 3.83 & 3.23 \\
+       ILP & 0.76 & 3.70 & 3.58 \\
+       \hline
+    \end{tabular}
+   \end{center}
+   \normalsize
+   \caption{Human evaluation for shorter compressions and for
+     variations of our paraphrase system.  +Feat.\ includes the
+     compression features from Section \ref{feat-design}, +Aug.\
+     includes optional deletion rules from Section
+     \ref{injection}. \vspace{-.5cm}}
+   \label{comparison}
+ \end{table}
 
 \section{Conclusion}
 \label{sec-conclusion}
+
+In this work we introduced a method to learn syntactically informed
+paraphrases from bilingual parallel texts. We discussed the expressive
+power and limitations of our formalism and outlined straightforward
+adaptation strategies for applications in text-to-text generation. We
+demonstrated when our paraphrasing system was adapted to do sentence
+compression, it achieved results competitive with state-of-the-art
+compression systems with only minimal effort.
+
 
 \bibliographystyle{naaclhlt2012}
 \bibliography{monods_t2t}
