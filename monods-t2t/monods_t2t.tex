@@ -382,7 +382,8 @@ Section~\ref{sec-setup}.
   the rule. The nonterminal symbols on the target side are identical
   to the source side in all cases and are omitted for legibility. The
   numbers next to the paraphrase candidates are the log-linear model
-  costs, i.e. lower is better.}
+  costs, i.e. lower is better\footnote{The log-linear model costs are
+    only comparable within each column.}}
 \label{tab-ranking}
 \end{table*}
 
@@ -411,31 +412,17 @@ ranking comparison is based on general paraphrase quality rather than
 task-specific utility.
 
 Table~\ref{tab-ranking} shows two example patterns pulled from our
-grammar, along with the top 5 paraphrases according to each
-system. Comparing across the systems, we notice that the baseline
-system appears to be biased towards the identity paraphrase. This is
-not surprising, as we would intuitively expect an English expression
-to pivot back onto itself more often than it would onto other
-synonymous expressions. While the inclusion of the $n$-gram
-distributional model doesn't seem to have any impact, the rich model
-noticeably flattens the distribution over candidates\footnote{It
-  should be noted, however, that the log-linear model costs the
-  paraphrases are ranked by are only comparable within each
-  column.}. This suggests that by adding rich distributional
-similarity features, we can enable our system to paraphrase more
-freely and thus make it more flexible and expressive.
-
-In addition to this, we can observe a number of high-ranking bad
-paraphrases such as \emph{assume that} going to \emph{is} or
-\emph{sign of} paraphrasing as \emph{with} that occur in the baseline
-system. These seem to be the result of errors in word alignment, and
-only in fringe cases would they result in grammatical or
-meaning-preserving output. While the $n$-gram model partially fixes
-the issue, it is limited by its unigram feature set, making it prone
-to errors such as reducing \emph{sign of} to \emph{of}. Again, the
-rich model fares significantly better here, mostly eliminating bad
-paraphrases in favor of true, and occasionally interesting paraphrases
-such as \emph{imagine} for \emph{assume that}.
+grammar, along with the top 5 paraphrases according to each system. We
+see a number of high-ranking bad paraphrases such as \emph{assume
+  that} going to \emph{is} or \emph{sign of} paraphrasing as
+\emph{with} that occur in the baseline system. These seem to be the
+result of errors in word alignment, and only in fringe cases would
+they result in grammatical or meaning-preserving output. While the
+$n$-gram model partially fixes the issue, it is limited by its unigram
+feature set, making it prone to errors such as reducing \emph{sign of}
+to \emph{of}. Again, the rich model fares significantly better here,
+mostly eliminating bad paraphrases in favor of true, and occasionally
+interesting paraphrases such as \emph{imagine} for \emph{assume that}.
 
 These qualitative observations suggest that a rich feature set is indeed valuable
 when integrating distributional similarity information into a
