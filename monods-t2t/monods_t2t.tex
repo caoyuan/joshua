@@ -228,16 +228,6 @@ generation.
 
 %In this work, we will qualitatively and quantitatively compare the two approaches to distributional signature construction. Section~\ref{sec-ranking} discusses the difference in effects on paraphrase ranking, and Section~\ref{sec-results} presents human evaluation results on a text-to-text task.
 
-\begin{figure}[!t]
-\begin{center}
-\includegraphics[width=0.99\linewidth]{figures/ngram_context.pdf}
-\end{center}
-\caption{An example of immediate lexical context acquisition over
-  n-gram corpora. Left- and right-adjacent unigrams are stored as
-  features for the phrase. Here, ``perfect instance'' and ``great
-  example'' share a number of contexts and would thus be assumed to be
-  paraphrases.}\label{fig-ngram-context}
-\end{figure}
 
 
 \subsection{Additional Related Work}
@@ -551,6 +541,16 @@ approximate the cosine similarity of $u$ and $v$ as:
 where $D()$ is the Hamming distance.
 
 
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/ngram_context.pdf}
+\end{center}
+\caption{An example of immediate lexical context acquisition over
+  n-gram corpora. Left- and right-adjacent unigrams are stored as
+  features for the phrase. Here, ``perfect instance'' and ``great
+  example'' share a number of contexts and would thus be assumed to be
+  paraphrases.}\label{fig-ngram-context}
+\end{figure}
 
 
 \section{Evaluation Results}
