@@ -324,18 +324,34 @@ of occurrences, we additionally query for the shorter sub-phrases that
 are more likely to have been observed often enough for reliable
 signature and thus similarity estimates.
 
-The similarity score is incorporated into our paraphraser as an
-additional rule-level feature $\varphi_{\mathit{sim}}$, and the
-corresponding weight $\lambda_{\mathit{sim}}$ is estimated along with
-the other $\lambda_i$ in our training framework, detailed in
-Section~\ref{sec-setup}. We keep track of the $n$-gram-based
-similarity scores and the richer feature set separately.
+Our two similarity scores are incorporated into the paraphraser as an
+additional rule feature $\varphi_{\mathit{sim}}$. The corresponding
+weight $\lambda_{\mathit{sim}}$ is estimated along with the other
+$\lambda_i$ in our training framework, detailed in
+Section~\ref{sec-setup}.
 
 
 \section{Paraphrase Ranking}
 \label{sec-ranking}
 
-We investigate the effect of combining distributional similarity 
+Properly estimating the quality of a paraphrase pair is crucial to a
+paraphrase system's usefulness to text-to-text applications. 
+
+Pivoted paraphrases and ones based on monolingual distributional
+similarity are drawing on orthogonal sources of information, and we
+believe that combining the two will improve paraphrase quality beyond
+either individual approach.
+
+We test our hypothesis in two ways: applying the distributional
+similarity-annotated paraphrase system to a text-to-text task (see
+Section~\ref{sec-results}), and by examining the effect the
+incorporation of distributional similarity has on the ranking of
+paraphrases within our grammar.
+
+We also compare the two types of distributional similarity at hand:
+simple lexical features estimated collected from a large-scale
+$n$-gram corpus, against a richer feature set but with significantly
+less coverage.
 
 \begin{table*}[t]
 \small
@@ -413,7 +429,7 @@ We investigate the effect of combining distributional similarity
 
 
 
-\section{Experimental Results}
+\section{Experiments}
 \label{sec-results}
 
 \subsection{Sentence Compression}
@@ -556,6 +572,7 @@ source sentence more accurately.
 
   Source & should these political developments have an impact on sports
   ? \tabularnewline
+  \hline
   Reference & should these political events affect sports ? \tabularnewline
   \hline
   Rich & should these events have an impact on sports ? \tabularnewline
