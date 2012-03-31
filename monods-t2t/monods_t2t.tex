@@ -227,11 +227,7 @@ of features for a variety of purposes in NLP and text-to-text
 generation.
 \cite{LapataKellerSaLP05,Bhagat2008,LinEtAlLREC10,VanDurmeLallACL10}.
 
-In this work, we will qualitatively and quantitatively compare the two
-approaches to distributional signature
-construction. Section~\ref{sec-ranking} discusses the difference in
-effects on paraphrase ranking, and Section~\ref{sec-results} presents
-human evaluation results on a text-to-text task.
+%In this work, we will qualitatively and quantitatively compare the two approaches to distributional signature construction. Section~\ref{sec-ranking} discusses the difference in effects on paraphrase ranking, and Section~\ref{sec-results} presents human evaluation results on a text-to-text task.
 
 \begin{figure}[!t]
 \begin{center}
@@ -253,69 +249,6 @@ distributional information. They presented a re-ranking approach and
 evaluated their method via a substitution task. We expand on their by
 both substantially generalizing the formalism used, and by applying an
 evaluating our paraphrase system on a text-to-text generation task.
-
-
-\section{Distributional Similarity Model}
-In order to investigate the impact of the feature set used, we chose
-to extract two collections of distributional similarity-based
-paraphrases. Using a web-scale $n$-gram corpus
-\cite{GoogleNgrams,LinEtAlLREC10}, we extract unigram features for the
-words to the left and right for phrases up to a length of 4. The
-features are weighed with the $n$-gram count given by the dataset. The
-resulting collection comprised context vectors for the 200 million
-most frequent 1- to 4-grams in the dataset.
-
-For contrast, we use the constituency- and dependency-parsed Los
-Angeles Times/Washington Post portion of the Gigaword corpus
-\cite{Gigaword}. The following feature set is used to compute phrase
-contexts over this dataset:
-\begin{itemize}
-\item Lexical and part-of-speech unigram and bigram features,
-  drawn from a three-word window to the right and left of the phrase. 
-\item Features based on dependencies for both links into and out of
-  the phrase, labeled with the corresponding lexical item and POS. If
-  the phrase is syntactically well-formed we additionally include
-  lexical and POS features for its head.
-\item Syntactic features for constituents governing the phrase, as
-  well as for CCG-style slashed constituent labels for the phrase,
-  split by governing constituent and missing constituent. 
-\end{itemize}
-Figure~\ref{fig-rich-context} illustrates our choice of feature
-set. As a result we obtain context information for over 12 million 1-
-to 4-gram phrases.
-
-\begin{figure}[!t]
-\begin{center}
-\includegraphics[width=0.99\linewidth]{figures/rich_context.pdf}
-\end{center}
-\caption{An example of word-labeled dependency-based rich
-  distributional features over a parsed text corpus. The phrase
-  ``perfect instance'' is annotated with the in- and outgoing
-  dependency links, the words at the end of the links and a
-  count.}\label{fig-rich-context}
-\end{figure}
-
-Much like \newcite{Ravichandran2005} and \newcite{Bhagat2008}, we
-relied on Locality Sensitive Hashing (LSH), to make the use of these
-large collections practical. In order to avoid explicitly computing
-the feature vectors, which can be memory intensive for frequent
-phrases, we chose the online LSH variant described in
-\cite{VanDurmeLallACL10}. This method, based on the earlier work of
-\newcite{IndykSTOC98} and \newcite{Charikar02}, approximates the
-cosine similarity between two feature vectors based on the Hamming
-distance in a dimensionality-reduced bitwise representation. Two
-feature vectors $u$, $v$ each of dimension $d$ are first projected
-through a $d \times b$ random matrix populated with draws from
-$\mathcal{N}(0,1)$. We then convert the resulting $b$-dimensional
-vectors into bit-vectors by setting each bit of the signature
-conditioned on whether the corresponding projected value is less than
-0. Now, given the bit signatures $h(\vec{u})$ and $h(\vec{v})$, we
-approximate the cosine similarity of $u$ and $v$ as:
-\begin{equation*}
-  \mathit{sim'}(u, v) =
-  \cos\Big(\frac{D(h(\vec{u}),h(\vec{v}))}{b}\pi\Big) ,
-\end{equation*}
-where $D()$ is the Hamming distance.
 
 
 \section{Incorporating Distributional Similarity}
@@ -461,7 +394,7 @@ pivoting-based baseline system, with the integrations of the two
 previously described distributional similarity models: simple unigram
 features trained on a large $n$-gram corpus (which we will refer to as
 the ``$n$-gram'' model), and a similarity model with a richer feature
-set, but with significantly less coverage (dubbed ``rich'').
+set (dubbed ``rich''), but which has lower coverage.
 
 The ranking of paraphrase candidates is crucially dependent on the
 log-linear model weights $\lambda_i$. To make our analysis realistic,
@@ -499,18 +432,18 @@ rich model fares significantly better here, mostly eliminating bad
 paraphrases in favor of true, and occasionally interesting paraphrases
 such as \emph{imagine} for \emph{assume that}.
 
-Our observations suggest that a rich feature set is indeed valuable
+These qualitative observations suggest that a rich feature set is indeed valuable
 when integrating distributional similarity information into a
-pivot-based paraphrasing system. In the following, we will quantify
+pivot-based paraphrasing system. In next section, we quantify
 this gain by evaluating our system on a text-to-text generation
 problem.
 
 
 
-\section{Experiments}
-\label{sec-results}
+\section{Experimental Setup}
+\label{sec-setup}
 
-\subsection{Sentence Compression}
+\subsection{Task: Sentence Compression}
 
 To evaluate our method on a real text-to-text application, we chose to
 adopt the setting and datasets from \cite{Ganitkevitch2011}. We train
@@ -522,8 +455,7 @@ similarity-informed paraphrase system with an uninformed pivoting-only
 series of constraints in an integer linear programming (ILP)
 solver.
 
-\subsection{Experimental Setup}
-\label{sec-setup}
+\subsection{Baseline Paraphrase Grammar}
 
 We extracted our paraphrase grammar from the French--English portion
 of the Europarl corpus (version 5) \cite{koehn2005europarl}. The
@@ -556,7 +488,74 @@ language model used in our paraphraser and the \newcite{Clarke2008}
 baseline system is a Kneser-Ney discounted 5-gram model estimated on
 the Gigaword corpus using the SRILM toolkit \cite{SRILM}.
 
-\subsection{Evaluation Results}
+
+\subsection{Distributional Similarity Model}\label{distributional-similarity-model}
+In order to investigate the impact of the feature set used, we chose
+to extract two collections of distributional similarity-based
+paraphrases. Using a web-scale $n$-gram corpus
+\cite{GoogleNgrams,LinEtAlLREC10}, we extract unigram features for the
+words to the left and right for phrases up to a length of 4. The
+features are weighed with the $n$-gram count given by the dataset. The
+resulting collection comprised context vectors for the 200 million
+most frequent 1- to 4-grams in the dataset.
+
+For contrast, we use the constituency- and dependency-parsed Los
+Angeles Times/Washington Post portion of the Gigaword corpus
+\cite{Gigaword}. The following feature set is used to compute phrase
+contexts over this dataset:
+\begin{itemize}
+\item Lexical and part-of-speech unigram and bigram features,
+  drawn from a three-word window to the right and left of the phrase. 
+\item Features based on dependencies for both links into and out of
+  the phrase, labeled with the corresponding lexical item and POS. If
+  the phrase is syntactically well-formed we additionally include
+  lexical and POS features for its head.
+\item Syntactic features for constituents governing the phrase, as
+  well as for CCG-style slashed constituent labels for the phrase,
+  split by governing constituent and missing constituent. 
+\end{itemize}
+Figure~\ref{fig-rich-context} illustrates our choice of feature
+set. As a result we obtain context information for over 12 million 1-
+to 4-gram phrases.
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.99\linewidth]{figures/rich_context.pdf}
+\end{center}
+\caption{An example of word-labeled dependency-based rich
+  distributional features over a parsed text corpus. The phrase
+  ``perfect instance'' is annotated with the in- and outgoing
+  dependency links, the words at the end of the links and a
+  count.}\label{fig-rich-context}
+\end{figure}
+
+Much like \newcite{Ravichandran2005} and \newcite{Bhagat2008}, we
+relied on Locality Sensitive Hashing (LSH), to make the use of these
+large collections practical. In order to avoid explicitly computing
+the feature vectors, which can be memory intensive for frequent
+phrases, we chose the online LSH variant described in
+\cite{VanDurmeLallACL10}. This method, based on the earlier work of
+\newcite{IndykSTOC98} and \newcite{Charikar02}, approximates the
+cosine similarity between two feature vectors based on the Hamming
+distance in a dimensionality-reduced bitwise representation. Two
+feature vectors $u$, $v$ each of dimension $d$ are first projected
+through a $d \times b$ random matrix populated with draws from
+$\mathcal{N}(0,1)$. We then convert the resulting $b$-dimensional
+vectors into bit-vectors by setting each bit of the signature
+conditioned on whether the corresponding projected value is less than
+0. Now, given the bit signatures $h(\vec{u})$ and $h(\vec{v})$, we
+approximate the cosine similarity of $u$ and $v$ as:
+\begin{equation*}
+  \mathit{sim'}(u, v) =
+  \cos\Big(\frac{D(h(\vec{u}),h(\vec{v}))}{b}\pi\Big) ,
+\end{equation*}
+where $D()$ is the Hamming distance.
+
+
+
+
+\section{Evaluation Results}
+\label{sec-results}
 
 To rate the quality of our output, we solicit human judgments of the
 compressions along two five-point scales: grammaticality and
@@ -595,8 +594,8 @@ statistically significant at $p < 0.05$.
 \begin{center}
 \includegraphics[width=0.99\linewidth]{figures/pairwise_comparison.pdf}
 \end{center}
-\caption{A breakdown of the of the collected human judgments comparing
-  the systems head to head.}\label{num-ties-wins}
+\caption{A pairwise breakdown of the human judgments comparing
+  the systems. Light bleu regions show the number of times the twi systems were tied, and dark blue shows how many times one system was judged to be better than the other.}\label{num-ties-wins}
 \end{figure}
 
 Table~\ref{test_examples} shows an example sentence drawn from our
