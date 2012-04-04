@@ -1,8 +1,8 @@
 all:
-	pdflatex thrax
-	bibtex thrax
-	pdflatex thrax
-	pdflatex thrax
+	pdflatex joshua
+	bibtex joshua
+	pdflatex joshua
+	pdflatex joshua
 
 clean:
 	rm *.aux *.bbl *.blg *.log
