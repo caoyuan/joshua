@@ -1,0 +1,189 @@
+\documentclass[11pt]{article}
+
+\usepackage{naaclhlt2012}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{marvosym}
+
+\setlength\titlebox{6.5cm}
+
+\hyphenation{CachePipe}
+
+%% \newcommand{\aff}{\ensuremath{{}^\text{\Radioactivity}}}
+%% \newcommand{\afff}{\ensuremath{{}^\text{\Bat}}}
+\newcommand{\aff}{\ensuremath{{}^\text{1}}}
+\newcommand{\afff}{\ensuremath{{}^\text{2}}}
+\newcommand{\grammarrule}[3]{$#1 \to \langle \text{#2} , \text{#3} \rangle$ }
+
+\title{Joshua 3.0: Syntax-based Machine Translation \\ with the Thrax
+  Grammar Extractor}
+
+\author{Juri Ganitkevitch\aff, Yuan Cao\aff, Chris
+  Callison-Burch\aff, Matt Post\afff, \and Jonathan Weese\aff \\
+  \aff Center for Language and Speech Processing \\
+  \afff Human Language Technology Center of Excellence \\
+  Johns Hopkins University}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Pro, compact grammars, paraphrase pivoting 
+  TODO Juri: write this
+\end{abstract}
+
+\section{Introduction}
+
+TODO Juri: clean this up and flesh it out.
+
+Joshua is an
+open-source\footnote{\url{http://github.com/joshua-decoder/joshua}}
+toolkit for hierarchical machine translation of human languages.  The
+original version of Joshua \cite{Joshua-WMT} was a reimplementation of
+the Python-based Hiero machine-translation system \cite{Chiang2007};
+it was later extended \cite{li2010joshua} to support richer
+formalisms, such as SAMT \cite{samt2006}.
+
+\section{Compact Grammar Representation}
+
+TODO Juri: intro into this part.
+
+\subsection{Packed Synchronous Tries}
+
+Memory usage is a limitation of both the Joshua and cdec
+extractors. Translation models can be very large, and many feature
+scores require accumulation of statistical data from the entire set of
+extracted rules. Since it is impractical to keep the entire grammar in
+memory, rules are usually sorted on disk and then read sequentially.
+
+\subsubsection{Source-Side Trie}
+
+TODO Juri: describe source-side format
+
+\subsubsection{Target-Side Trie}
+
+TODO Juri: describe target-side format
+
+\subsubsection{Attached Data}
+
+TODO Juri: discuss attached data idea, describe feature format,
+alignments
+
+\subsection{Quantization}
+
+TODO Juri: discuss features taking the most spaces, quantization in
+the spirit of KenLM and BerkeleyLM.
+
+\subsection{Optimizations}
+
+TODO Juri: what did we do to improve decoding speed?
+
+\subsection{Experiments}
+
+TODO Juri: brief rundown of experiments
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.4\linewidth]{figures/placeholder.jpeg}
+\end{center}
+\caption{TODO Juri: Decoding versus load time plot.}
+\label{fig-example-compression}
+\end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+Language pair & sentences (K) & words (M) \\
+\hline\hline
+cs--en & 332 & 4.7 \\
+de--en & 279 & 5.5 \\
+en--cs & 487 & 6.9 \\
+en--de & 359 & 7.2 \\
+en--fr & 682 & 12.5 \\
+fr--en & 792 & 14.4 \\
+\end{tabular}
+\caption{TODO Juri: some BLEU scores for quantized versus not quantized.}
+\end{table}
+
+
+\section{Y-PRO: Pairwise Ranking Optimization in Joshua}
+\label{section:results}
+
+TODO Yuan: give a brief description of PRO, highlight the
+compatibility with Z-MERT's easily plugged in metrics. Also highlight
+the supported classifiers (which we should fix in the main repository) 
+
+\subsection{Experiments}
+
+TODO Yuan: Describe the experiments you did for
+convergence/speed/translation quality
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.4\linewidth]{figures/placeholder.jpeg}
+\end{center}
+\caption{TODO Yuan: Plot of iterations/score for various classifiers,
+  pointing out that our built-in perceptron is doing well.}
+\label{fig-example-compression}
+\end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+Language pair & sentences (K) & words (M) \\
+\hline\hline
+cs--en & 332 & 4.7 \\
+de--en & 279 & 5.5 \\
+en--cs & 487 & 6.9 \\
+en--de & 359 & 7.2 \\
+en--fr & 682 & 12.5 \\
+fr--en & 792 & 14.4 \\
+\end{tabular}
+\caption{TODO Yuan: Table of MERT versus PRO (with various
+  classifiers) showing numer of iterations, time needed and scores on
+  dev and test.}
+\end{table}
+
+
+\section{Thrax: Paraphrase Extraction at Scale}
+
+TODO Juri: describe paraphrase stage and integration with Thrax
+features
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+Language pair & sentences (K) & words (M) \\
+\hline\hline
+cs--en & 332 & 4.7 \\
+de--en & 279 & 5.5 \\
+en--cs & 487 & 6.9 \\
+en--de & 359 & 7.2 \\
+en--fr & 682 & 12.5 \\
+fr--en & 792 & 14.4 \\
+\end{tabular}
+\caption{TODO Juri: Table of large grammars we extracted.}
+\end{table}
+
+\section{Future work}
+
+TODO All: Ideas? Sparse features?
+
+
+% \section*{Acknowledgements}
+% This research was supported by in part by the EuroMatrixPlus project
+% funded by the European Commission (7th Framework Programme), and by
+% the NSF under grant IIS-0713448. Opinions, interpretations, and
+% conclusions are the authors' alone.
+
+\bibliographystyle{naaclhlt2012}
+\bibliography{joshua}
+
+\end{document}
