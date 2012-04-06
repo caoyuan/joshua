@@ -113,6 +113,7 @@ fr--en & 792 & 14.4 \\
 \end{table}
 
 
+<<<<<<< HEAD
 \section{J-PRO: Pairwise Ranking Optimization in Joshua}
 \label{section:results}
 \subsection{PRO Overview} \label{section:pro-overview}
@@ -183,6 +184,44 @@ Test(MT04)  &32.56  &32.65  &32.65  &32.55\\
 Test(MT05)  &30.68  &30.87  &31     &30.89\\
 \end{tabular}
 \caption{\label{table:pro} Comparison between the results given by Z-MERT and J-PRO(trained with 10 features).}
+=======
+\section{Y-PRO: Pairwise Ranking Optimization in Joshua}
+\label{section:results}
+
+TODO Yuan: give a brief description of PRO, highlight the
+compatibility with Z-MERT's easily plugged in metrics. Also highlight
+the supported classifiers (which we should fix in the main repository) 
+
+\subsection{Experiments}
+
+TODO Yuan: Describe the experiments you did for
+convergence/speed/translation quality
+
+\begin{figure}[!t]
+\begin{center}
+\includegraphics[width=0.4\linewidth]{figures/placeholder.jpeg}
+\end{center}
+\caption{TODO Yuan: Plot of iterations/score for various classifiers,
+  pointing out that our built-in perceptron is doing well.}
+\label{fig-example-compression}
+\end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+Language pair & sentences (K) & words (M) \\
+\hline\hline
+cs--en & 332 & 4.7 \\
+de--en & 279 & 5.5 \\
+en--cs & 487 & 6.9 \\
+en--de & 359 & 7.2 \\
+en--fr & 682 & 12.5 \\
+fr--en & 792 & 14.4 \\
+\end{tabular}
+\caption{TODO Yuan: Table of MERT versus PRO (with various
+  classifiers) showing numer of iterations, time needed and scores on
+  dev and test.}
+>>>>>>> 16400e4dea2b9355b8c7e2fdfa80cd4d6e843fe2
 \end{table}
 
 
@@ -208,8 +247,12 @@ fr--en & 792 & 14.4 \\
 
 \section{Future work}
 
+<<<<<<< HEAD
 %TODO All: Ideas? Sparse features?
 (Possibly more flexible/convenient definition of sparse features in the decoder.)
+=======
+TODO All: Ideas? Sparse features?
+>>>>>>> 16400e4dea2b9355b8c7e2fdfa80cd4d6e843fe2
 
 
 % \section*{Acknowledgements}
