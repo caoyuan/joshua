@@ -1,19 +1,17 @@
-/* This file is part of the Joshua Machine Translation System.
+/*
+ * This file is part of the Joshua Machine Translation System.
  * 
- * Joshua is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Joshua is free software; you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free
- * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307 USA
  */
 
 package joshua.pro;
@@ -31,7 +29,7 @@ import java.lang.Class;
 
 import joshua.zmert.*;
 
-//this class implements the PRO tuning method
+// this class implements the PRO tuning method
 public class Optimizer {
   public Optimizer(long _seed, int _sentNum, Vector<String> _output, double[] _initialTotalLambda,
       HashMap<String, String>[] _feat_hash, HashMap<String, String>[] _stats_hash,
@@ -88,8 +86,8 @@ public class Optimizer {
 
     try {
       // create classifier object from the given class name string
-      ClassifierInterface myClassifier = (ClassifierInterface) Class.forName(classifierAlg)
-          .newInstance();
+      ClassifierInterface myClassifier =
+          (ClassifierInterface) Class.forName(classifierAlg).newInstance();
       System.out.println("Total training samples(class +1 & class -1): " + allSamples.size());
 
       // thet intitialLambda & finalLambda are all trainable parameters
@@ -218,8 +216,8 @@ public class Optimizer {
           if (!trainMode.equals("3")) {
             for (int f = 0; f < feat_str.length; f++) {
               feat_info = feat_str[f].split(":");
-              modelScore += Double.parseDouble(feat_info[1])
-                  * finalLambda[Integer.parseInt(feat_info[0])];
+              modelScore +=
+                  Double.parseDouble(feat_info[1]) * finalLambda[Integer.parseInt(feat_info[0])];
             }
           } else {
             int new_feat_id = 0;
@@ -327,8 +325,7 @@ public class Optimizer {
 
         accept = randgen.nextDouble() <= probAccept ? true : false;
 
-        if (accept)
-          acceptedPair.put(j1 + " " + j2, scoreDiff);
+        if (accept) acceptedPair.put(j1 + " " + j2, scoreDiff);
       }
     } else {
       for (int i = 0; i < candCount; i++) {
@@ -340,8 +337,7 @@ public class Optimizer {
 
             accept = randgen.nextDouble() <= probAccept ? true : false;
 
-            if (accept)
-              acceptedPair.put(i + " " + j, scoreDiff);
+            if (accept) acceptedPair.put(i + " " + j, scoreDiff);
           }
         }
       }
@@ -365,8 +361,7 @@ public class Optimizer {
                                                    // duplicate
 
     for (String key : acceptedPairSort.keySet()) {
-      if (topCount == Xi)
-        break;
+      if (topCount == Xi) break;
 
       pair_str = key.split("\\s+");
       // System.out.println(pair_str[0]+" "+pair_str[1]+" "+acceptedPair.get(key));
@@ -390,10 +385,14 @@ public class Optimizer {
 
         if (nbestFormat.equals("dense")) {
           for (int i = 0; i < feat_str_j1.length; i++) {
-            featDiff += (i + 1) + ":"
-                + (Double.parseDouble(feat_str_j1[i]) - Double.parseDouble(feat_str_j2[i])) + " ";
-            neg_featDiff += (i + 1) + ":"
-                + (Double.parseDouble(feat_str_j2[i]) - Double.parseDouble(feat_str_j1[i])) + " ";
+            featDiff +=
+                (i + 1) + ":"
+                    + (Double.parseDouble(feat_str_j1[i]) - Double.parseDouble(feat_str_j2[i]))
+                    + " ";
+            neg_featDiff +=
+                (i + 1) + ":"
+                    + (Double.parseDouble(feat_str_j2[i]) - Double.parseDouble(feat_str_j1[i]))
+                    + " ";
           }
         } else {
           HashMap<String, String> firing_feat = new HashMap<String, String>();
@@ -409,14 +408,16 @@ public class Optimizer {
               feat_info = feat_str_j2[i].split(":");
 
               if (firing_feat.containsKey(feat_info[0])) {
-                featDiff += feat_info[0]
-                    + ":"
-                    + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
-                        .parseDouble(feat_info[1])) + " ";
-                neg_featDiff += feat_info[0]
-                    + ":"
-                    + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
-                        .get(feat_info[0]))) + " ";
+                featDiff +=
+                    feat_info[0]
+                        + ":"
+                        + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
+                            .parseDouble(feat_info[1])) + " ";
+                neg_featDiff +=
+                    feat_info[0]
+                        + ":"
+                        + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
+                            .get(feat_info[0]))) + " ";
               }
             }
           } else {
@@ -436,14 +437,16 @@ public class Optimizer {
 
               // only cares about sparse features
               if (firing_feat.containsKey(feat_info[0]) && new_feat_id >= 1) {
-                featDiff += new_feat_id
-                    + ":"
-                    + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
-                        .parseDouble(feat_info[1])) + " ";
-                neg_featDiff += new_feat_id
-                    + ":"
-                    + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
-                        .get(feat_info[0]))) + " ";
+                featDiff +=
+                    new_feat_id
+                        + ":"
+                        + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
+                            .parseDouble(feat_info[1])) + " ";
+                neg_featDiff +=
+                    new_feat_id
+                        + ":"
+                        + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
+                            .get(feat_info[0]))) + " ";
               }
             }
           }
@@ -570,10 +573,8 @@ public class Optimizer {
     double scaling = 0.0;
 
     for (int i = 1; i < origLambda.length; i++) {
-      if (origLambda[i] > max)
-        max = origLambda[i];
-      if (origLambda[i] < min)
-        min = origLambda[i];
+      if (origLambda[i] > max) max = origLambda[i];
+      if (origLambda[i] < min) min = origLambda[i];
     }
 
     if (Math.abs(max) > 1e-30 || Math.abs(min) > 1e-30) // not all weights are
@@ -586,8 +587,7 @@ public class Optimizer {
           scaling = max;
         else
           scaling = Math.abs(min);
-      } else if (max <= 0)
-        scaling = Math.abs(min);
+      } else if (max <= 0) scaling = Math.abs(min);
 
       for (int i = 1; i < origLambda.length; i++)
         origLambda[i] /= scaling;
@@ -626,6 +626,7 @@ public class Optimizer {
   private final static double NegInf = (-1.0 / 0.0);
   private final static double PosInf = (+1.0 / 0.0);
 }
+
 
 class ValueComparator implements Comparator {
   Map base;

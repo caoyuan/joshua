@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
 
-//sparse feature representation version
+// sparse feature representation version
 public class ClassifierMegaM implements ClassifierInterface {
   @Override
   public double[] runClassifier(Vector<String> samples, double[] initialLambda, int featDim) {
@@ -81,8 +81,7 @@ public class ClassifierMegaM implements ClassifierInterface {
       exception.getStackTrace();
     } catch (InterruptedException e) {
       System.err.println("InterruptedException in MertCore.run_decoder(int): " + e.getMessage());
-      System.exit(99903);
-      ;
+      System.exit(99903);;
     }
 
     System.out.println("------- MegaM training ends ------");
