@@ -17,44 +17,50 @@
  */
 
 package joshua.pro;
-import java.io.*;
 
-public class PRO
-{
-  public static void main(String[] args) throws Exception
-  {
+public class PRO {
+  public static void main(String[] args) throws Exception {
     boolean external = false; // should each PRO iteration be launched externally?
 
     if (args.length == 1) {
-      if (args[0].equals("-h")) { printPROUsage(args.length,true); System.exit(2); }
-      else { external = false; }
-    } else if (args.length == 3) { external = true; }
-    else { printPROUsage(args.length,false); System.exit(1); }
+      if (args[0].equals("-h")) {
+        printPROUsage(args.length, true);
+        System.exit(2);
+      } else {
+        external = false;
+      }
+    } else if (args.length == 3) {
+      external = true;
+    } else {
+      printPROUsage(args.length, false);
+      System.exit(1);
+    }
 
     if (!external) {
-    PROCore myPRO = new PROCore(args[0]);
+      PROCore myPRO = new PROCore(args[0]);
       myPRO.run_PRO(); // optimize lambda[]!!!
       myPRO.finish();
     } else {
-    	
+
       int maxMem = Integer.parseInt(args[1]);
       String configFileName = args[2];
       String stateFileName = "PRO.temp.state";
       String cp = System.getProperty("java.class.path");
       boolean done = false;
       int iteration = 0;
-            
+
       while (!done) {
         ++iteration;
         Runtime rt = Runtime.getRuntime();
-        Process p = rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " joshua.pro.PROCore " + configFileName + " " + stateFileName + " " + iteration);
-/*
-        BufferedReader br_i = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        BufferedReader br_e = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        String dummy_line = null;
-        while ((dummy_line = br_i.readLine()) != null) { System.out.println(dummy_line); }
-        while ((dummy_line = br_e.readLine()) != null) { System.out.println(dummy_line); }
-*/
+        Process p = rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " joshua.pro.PROCore "
+            + configFileName + " " + stateFileName + " " + iteration);
+        /*
+         * BufferedReader br_i = new BufferedReader(new InputStreamReader(p.getInputStream()));
+         * BufferedReader br_e = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+         * String dummy_line = null; while ((dummy_line = br_i.readLine()) != null) {
+         * System.out.println(dummy_line); } while ((dummy_line = br_e.readLine()) != null) {
+         * System.out.println(dummy_line); }
+         */
         StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), 1);
         StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), 1);
 
@@ -63,9 +69,14 @@ public class PRO
 
         int status = p.waitFor();
 
-        if (status == 90) { done = true; }
-        else if (status == 91) { done = false; }
-        else { System.out.println("PRO exiting prematurely (PROCore returned " + status + ")..."); break; }
+        if (status == 90) {
+          done = true;
+        } else if (status == 91) {
+          done = false;
+        } else {
+          System.out.println("PRO exiting prematurely (PROCore returned " + status + ")...");
+          break;
+        }
       }
     }
 
@@ -73,8 +84,7 @@ public class PRO
 
   } // main(String[] args)
 
-  public static void printPROUsage(int argsLen, boolean detailed)
-  {
+  public static void printPROUsage(int argsLen, boolean detailed) {
     if (!detailed) {
       println("Oops, you provided " + argsLen + " args!");
       println("");
@@ -120,7 +130,7 @@ public class PRO
       println("  -opi oncePerIt: modify a parameter only once per iteration (1) or not (0)\n    [[default: 0]]");
       println("  -rand randInit: choose initial point randomly (1) or from paramsFile (0)\n    [[default: 0]]");
       println("  -seed seed: seed used to initialize random number generator\n    [[default: time (i.e. value returned by System.currentTimeMillis()]]");
-//      println("  -ud useDisk: reliance on disk (0-2; higher value => more reliance)\n    [[default: 2]]");
+      // println("  -ud useDisk: reliance on disk (0-2; higher value => more reliance)\n    [[default: 2]]");
       println("");
       println("Decoder specs:");
       println("  -cmd commandFile: name of file containing commands to run the decoder\n    [[default: null string (i.e. decoder is a JoshuaDecoder object)]]");
@@ -137,6 +147,8 @@ public class PRO
     }
   }
 
-  private static void println(Object obj) { System.out.println(obj); }
+  private static void println(Object obj) {
+    System.out.println(obj);
+  }
 
 }
