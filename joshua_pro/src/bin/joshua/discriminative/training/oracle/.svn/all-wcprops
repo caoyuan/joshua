@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/joshua/!svn/ver/1393/trunk/src/joshua/discriminative/training/oracle
+END
+FilterHyperGraph.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/FilterHyperGraph.java
+END
+StringSumInHG.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/StringSumInHG.java
+END
+ApproximateFilterHGByOneString.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/ApproximateFilterHGByOneString.java
+END
+ComputeOracleStateResult.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/ComputeOracleStateResult.java
+END
+FilgerHypergraph.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/FilgerHypergraph.java
+END
+EquivLMState.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/EquivLMState.java
+END
+RefineHG.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/RefineHG.java
+END
+DPStateOracle.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/DPStateOracle.java
+END
+OracleExtractionOnHGV2.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/joshua/!svn/ver/1393/trunk/src/joshua/discriminative/training/oracle/OracleExtractionOnHGV2.java
+END
+SplitHg.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/oracle/SplitHg.java
+END
+OracleExtractionOnHGV3.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/joshua/!svn/ver/1393/trunk/src/joshua/discriminative/training/oracle/OracleExtractionOnHGV3.java
+END

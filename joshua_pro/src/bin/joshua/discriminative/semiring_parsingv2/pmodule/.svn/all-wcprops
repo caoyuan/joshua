@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/1713/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule
+END
+ScalarPM.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/ScalarPM.java
+END
+PModule.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/PModule.java
+END
+ListPM.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/joshua/!svn/ver/1713/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/ListPM.java
+END
+SparseMap.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/SparseMap.java
+END
+SparseArray.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/SparseArray.java
+END
+ExpectationSemiringPM.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/pmodule/ExpectationSemiringPM.java
+END

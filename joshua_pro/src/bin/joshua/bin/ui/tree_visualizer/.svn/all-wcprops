@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/joshua/!svn/ver/1053/trunk/src/joshua/ui/tree_visualizer
+END
+tree.en
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnroot/joshua/!svn/ver/857/trunk/src/joshua/ui/tree_visualizer/tree.en
+END
+DerivationTree.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svnroot/joshua/!svn/ver/1053/trunk/src/joshua/ui/tree_visualizer/DerivationTree.java
+END
+DerivationTreePickedState.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/joshua/!svn/ver/1053/trunk/src/joshua/ui/tree_visualizer/DerivationTreePickedState.java
+END
+Node.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/joshua/!svn/ver/1053/trunk/src/joshua/ui/tree_visualizer/Node.java
+END
+tree.fr
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnroot/joshua/!svn/ver/857/trunk/src/joshua/ui/tree_visualizer/tree.fr
+END
+DerivationViewer.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/1053/trunk/src/joshua/ui/tree_visualizer/DerivationViewer.java
+END
+DerivationTreeTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/joshua/!svn/ver/1026/trunk/src/joshua/ui/tree_visualizer/DerivationTreeTransformer.java
+END
+DerivationBrowser.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/1026/trunk/src/joshua/ui/tree_visualizer/DerivationBrowser.java
+END
+DerivationTreeEdge.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/857/trunk/src/joshua/ui/tree_visualizer/DerivationTreeEdge.java
+END
+DerivationViewerApplet.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/joshua/!svn/ver/1026/trunk/src/joshua/ui/tree_visualizer/DerivationViewerApplet.java
+END

@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/joshua/!svn/ver/1778/trunk/src/joshua/util
+END
+JoshuaEval.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/joshua/!svn/ver/1778/trunk/src/joshua/util/JoshuaEval.java
+END
+Counted.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/959/trunk/src/joshua/util/Counted.java
+END
+Bits.java
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/joshua/!svn/ver/963/trunk/src/joshua/util/Bits.java
+END
+FileUtility.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/joshua/!svn/ver/1366/trunk/src/joshua/util/FileUtility.java
+END
+CommandLineParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/CommandLineParser.java
+END
+Cache.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/joshua/!svn/ver/1337/trunk/src/joshua/util/Cache.java
+END
+Ngram.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/joshua/!svn/ver/1373/trunk/src/joshua/util/Ngram.java
+END
+UnicodeCharacterName.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/joshua/!svn/ver/1219/trunk/src/joshua/util/UnicodeCharacterName.java
+END
+ReverseOrder.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/ReverseOrder.java
+END
+IntegerPair.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/joshua/!svn/ver/1370/trunk/src/joshua/util/IntegerPair.java
+END
+Regex.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/joshua/!svn/ver/1024/trunk/src/joshua/util/Regex.java
+END
+Counts.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/1357/trunk/src/joshua/util/Counts.java
+END
+CoIterator.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/joshua/!svn/ver/848/trunk/src/joshua/util/CoIterator.java
+END
+QuietFormatter.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/QuietFormatter.java
+END
+SocketUtility.java
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/joshua/!svn/ver/785/trunk/src/joshua/util/SocketUtility.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/util/package.html
+END
+CompareGrammars.java
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/joshua/!svn/ver/907/trunk/src/joshua/util/CompareGrammars.java
+END
+SampledList.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/SampledList.java
+END
+BotMap.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/joshua/!svn/ver/935/trunk/src/joshua/util/BotMap.java
+END
+ExtractTopCand.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/joshua/!svn/ver/917/trunk/src/joshua/util/ExtractTopCand.java
+END
+NullIterator.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/joshua/!svn/ver/920/trunk/src/joshua/util/NullIterator.java
+END
+Platform.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/joshua/!svn/ver/1067/trunk/src/joshua/util/Platform.java
+END
+FormatUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/FormatUtil.java
+END
+Pair.java
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/util/Pair.java
+END
+Lists.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/joshua/!svn/ver/992/trunk/src/joshua/util/Lists.java
+END

@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/joshua/!svn/ver/1722/trunk/src/joshua/decoder/ff/tm/hiero
+END
+DiskHyperGraphFormatReader.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/joshua/!svn/ver/1265/trunk/src/joshua/decoder/ff/tm/hiero/DiskHyperGraphFormatReader.java
+END
+MemoryBasedBatchGrammar.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/joshua/!svn/ver/1295/trunk/src/joshua/decoder/ff/tm/hiero/MemoryBasedBatchGrammar.java
+END
+SamtFormatReader.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/1722/trunk/src/joshua/decoder/ff/tm/hiero/SamtFormatReader.java
+END
+HieroFormatReader.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svnroot/joshua/!svn/ver/1722/trunk/src/joshua/decoder/ff/tm/hiero/HieroFormatReader.java
+END
+MemoryBasedRuleBin.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svnroot/joshua/!svn/ver/1174/trunk/src/joshua/decoder/ff/tm/hiero/MemoryBasedRuleBin.java
+END
+MemoryBasedTrie.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/1265/trunk/src/joshua/decoder/ff/tm/hiero/MemoryBasedTrie.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/decoder/ff/tm/hiero/package.html
+END

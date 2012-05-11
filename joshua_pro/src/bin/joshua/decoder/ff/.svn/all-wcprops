@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/joshua/!svn/ver/1722/trunk/src/joshua/decoder/ff
+END
+PhraseModelFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/decoder/ff/PhraseModelFF.java
+END
+FeatureFunction.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/decoder/ff/FeatureFunction.java
+END
+ArityPhrasePenaltyFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/joshua/!svn/ver/1402/trunk/src/joshua/decoder/ff/ArityPhrasePenaltyFF.java
+END
+WordPenaltyFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnroot/joshua/!svn/ver/1368/trunk/src/joshua/decoder/ff/WordPenaltyFF.java
+END
+DefaultStatefulFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/decoder/ff/DefaultStatefulFF.java
+END
+DefaultStatelessFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/joshua/!svn/ver/1336/trunk/src/joshua/decoder/ff/DefaultStatelessFF.java
+END
+SourcePathFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/decoder/ff/SourcePathFF.java
+END
+SourceLatticeArcLogPFF.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/decoder/ff/SourceLatticeArcLogPFF.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/decoder/ff/package.html
+END

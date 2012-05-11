@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring
+END
+LogSemiring.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring/LogSemiring.java
+END
+SecondOrderES.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring/SecondOrderES.java
+END
+ExpectationSemiring.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring/ExpectationSemiring.java
+END
+RealSemiring.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring/RealSemiring.java
+END
+Semiring.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/semiring_parsingv2/semiring/Semiring.java
+END

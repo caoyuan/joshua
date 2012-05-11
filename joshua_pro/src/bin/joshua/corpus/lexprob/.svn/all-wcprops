@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/joshua/!svn/ver/1404/trunk/src/joshua/corpus/lexprob
+END
+AbstractLexProbs.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/joshua/!svn/ver/956/trunk/src/joshua/corpus/lexprob/AbstractLexProbs.java
+END
+SampledLexProbs.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/joshua/!svn/ver/1354/trunk/src/joshua/corpus/lexprob/SampledLexProbs.java
+END
+CompareLexProbs.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/joshua/!svn/ver/901/trunk/src/joshua/corpus/lexprob/CompareLexProbs.java
+END
+ExtractWordPairs.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/corpus/lexprob/ExtractWordPairs.java
+END
+WriteLexProbs.java
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/joshua/!svn/ver/1017/trunk/src/joshua/corpus/lexprob/WriteLexProbs.java
+END
+LexicalProbabilities.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/1354/trunk/src/joshua/corpus/lexprob/LexicalProbabilities.java
+END
+LexProbs.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/joshua/!svn/ver/1404/trunk/src/joshua/corpus/lexprob/LexProbs.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/corpus/lexprob/package.html
+END

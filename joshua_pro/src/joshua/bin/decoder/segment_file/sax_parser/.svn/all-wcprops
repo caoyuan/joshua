@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svnroot/joshua/!svn/ver/898/trunk/src/joshua/decoder/segment_file/sax_parser
+END
+LocatorInputStream.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/joshua/!svn/ver/881/trunk/src/joshua/decoder/segment_file/sax_parser/LocatorInputStream.java
+END
+SAXConstraintSpan.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/joshua/!svn/ver/882/trunk/src/joshua/decoder/segment_file/sax_parser/SAXConstraintSpan.java
+END
+SAXConstraintRule.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/joshua/!svn/ver/882/trunk/src/joshua/decoder/segment_file/sax_parser/SAXConstraintRule.java
+END
+example.xml
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svnroot/joshua/!svn/ver/874/trunk/src/joshua/decoder/segment_file/sax_parser/example.xml
+END
+SAXSegmentParser.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/joshua/!svn/ver/898/trunk/src/joshua/decoder/segment_file/sax_parser/SAXSegmentParser.java
+END
+SegmentFile.dtd
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/joshua/!svn/ver/866/trunk/src/joshua/decoder/segment_file/sax_parser/SegmentFile.dtd
+END
+SAXSegment.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/joshua/!svn/ver/882/trunk/src/joshua/decoder/segment_file/sax_parser/SAXSegment.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svnroot/joshua/!svn/ver/810/trunk/src/joshua/decoder/segment_file/sax_parser/package.html
+END

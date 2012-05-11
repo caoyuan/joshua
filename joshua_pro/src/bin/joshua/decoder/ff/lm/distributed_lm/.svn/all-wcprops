@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/joshua/!svn/ver/1271/trunk/src/joshua/decoder/ff/lm/distributed_lm
+END
+LMServer.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/817/trunk/src/joshua/decoder/ff/lm/distributed_lm/LMServer.java
+END
+LMClient.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svnroot/joshua/!svn/ver/574/trunk/src/joshua/decoder/ff/lm/distributed_lm/LMClient.java
+END
+LMClientMultiServer.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/joshua/!svn/ver/1271/trunk/src/joshua/decoder/ff/lm/distributed_lm/LMClientMultiServer.java
+END
+LMClientSingle.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/joshua/!svn/ver/1271/trunk/src/joshua/decoder/ff/lm/distributed_lm/LMClientSingle.java
+END
+LMGrammarRemote.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/joshua/!svn/ver/816/trunk/src/joshua/decoder/ff/lm/distributed_lm/LMGrammarRemote.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/decoder/ff/lm/distributed_lm/package.html
+END
