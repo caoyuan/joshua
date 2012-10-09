@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/ui/hypergraph_visualizer
+END
+HyperEdgeListCellRenderer.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/joshua/!svn/ver/1305/trunk/src/joshua/ui/hypergraph_visualizer/HyperEdgeListCellRenderer.java
+END
+Browser.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svnroot/joshua/!svn/ver/1045/trunk/src/joshua/ui/hypergraph_visualizer/Browser.java
+END
+NodeVertex.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/1258/trunk/src/joshua/ui/hypergraph_visualizer/NodeVertex.java
+END
+Edge.java
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/joshua/!svn/ver/919/trunk/src/joshua/ui/hypergraph_visualizer/Edge.java
+END
+HyperEdgeListSelectionListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/joshua/!svn/ver/1050/trunk/src/joshua/ui/hypergraph_visualizer/HyperEdgeListSelectionListener.java
+END
+LeafVertex.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/joshua/!svn/ver/1050/trunk/src/joshua/ui/hypergraph_visualizer/LeafVertex.java
+END
+HyperEdgeVertex.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svnroot/joshua/!svn/ver/1021/trunk/src/joshua/ui/hypergraph_visualizer/HyperEdgeVertex.java
+END
+HyperGraphPickedState.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/joshua/!svn/ver/1258/trunk/src/joshua/ui/hypergraph_visualizer/HyperGraphPickedState.java
+END
+HyperGraphViewer.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/joshua/!svn/ver/1258/trunk/src/joshua/ui/hypergraph_visualizer/HyperGraphViewer.java
+END
+HyperGraphTransformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/joshua/!svn/ver/1021/trunk/src/joshua/ui/hypergraph_visualizer/HyperGraphTransformer.java
+END
+JungHyperGraph.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/joshua/!svn/ver/1258/trunk/src/joshua/ui/hypergraph_visualizer/JungHyperGraph.java
+END
+Vertex.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/joshua/!svn/ver/1052/trunk/src/joshua/ui/hypergraph_visualizer/Vertex.java
+END

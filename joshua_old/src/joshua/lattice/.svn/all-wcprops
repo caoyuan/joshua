@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/joshua/!svn/ver/1067/trunk/src/joshua/lattice
+END
+NodeIdentifierComparator.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/lattice/NodeIdentifierComparator.java
+END
+Arc.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/1067/trunk/src/joshua/lattice/Arc.java
+END
+Lattice.java
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/joshua/!svn/ver/1067/trunk/src/joshua/lattice/Lattice.java
+END
+Node.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/joshua/!svn/ver/849/trunk/src/joshua/lattice/Node.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/joshua/!svn/ver/758/trunk/src/joshua/lattice/package.html
+END

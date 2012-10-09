@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder
+END
+ConstituentVariationalDecoder.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/ConstituentVariationalDecoder.java
+END
+VariationalDecoder.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/VariationalDecoder.java
+END
+VariationalDecoderMinRiskMert.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/VariationalDecoderMinRiskMert.java
+END
+VariationalNgramApproximator.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/VariationalNgramApproximator.java
+END
+CrossEntropyOnHG.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/CrossEntropyOnHG.java
+END
+VariationalDecoderConfiguration.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/VariationalDecoderConfiguration.java
+END
+InformationMeasures.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/variational_decoder/InformationMeasures.java
+END

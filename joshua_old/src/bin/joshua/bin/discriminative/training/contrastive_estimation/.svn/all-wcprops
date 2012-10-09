@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/joshua/!svn/ver/1576/trunk/src/joshua/discriminative/training/contrastive_estimation
+END
+ConfusionExtractorFromHG.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svnroot/joshua/!svn/ver/1576/trunk/src/joshua/discriminative/training/contrastive_estimation/ConfusionExtractorFromHG.java
+END
+ConvertGrammarToFeatureFile.java
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/contrastive_estimation/ConvertGrammarToFeatureFile.java
+END
+ConfusionExtractorFromBilingualSCFG.java
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svnroot/joshua/!svn/ver/1576/trunk/src/joshua/discriminative/training/contrastive_estimation/ConfusionExtractorFromBilingualSCFG.java
+END
+readme
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/joshua/!svn/ver/1348/trunk/src/joshua/discriminative/training/contrastive_estimation/readme
+END

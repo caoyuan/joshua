@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svnroot/joshua/!svn/ver/1799/trunk/src/joshua/discriminative/training/risk_annealer
+END
+GradientOptimizer.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svnroot/joshua/!svn/ver/1771/trunk/src/joshua/discriminative/training/risk_annealer/GradientOptimizer.java
+END
+InvertWordAlignment.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/joshua/!svn/ver/1794/trunk/src/joshua/discriminative/training/risk_annealer/InvertWordAlignment.java
+END
+AbstractMinRiskMERT.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/joshua/!svn/ver/1383/trunk/src/joshua/discriminative/training/risk_annealer/AbstractMinRiskMERT.java
+END
+DeterministicAnnealer.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/joshua/!svn/ver/1368/trunk/src/joshua/discriminative/training/risk_annealer/DeterministicAnnealer.java
+END
+GradientComputer.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/joshua/!svn/ver/1771/trunk/src/joshua/discriminative/training/risk_annealer/GradientComputer.java
+END
+readme
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/joshua/!svn/ver/1537/trunk/src/joshua/discriminative/training/risk_annealer/readme
+END

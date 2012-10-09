@@ -174,7 +174,7 @@ public class PROCore {
   private int initsPerIt;
   // number of intermediate initial points per iteration
 
-  private int maxMERTIterations, minMERTIterations, prevMERTIterations;
+  private int maxPROIterations, minPROIterations, prevMERTIterations;
   // max: maximum number of MERT iterations
   // min: minimum number of MERT iterations before an early MERT exit
   // prev: number of previous MERT iterations from which to consider candidates
@@ -183,12 +183,12 @@ public class PROCore {
 
   private double stopSigValue;
   // early MERT exit if no weight changes by more than stopSigValue
-  // (but see minMERTIterations above and stopMinIts below)
+  // (but see minPROIterations above and stopMinIts below)
 
   private int stopMinIts;
   // some early stopping criterion must be satisfied in stopMinIts *consecutive*
   // iterations
-  // before an early exit (but see minMERTIterations above)
+  // before an early exit (but see minPROIterations above)
 
   private boolean oneModificationPerIteration;
   // if true, each MERT iteration performs at most one parameter modification.
@@ -273,8 +273,8 @@ public class PROCore {
       println("----------------------------------------------------", 1);
       println("", 1);
 
-      println("Random number generator initialized using seed: " + seed, 1);
-      println("", 1);
+      //println("Random number generator initialized using seed: " + seed, 1);
+      //println("", 1);
     }
 
     // COUNT THE TOTAL NUM OF SENTENCES TO BE DECODED, refFileName IS THE
@@ -443,10 +443,12 @@ public class PROCore {
       println("Number of documents: " + numDocuments, 1);
       println("Optimizing " + metricName_display, 1);
 
+      /*
       print("docSubsetInfo: {", 1);
       for (int f = 0; f < 6; ++f)
         print(docSubsetInfo[f] + ", ", 1);
       println(docSubsetInfo[6] + "}", 1);
+      */
 
       println("Number of features: " + numParams, 1);
       print("Feature names: {", 1);
@@ -536,10 +538,34 @@ public class PROCore {
   // -------------------------
 
   public void run_PRO() {
-    run_PRO(minMERTIterations, maxMERTIterations, prevMERTIterations);
+    run_PRO(minPROIterations, maxPROIterations, prevMERTIterations);
   }
 
   public void run_PRO(int minIts, int maxIts, int prevIts) {
+  //FIRST, CLEAN ALL PREVIOUS TEMP FILES
+    String dir;
+    int k = tmpDirPrefix.lastIndexOf("/");
+    if (k >= 0) {
+        dir = tmpDirPrefix.substring(0, k + 1);
+    } else {
+        dir = "./";
+    }
+    String files;
+    File folder = new File(dir);
+    
+    if(folder.exists()) {
+      File[] listOfFiles = folder.listFiles(); 
+
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+          files = listOfFiles[i].getName();
+          if (files.startsWith("PRO.temp")) {
+            deleteFile(files);
+          }
+        }
+      }
+    }
+    
     println("----------------------------------------------------", 1);
     println("PRO run started @ " + (new Date()), 1);
     // printMemoryUsage();
@@ -806,8 +832,8 @@ public class PROCore {
       }
 
       // SCORES CORRESPONDING TO EACH WEIGHT VECTOR CANDIDATE
-      double[] initialScore = new double[1 + initsPerIt]; // BLEU SCORE
-      double[] finalScore = new double[1 + initsPerIt]; // COMPUTED BY
+      //double[] initialScore = new double[1 + initsPerIt]; // BLEU SCORE
+      //double[] finalScore = new double[1 + initsPerIt]; // COMPUTED BY
                                                         // "IntermediateOptimizer.java"
 
       double[][] best1Score = new double[1 + initsPerIt][numSentences]; // MODEL
@@ -1065,7 +1091,7 @@ public class PROCore {
 
                   if (!trainingMode.equals("4")) {
                     for (int c = 0; c < featVal_str.length; c++) {
-                      feat_info = featVal_str[c].split(":");
+                      feat_info = featVal_str[c].split("[:=]");
                       currFeatVal[Integer.parseInt(feat_info[0])] =
                           Double.parseDouble(feat_info[1]); // INDEX STARTS FROM 1
                     }
@@ -1076,7 +1102,7 @@ public class PROCore {
                     String updated_feat_str = "";
 
                     for (int c = 0; c < featVal_str.length; c++) {
-                      feat_info = featVal_str[c].split(":");
+                      feat_info = featVal_str[c].split("[:=]");
                       featId = Integer.parseInt(feat_info[0]);
 
                       if (1 <= featId && featId <= (numParamsInFile - 1)) // REGULAR
@@ -1369,7 +1395,7 @@ public class PROCore {
 
                 if (!trainingMode.equals("4")) {
                   for (int c = 0; c < featVal_str.length; c++) {
-                    feat_info = featVal_str[c].split(":");
+                    feat_info = featVal_str[c].split("[:=]");
                     currFeatVal[Integer.parseInt(feat_info[0])] = Double.parseDouble(feat_info[1]); // INDEX
                                                                                                     // STARTS
                                                                                                     // FROM
@@ -1382,7 +1408,7 @@ public class PROCore {
                   String updated_feat_str = "";
 
                   for (int c = 0; c < featVal_str.length; c++) {
-                    feat_info = featVal_str[c].split(":");
+                    feat_info = featVal_str[c].split("[:=]");
                     featId = Integer.parseInt(feat_info[0]);
 
                     if (1 <= featId && featId <= (numParamsInFile - 1)) // REGULAR
@@ -2630,9 +2656,9 @@ public class PROCore {
     metricOptions[1] = "closest";
     docSubsetInfo = new int[7];
     docSubsetInfo[0] = 0;
-    maxMERTIterations = 20;
+    maxPROIterations = 20;
     prevMERTIterations = 20;
-    minMERTIterations = 5;
+    minPROIterations = 1;
     stopMinIts = 3;
     stopSigValue = -1;
     //
@@ -2755,14 +2781,14 @@ public class PROCore {
           System.exit(10);
         }
       } else if (option.equals("-maxIt")) {
-        maxMERTIterations = Integer.parseInt(args[i + 1]);
-        if (maxMERTIterations < 1) {
+        maxPROIterations = Integer.parseInt(args[i + 1]);
+        if (maxPROIterations < 1) {
           println("maxMERTIts must be positive.");
           System.exit(10);
         }
       } else if (option.equals("-minIt")) {
-        minMERTIterations = Integer.parseInt(args[i + 1]);
-        if (minMERTIterations < 1) {
+        minPROIterations = Integer.parseInt(args[i + 1]);
+        if (minPROIterations < 1) {
           println("minMERTIts must be positive.");
           System.exit(10);
         }
@@ -2947,13 +2973,13 @@ public class PROCore {
       System.exit(30);
     }
 
-    if (maxMERTIterations < minMERTIterations) {
+    if (maxPROIterations < minPROIterations) {
 
       if (firstTime)
         println("Warning: maxMERTIts is smaller than minMERTIts; " + "decreasing minMERTIts from "
-            + minMERTIterations + " to maxMERTIts " + "(i.e. " + maxMERTIterations + ").", 1);
+            + minPROIterations + " to maxMERTIts " + "(i.e. " + maxPROIterations + ").", 1);
 
-      minMERTIterations = maxMERTIterations;
+      minPROIterations = maxPROIterations;
     }
 
     if (dirPrefix != null) { // append dirPrefix to file names
@@ -3019,7 +3045,7 @@ public class PROCore {
       }
 
       int lastGoodIt = 0;
-      for (int it = 1; it <= maxMERTIterations; ++it) {
+      for (int it = 1; it <= maxPROIterations; ++it) {
         if (fileExists(fakeFileNamePrefix + it + fakeFileNameSuffix)) {
           lastGoodIt = it;
         } else {
@@ -3031,7 +3057,7 @@ public class PROCore {
         println("Fake decoder cannot find first output file "
             + (fakeFileNamePrefix + 1 + fakeFileNameSuffix));
         System.exit(13);
-      } else if (lastGoodIt < maxMERTIterations) {
+      } else if (lastGoodIt < maxPROIterations) {
         if (firstTime)
           println("Warning: can only run fake decoder; existing output files "
               + "are only available for the first " + lastGoodIt + " iteration(s).", 1);
@@ -3763,7 +3789,7 @@ public class PROCore {
     }
 
     double[] A =
-        DMC.run_single_iteration(currIteration, DMC.minMERTIterations, DMC.maxMERTIterations,
+        DMC.run_single_iteration(currIteration, DMC.minPROIterations, DMC.maxPROIterations,
             DMC.prevMERTIterations, earlyStop, maxIndex);
 
     if (A != null) {
@@ -3825,7 +3851,7 @@ public class PROCore {
       DMC.println("", 1);
 
       // delete intermediate .temp.*.it* decoder output files
-      for (int iteration = 1; iteration <= DMC.maxMERTIterations; ++iteration) {
+      for (int iteration = 1; iteration <= DMC.maxPROIterations; ++iteration) {
         if (DMC.compressFiles == 1) {
           DMC.deleteFile(DMC.tmpDirPrefix + "temp.sents.it" + iteration + ".gz");
           DMC.deleteFile(DMC.tmpDirPrefix + "temp.feats.it" + iteration + ".gz");

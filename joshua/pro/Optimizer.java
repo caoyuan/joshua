@@ -358,7 +358,7 @@ public class Optimizer {
     String j1Cand, j2Cand;
     String featDiff, neg_featDiff;
     HashSet<String> added = new HashSet<String>(); // to avoid symmetric
-                                                   // duplicate
+                                                   // duplication
 
     for (String key : acceptedPairSort.keySet()) {
       if (topCount == Xi) break;
@@ -395,30 +395,32 @@ public class Optimizer {
                     + " ";
           }
         } else {
-          HashMap<String, String> firing_feat = new HashMap<String, String>();
+          HashMap<String, String> feat_diff = new HashMap<String, String>();
           String[] feat_info;
 
           for (int i = 0; i < feat_str_j1.length; i++) {
             feat_info = feat_str_j1[i].split(":");
-            firing_feat.put(feat_info[0], feat_info[1]);
+            feat_diff.put(feat_info[0], feat_info[1]);
           }
 
           if (!trainMode.equals("3")) {
             for (int i = 0; i < feat_str_j2.length; i++) {
               feat_info = feat_str_j2[i].split(":");
 
-              if (firing_feat.containsKey(feat_info[0])) {
-                featDiff +=
-                    feat_info[0]
-                        + ":"
-                        + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
-                            .parseDouble(feat_info[1])) + " ";
-                neg_featDiff +=
-                    feat_info[0]
-                        + ":"
-                        + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
-                            .get(feat_info[0]))) + " ";
-              }
+              if (feat_diff.containsKey(feat_info[0])) //overlapping features
+                feat_diff.put( feat_info[0], 
+                  Double.toString(Double.parseDouble(feat_diff.get(feat_info[0]))-Double.parseDouble(feat_info[1])) );
+              else //only fired in the cand 2
+                feat_diff.put( feat_info[0], Double.toString(-1.0*Double.parseDouble(feat_info[1])));
+            }
+            
+            Iterator it = feat_diff.keySet().iterator();
+            String id;
+            while(it.hasNext())
+            {
+              id = (String) it.next();
+              featDiff += id + ":" + feat_diff.get(id) + " ";
+              neg_featDiff += id + ":" + -1.0*Double.parseDouble(feat_diff.get(id)) + " ";
             }
           } else {
             int new_feat_id = 0;
@@ -436,18 +438,24 @@ public class Optimizer {
               // the lambda vector
 
               // only cares about sparse features
-              if (firing_feat.containsKey(feat_info[0]) && new_feat_id >= 1) {
-                featDiff +=
-                    new_feat_id
-                        + ":"
-                        + (Double.parseDouble(firing_feat.get(feat_info[0])) - Double
-                            .parseDouble(feat_info[1])) + " ";
-                neg_featDiff +=
-                    new_feat_id
-                        + ":"
-                        + (Double.parseDouble(feat_info[1]) - Double.parseDouble(firing_feat
-                            .get(feat_info[0]))) + " ";
-              }
+              if (feat_diff.containsKey(feat_info[0]) && new_feat_id >= 1) //overlapping features
+                feat_diff.put( feat_info[0],
+                  Double.toString(Double.parseDouble(feat_diff.get(feat_info[0]))-Double.parseDouble(feat_info[1])) ); 
+              else //only firing in cand 2
+                feat_diff.put( feat_info[0], Double.toString(-1.0*Double.parseDouble(feat_info[1])));
+              
+              Iterator it = feat_diff.keySet().iterator();
+              String id;
+              while(it.hasNext())
+              {
+                id = (String) it.next();
+                new_feat_id = Integer.parseInt(id) - regParamDim;
+                if(new_feat_id>=1)
+                {
+                  featDiff += new_feat_id + ":" + feat_diff.get(id) + " ";
+                  neg_featDiff += new_feat_id + ":" + -1.0*Double.parseDouble(feat_diff.get(id)) + " ";
+                }
+              } 
             }
           }
         }

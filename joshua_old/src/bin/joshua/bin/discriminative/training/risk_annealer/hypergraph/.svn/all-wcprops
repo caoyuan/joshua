@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/joshua/!svn/ver/1799/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph
+END
+HyperGraphFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svnroot/joshua/!svn/ver/1787/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/HyperGraphFactory.java
+END
+HGAndReferences.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/joshua/!svn/ver/1786/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/HGAndReferences.java
+END
+HGRiskGradientComputer.java
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svnroot/joshua/!svn/ver/1797/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/HGRiskGradientComputer.java
+END
+MRConfig.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/joshua/!svn/ver/1787/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/MRConfig.java
+END
+RiskAndFeatureAnnotationOnLMHG.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svnroot/joshua/!svn/ver/1787/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/RiskAndFeatureAnnotationOnLMHG.java
+END
+FeatureHyperEdge.java
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/joshua/!svn/ver/1787/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/FeatureHyperEdge.java
+END
+HGMinRiskDAMert.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/joshua/!svn/ver/1799/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/HGMinRiskDAMert.java
+END
+FeatureForest.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/joshua/!svn/ver/1787/trunk/src/joshua/discriminative/training/risk_annealer/hypergraph/FeatureForest.java
+END

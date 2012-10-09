@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/joshua/!svn/ver/1404/trunk/src/joshua/aligner
+END
+AlignCandidates.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/joshua/!svn/ver/880/trunk/src/joshua/aligner/AlignCandidates.java
+END
+ParseTree.java
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/joshua/!svn/ver/1404/trunk/src/joshua/aligner/ParseTree.java
+END
+JoshuaDerivationTree.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svnroot/joshua/!svn/ver/880/trunk/src/joshua/aligner/JoshuaDerivationTree.java
+END
