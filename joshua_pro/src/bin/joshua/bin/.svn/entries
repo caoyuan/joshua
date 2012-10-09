@@ -1,64 +1,0 @@
-10
-
-dir
-1799
-https://joshua.svn.sf.net/svnroot/joshua/trunk/src/joshua
-https://joshua.svn.sf.net/svnroot/joshua
-
-
-
-2011-03-24T05:27:24.751689Z
-1799
-zhifeili
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-0ae5e6b2-d358-4f09-a895-f82f13dd62a4
-
-tools
-dir
-
-aligner
-dir
-
-zmert
-dir
-
-decoder
-dir
-
-lattice
-dir
-
-oracle
-dir
-
-discriminative
-dir
-
-corpus
-dir
-
-subsample
-dir
-
-prefix_tree
-dir
-
-ui
-dir
-
-util
-dir
-
