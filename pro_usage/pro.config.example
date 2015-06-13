@@ -26,13 +26,13 @@
 #3: train sparse feature weights only(with dense feature weights fixed) also works)
 #4: treat sparse features as one component(summary feature), train dense and summary feature weights together
 
--trainingMode	2
+-trainingMode	1
 
 #-nbestFormat can be "sparse" or "dense"
 #for trainingMode 1: either "dense" or "sparse"
 #for trainingMode 2-4: use "sparse" format
 
--nbestFormat	sparse	#dense or sparse
+-nbestFormat	dense	#dense or sparse
 
 #use one of the classifiers(and the corresponding parameter setting) below:
 #1.perceptron paramters
